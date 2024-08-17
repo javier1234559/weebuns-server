@@ -4,16 +4,16 @@ import {
   HealthCheck,
   HealthCheckService,
   MemoryHealthIndicator,
-  TypeOrmHealthIndicator,
+  PrismaHealthIndicator,
 } from '@nestjs/terminus';
 
-import { PingIndicator } from 'src/health/ping.indicator';
+import { PingIndicator } from 'src/common/health/ping.indicator';
 
 @Controller('health')
 export class HealthController {
   constructor(
     private health: HealthCheckService,
-    private ormIndicator: TypeOrmHealthIndicator,
+    // private prismaIndicator: PrismaHealthIndicator,
     private memory: MemoryHealthIndicator,
     private disk: DiskHealthIndicator,
     private ping: PingIndicator,
@@ -23,7 +23,6 @@ export class HealthController {
   @HealthCheck()
   check() {
     return this.health.check([
-      () => this.ormIndicator.pingCheck('database', { timeout: 15000 }),
       () => this.memory.checkHeap('memory_heap', 1000 * 1024 * 1024),
       () => this.memory.checkRSS('memory_RSS', 1000 * 1024 * 1024),
       () =>

@@ -3,25 +3,31 @@ import { Module } from '@nestjs/common';
 import { GraphQLModule } from '@nestjs/graphql';
 
 import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default';
+import { join } from 'path';
 
-import { AuthModule } from './auth/auth.module';
-import { AuthResolver } from './auth/auth.resolver';
-import { CommonModule } from './common/common.module';
-import { HealthModule } from './health/health.module';
-import { UserModule } from './user/user.module';
+import { AuthModule } from 'src/common/auth/auth.module';
+import { AuthResolver } from 'src/common/auth/auth.resolver';
+import { CommonModule } from 'src/common/common.module';
+import { HealthModule } from 'src/common/health/health.module';
+import { UserModule } from 'src/models/user/user.module';
+
+import { ClassMemberModule } from './models/class-member/class-member.module';
+import { ClassModule } from './models/class/class.module';
 
 @Module({
   imports: [
     CommonModule,
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
-      autoSchemaFile: 'src/schema.gql',
+      autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
       playground: false,
       plugins: [ApolloServerPluginLandingPageLocalDefault()],
     }),
     UserModule,
     HealthModule,
-    AuthModule,
+    // AuthModule,
+    // ClassModule,
+    // ClassMemberModule,
   ],
   providers: [AuthResolver],
 })

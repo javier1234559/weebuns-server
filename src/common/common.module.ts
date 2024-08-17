@@ -1,8 +1,8 @@
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { ConfigModule } from '@nestjs/config';
 
 import { LoggerMiddleware } from 'src/common/logger/logger.middleware';
+import { PrismaModule } from 'src/common/prisma/prisma.module';
 import config from 'src/config';
 
 @Module({
@@ -11,20 +11,12 @@ import config from 'src/config';
       isGlobal: true,
       load: [() => config],
     }),
-    TypeOrmModule.forRootAsync({
-      imports: [ConfigModule],
-      useFactory: (configService: ConfigService) => ({
-        type: 'postgres',
-        host: configService.get('database.host'),
-        port: configService.get('database.port'),
-        username: configService.get('database.username'),
-        password: configService.get('database.password'),
-        database: configService.get('database.name'),
-        entities: [],
-        synchronize: configService.get('mode') === 'development',
-      }),
-      inject: [ConfigService],
-    }),
+    PrismaModule,
+    // JwtModule.register({
+    //   global: true,
+    //   secret: process.env.JWT_SECRET,
+    //   signOptions: { expiresIn: MAX_AGE },
+    // }),
   ],
   exports: [ConfigModule],
 })

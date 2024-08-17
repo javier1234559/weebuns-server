@@ -1,0 +1,95 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator nestjsDto {
+  provider                        = "prisma-generator-nestjs-dto"
+  output                          = "../src/models"
+  outputToNestJsResourceStructure = "true"
+  exportRelationModifierClasses   = "true"
+  reExport                        = "false"
+  createDtoPrefix                 = "Create"
+  updateDtoPrefix                 = "Update"
+  dtoSuffix                       = "Dto"
+  entityPrefix                    = ""
+  entitySuffix                    = ""
+  fileNamingStyle                 = "camel"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  user
+  student
+  teacher
+  admin
+}
+
+enum ClassMemberRole {
+  student
+  teacher
+}
+
+enum AssignmentStatus {
+  pending
+  submitted
+  graded
+}
+
+enum AuthProvider {
+  local
+  google
+  facebook
+}
+
+model User {
+  id                Int           @id @default(autoincrement())
+  username          String        @unique
+  email             String        @unique
+  password_hash     String?
+  role              UserRole      @default(user)
+  auth_provider     AuthProvider  @default(local)
+  auth_provider_id  String?
+  first_name        String?
+  last_name         String?
+  profile_picture   String?
+  is_email_verified Boolean       @default(false)
+  last_login        DateTime?
+  created_at        DateTime      @default(now())
+  updated_at        DateTime      @updatedAt
+  created_classes   Class[]
+  class_memberships ClassMember[]
+}
+
+model Class {
+  id          Int           @id @default(autoincrement())
+  name        String
+  description String?
+  created_by  Int
+  creator     User          @relation(fields: [created_by], references: [id])
+  is_trial    Boolean       @default(false)
+  created_at  DateTime      @default(now())
+  updated_at  DateTime      @updatedAt
+  members     ClassMember[]
+}
+
+model ClassMember {
+  id        Int             @id @default(autoincrement())
+  class_id  Int
+  class     Class           @relation(fields: [class_id], references: [id])
+  user_id   Int
+  user      User            @relation(fields: [user_id], references: [id])
+  role      ClassMemberRole
+  joined_at DateTime        @default(now())
+
+  @@unique([class_id, user_id])
+}
