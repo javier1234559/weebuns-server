@@ -5,8 +5,6 @@ import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default';
 import { join } from 'path';
 
-import { AuthModule } from 'src/common/auth/auth.module';
-import { AuthResolver } from 'src/common/auth/auth.resolver';
 import { CommonModule } from 'src/common/common.module';
 import { HealthModule } from 'src/common/health/health.module';
 import { UserModule } from 'src/models/user/user.module';
@@ -25,10 +23,9 @@ import { ClassModule } from './models/class/class.module';
     }),
     UserModule,
     HealthModule,
+    ClassModule,
+    ClassMemberModule,
     // AuthModule,
-    // ClassModule,
-    // ClassMemberModule,
   ],
-  providers: [AuthResolver],
 })
 export class AppModule {}

@@ -1,9 +1,10 @@
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { JwtModule } from '@nestjs/jwt';
 
 import { LoggerMiddleware } from 'src/common/logger/logger.middleware';
 import { PrismaModule } from 'src/common/prisma/prisma.module';
-import config from 'src/config';
+import config, { MAX_AGE } from 'src/config';
 
 @Module({
   imports: [
@@ -12,11 +13,11 @@ import config from 'src/config';
       load: [() => config],
     }),
     PrismaModule,
-    // JwtModule.register({
-    //   global: true,
-    //   secret: process.env.JWT_SECRET,
-    //   signOptions: { expiresIn: MAX_AGE },
-    // }),
+    JwtModule.register({
+      global: true,
+      secret: process.env.JWT_SECRET,
+      signOptions: { expiresIn: MAX_AGE },
+    }),
   ],
   exports: [ConfigModule],
 })

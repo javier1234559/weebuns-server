@@ -1,15 +1,19 @@
-import { Resolver, Query, Mutation, Args, Int } from '@nestjs/graphql';
+import { Args, Int, Mutation, Query, Resolver } from '@nestjs/graphql';
+
 import { ClassMemberService } from './class-member.service';
-import { ClassMember } from './entities/class-member.entity';
 import { CreateClassMemberInput } from './dto/create-class-member.input';
 import { UpdateClassMemberInput } from './dto/update-class-member.input';
+import { ClassMember } from './entities/class-member.entity';
 
 @Resolver(() => ClassMember)
 export class ClassMemberResolver {
   constructor(private readonly classMemberService: ClassMemberService) {}
 
   @Mutation(() => ClassMember)
-  createClassMember(@Args('createClassMemberInput') createClassMemberInput: CreateClassMemberInput) {
+  createClassMember(
+    @Args('createClassMemberInput')
+    createClassMemberInput: CreateClassMemberInput,
+  ) {
     return this.classMemberService.create(createClassMemberInput);
   }
 
@@ -24,8 +28,14 @@ export class ClassMemberResolver {
   }
 
   @Mutation(() => ClassMember)
-  updateClassMember(@Args('updateClassMemberInput') updateClassMemberInput: UpdateClassMemberInput) {
-    return this.classMemberService.update(updateClassMemberInput.id, updateClassMemberInput);
+  updateClassMember(
+    @Args('updateClassMemberInput')
+    updateClassMemberInput: UpdateClassMemberInput,
+  ) {
+    return this.classMemberService.update(
+      updateClassMemberInput.id,
+      updateClassMemberInput,
+    );
   }
 
   @Mutation(() => ClassMember)

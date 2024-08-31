@@ -1,9 +1,17 @@
-import { Field, ID, ObjectType } from '@nestjs/graphql';
+import { Field, ID, ObjectType, registerEnumType} from '@nestjs/graphql';
 
-import { $Enums, AuthProvider, UserRole } from '@prisma/client';
+import { $Enums, AuthProvider, UserRole} from '@prisma/client';
 
-import { Class } from '../../class/entities/class.entity';
-import { ClassMember } from '../../classMember/entities/classMember.entity';
+registerEnumType(UserRole, {
+  name: 'UserRole',
+  description: 'User roles in the system',
+});
+
+registerEnumType(AuthProvider, {
+  name: 'AuthProvider',
+  description: 'Authentication providers',
+});
+
 
 @ObjectType()
 export class User {
@@ -19,11 +27,11 @@ export class User {
   @Field(() => String, { nullable: true })
   password_hash: string | null;
 
-  // @Field(() => $Enums.UserRole)
-  // role: $Enums.UserRole;
+  @Field(() => $Enums.UserRole)
+  role: $Enums.UserRole;
 
-  // @Field(() => $Enums.AuthProvider)
-  // auth_provider: $Enums.AuthProvider;
+  @Field(() => $Enums.AuthProvider)
+  auth_provider: $Enums.AuthProvider;
 
   @Field(() => String, { nullable: true })
   auth_provider_id: string | null;

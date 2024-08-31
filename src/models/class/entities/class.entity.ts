@@ -1,16 +1,34 @@
+import { Field, ID, ObjectType } from '@nestjs/graphql';
 
-import {User} from '../../user/entities/user.entity'
-import {ClassMember} from '../../classMember/entities/classMember.entity'
+import { ClassMember } from 'src/models/class-member/entities/class-member.entity';
+import { User } from 'src/models/user/graphql/entities/user.entity';
 
-
+@ObjectType()
 export class Class {
-  id: number ;
-name: string ;
-description: string  | null;
-created_by: number ;
-creator?: User ;
-is_trial: boolean ;
-created_at: Date ;
-updated_at: Date ;
-members?: ClassMember[] ;
+  @Field(() => ID)
+  id: number;
+
+  @Field()
+  name: string;
+
+  @Field(() => String, { nullable: true })
+  description: string | null;
+
+  @Field()
+  created_by: number;
+
+  @Field(() => User, { nullable: true })
+  creator?: User;
+
+  @Field()
+  is_trial: boolean;
+
+  @Field(() => Date)
+  created_at: Date;
+
+  @Field(() => Date)
+  updated_at: Date;
+
+  @Field(() => [ClassMember], { nullable: true })
+  members?: ClassMember[];
 }

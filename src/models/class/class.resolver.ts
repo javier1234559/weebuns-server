@@ -1,8 +1,9 @@
-import { Resolver, Query, Mutation, Args, Int } from '@nestjs/graphql';
+import { Args, Int, Mutation, Query, Resolver } from '@nestjs/graphql';
+
 import { ClassService } from './class.service';
-import { Class } from './entities/class.entity';
 import { CreateClassInput } from './dto/create-class.input';
 import { UpdateClassInput } from './dto/update-class.input';
+import { Class } from './entities/class.entity';
 
 @Resolver(() => Class)
 export class ClassResolver {

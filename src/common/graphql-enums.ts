@@ -26,3 +26,4 @@ registerEnumType(AuthProvider, {
   name: 'AuthProvider',
   description: 'Authentication providers',
 });
+

@@ -1,6 +1,9 @@
 import { config as dotenvConfig } from 'dotenv';
+import { logger } from 'src/common/utils/logger';
 
 dotenvConfig();
+
+export const MAX_AGE = '3d';
 
 const config = {
   mode: process.env.NODE_ENV,
@@ -30,7 +33,8 @@ const config = {
   },
   // Google OAuth configuration
   googleClientID: process.env.GOOGLE_AUTH_CLIENT_ID,
+  
 };
 
-console.log(config);
+logger.info('Configuration loaded:', config);
 export default config;
