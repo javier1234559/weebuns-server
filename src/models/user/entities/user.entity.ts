@@ -1,20 +1,11 @@
-import { Field, ID, ObjectType, registerEnumType} from '@nestjs/graphql';
+import { Field, ID, ObjectType } from '@nestjs/graphql';
 
-import { $Enums, AuthProvider, UserRole} from '@prisma/client';
+import { $Enums } from '@prisma/client';
 
-registerEnumType(UserRole, {
-  name: 'UserRole',
-  description: 'User roles in the system',
-});
+import { IUser } from 'src/models/user/user.interface';
 
-registerEnumType(AuthProvider, {
-  name: 'AuthProvider',
-  description: 'Authentication providers',
-});
-
-
-@ObjectType()
-export class User {
+@ObjectType() // object type is the return type of the resolver
+export class User implements IUser {
   @Field(() => ID)
   id: number;
 

@@ -1,11 +1,14 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 
+import { Prisma } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 
 import { PrismaService } from 'src/common/prisma/prisma.service';
 import { AuthProvider, UserRole } from 'src/common/type';
+import { calculatePagination } from 'src/common/utils/pagination';
 import { generateRandomNumber } from 'src/common/utils/random';
 import { CreateUserDto } from 'src/models/user/dtos/create-user.dto';
+import { FindAllUsersDto } from 'src/models/user/dtos/find-all-user.dto';
 import { UpdateUserDto } from 'src/models/user/dtos/update-user.dto';
 
 @Injectable()
@@ -21,18 +24,49 @@ export class UserService {
         id: generateRandomNumber(1, 100),
         ...userData,
         password_hash: hashedPassword,
-        role: UserRole.USER, // Default role
+        role: UserRole.USER,
         auth_provider: AuthProvider.LOCAL,
       },
     });
 
-    const { password_hash, ...userWithoutPassword } = newUser;
+    const { ...userWithoutPassword } = newUser;
     return userWithoutPassword;
   }
 
-  async findAll() {
-    const users = await this.prisma.user.findMany();
-    return users.map(({ password_hash, ...user }) => user);
+  async findAll(findAllUsersDto: FindAllUsersDto) {
+    const { page, perPage, search } = findAllUsersDto;
+    const skip = (page - 1) * perPage || 0;
+
+    let where: Prisma.UserWhereInput = {};
+
+    if (search) {
+      where = {
+        OR: [
+          { username: { contains: search, mode: 'insensitive' } },
+          { email: { contains: search, mode: 'insensitive' } },
+          { first_name: { contains: search, mode: 'insensitive' } },
+          { last_name: { contains: search, mode: 'insensitive' } },
+        ],
+      };
+    }
+
+    const [users, totalItems] = await Promise.all([
+      this.prisma.user.findMany({
+        where,
+        skip,
+        take: perPage,
+        orderBy: { created_at: 'desc' },
+      }),
+      this.prisma.user.count({ where }),
+    ]);
+
+    const pagination = calculatePagination(totalItems, findAllUsersDto);
+
+    return {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      data: users.map(({ password_hash, ...user }) => user),
+      pagination,
+    };
   }
 
   async findOne(id: number) {
@@ -44,6 +78,7 @@ export class UserService {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password_hash, ...userWithoutPassword } = user;
     return userWithoutPassword;
   }
@@ -65,7 +100,7 @@ export class UserService {
       where: { id },
     });
 
-    const { password_hash, ...userWithoutPassword } = deletedUser;
+    const { ...userWithoutPassword } = deletedUser;
     return userWithoutPassword;
   }
 }

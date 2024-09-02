@@ -3,7 +3,7 @@ import { Field, ID, ObjectType, registerEnumType } from '@nestjs/graphql';
 import { ClassMemberRole } from '@prisma/client';
 
 import { Class } from '../../class/entities/class.entity';
-import { User } from '../../user/graphql/entities/user.entity';
+import { User } from '../../user/entities/user.entity';
 
 registerEnumType(ClassMemberRole, {
   name: 'ClassMemberRole',

@@ -25,7 +25,6 @@ import { ClassModule } from './models/class/class.module';
     HealthModule,
     ClassModule,
     ClassMemberModule,
-    // AuthModule,
   ],
 })
 export class AppModule {}

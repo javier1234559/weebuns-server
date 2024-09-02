@@ -1,7 +1,9 @@
 import { SetMetadata } from '@nestjs/common';
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
+
 import { Observable } from 'rxjs';
+
 import { UserRole } from 'src/common/type';
 
 export const Roles = (...roles: UserRole[]) => SetMetadata('roles', roles);
@@ -27,7 +29,10 @@ export class RolesGuard implements CanActivate {
     return this.matchRoles(requiredRoles, user.roles);
   }
 
-  private matchRoles(requiredRoles: UserRole[], userRoles: UserRole[]): boolean {
+  private matchRoles(
+    requiredRoles: UserRole[],
+    userRoles: UserRole[],
+  ): boolean {
     return requiredRoles.some((role) => userRoles.includes(role));
   }
 }

@@ -1,36 +1,58 @@
+import { UseGuards } from '@nestjs/common';
 import { Args, Int, Mutation, Query, Resolver } from '@nestjs/graphql';
 
-import { User } from './entities/user.entity';
-import { UserService } from '../user.service';
+import { AuthGuard } from 'src/common/auth/auth.guard';
+import { Roles } from 'src/common/auth/role.guard';
+import { UserRole } from 'src/common/type';
 import { CreateUserDto } from 'src/models/user/dtos/create-user.dto';
+import {
+  FindAllUsersDto,
+  UsersResponse,
+} from 'src/models/user/dtos/find-all-user.dto';
 import { UpdateUserDto } from 'src/models/user/dtos/update-user.dto';
+
+import { User } from '../entities/user.entity';
+import { UserService } from '../user.service';
 
 @Resolver(() => User)
 export class UserResolver {
   constructor(private readonly userService: UserService) {}
 
-  // @Mutation(() => User)
-  // createUser(@Args('CreateUserDto') createUserInput: CreateUserDto  ) {
-  //   return this.userService.create(createUserInput);
-  // }
+  @Query(() => UsersResponse, { name: 'users' })
+  @UseGuards(AuthGuard)
+  @Roles(UserRole.ADMIN)
+  async findAll(@Args('findAllUsersDto') findAllUsersDto: FindAllUsersDto) {
+    return this.userService.findAll(findAllUsersDto);
+  }
 
-  // @Query(() => [User], { name: 'users' })
-  // findAll() {
-  //   return this.userService.findAll();
-  // }
+  @Query(() => User, { name: 'user' })
+  @UseGuards(AuthGuard)
+  @Roles(UserRole.ADMIN)
+  async findOne(@Args('id', { type: () => Int }) id: number) {
+    return this.userService.findOne(id);
+  }
 
-  // @Query(() => User, { name: 'user' })
-  // findOne(@Args('id', { type: () => Int }) id: number) {
-  //   return this.userService.findOne(id);
-  // }
+  @Mutation(() => User)
+  @UseGuards(AuthGuard)
+  @Roles(UserRole.ADMIN)
+  async createUser(@Args('createUserInput') createUserInput: CreateUserDto) {
+    return this.userService.create(createUserInput);
+  }
 
-  // @Mutation(() => User)
-  // updateUser(@Args('updateUserDto') updateUserDto: UpdateUserDto) {
-  //   return this.userService.update(updateUserDto.id, updateUserDto);
-  // }
+  @Mutation(() => User)
+  @UseGuards(AuthGuard)
+  @Roles(UserRole.ADMIN)
+  async updateUser(
+    @Args('id', { type: () => Int }) id: number,
+    @Args('updateUserInput') updateUserInput: UpdateUserDto,
+  ) {
+    return this.userService.update(id, updateUserInput);
+  }
 
-  // @Mutation(() => User)
-  // removeUser(@Args('id', { type: () => Int }) id: number) {
-  //   return this.userService.remove(id);
-  // }
+  @Mutation(() => User)
+  @UseGuards(AuthGuard)
+  @Roles(UserRole.ADMIN)
+  async removeUser(@Args('id', { type: () => Int }) id: number) {
+    return this.userService.remove(id);
+  }
 }

@@ -1,6 +1,10 @@
-import { IsEmail, IsString, MinLength } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
+
+import { IsString } from 'class-validator';
 
 export class LoginGoogleDto {
   @IsString()
+  //docs
+  @ApiProperty()
   uuid: string;
 }

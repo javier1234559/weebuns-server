@@ -6,6 +6,9 @@ import { LoggerMiddleware } from 'src/common/logger/logger.middleware';
 import { PrismaModule } from 'src/common/prisma/prisma.module';
 import config, { MAX_AGE } from 'src/config';
 
+// this import is necessary to register the enums
+import './graphql-enums';
+
 @Module({
   imports: [
     ConfigModule.forRoot({

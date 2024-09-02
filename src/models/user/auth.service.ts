@@ -52,16 +52,19 @@ export class AuthService {
     const user = await this.prisma.user.findUnique({ where: { email } });
 
     if (!user || user.auth_provider !== AuthProvider.local) {
-      throw new UnauthorizedException('Invalid credentials');
+      throw new UnauthorizedException('User not found');
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password_hash);
     if (!isPasswordValid) {
-      throw new UnauthorizedException('Invalid credentials');
+      throw new UnauthorizedException('The password is incorrect');
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password_hash: _, ...result } = user;
-    return this.generateToken(result);
+    const token = this.generateToken(result);
+    console.log(token);
+    return token;
   }
 
   async register(registerDto: RegisterDto) {
@@ -90,6 +93,7 @@ export class AuthService {
         },
       });
 
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { password_hash: _, ...user } = newUser;
       return this.generateToken(user);
     } catch (error) {

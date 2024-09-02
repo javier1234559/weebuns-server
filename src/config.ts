@@ -1,4 +1,5 @@
 import { config as dotenvConfig } from 'dotenv';
+
 import { logger } from 'src/common/utils/logger';
 
 dotenvConfig();
@@ -19,8 +20,7 @@ const config = {
   },
   // JWT configuration
   jwt: {
-    privateKey: process.env.JWT_PRIVATE_KEY,
-    publicKey: process.env.JWT_PUBLIC_KEY,
+    jwtSecret: process.env.JWT_SECRET,
   },
   // AWS S3 configuration
   aws: {
@@ -33,7 +33,6 @@ const config = {
   },
   // Google OAuth configuration
   googleClientID: process.env.GOOGLE_AUTH_CLIENT_ID,
-  
 };
 
 logger.info('Configuration loaded:', config);
