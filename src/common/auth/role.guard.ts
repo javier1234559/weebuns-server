@@ -4,7 +4,7 @@ import { Reflector } from '@nestjs/core';
 
 import { Observable } from 'rxjs';
 
-import { UserRole } from 'src/common/type';
+import { UserRole } from 'src/common/type/enum';
 
 export const Roles = (...roles: UserRole[]) => SetMetadata('roles', roles);
 

@@ -33,6 +33,7 @@ const config = {
   },
   // Google OAuth configuration
   googleClientID: process.env.GOOGLE_AUTH_CLIENT_ID,
+  googleClientSecret: process.env.GOOGLE_AUTH_CLIENT_SECRET,
 };
 
 logger.info('Configuration loaded:', config);

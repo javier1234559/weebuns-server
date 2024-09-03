@@ -6,5 +6,5 @@ export class LoginGoogleDto {
   @IsString()
   //docs
   @ApiProperty()
-  uuid: string;
+  credentialToken: string;
 }

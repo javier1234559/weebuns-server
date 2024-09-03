@@ -1,6 +1,6 @@
 import { PaginationOutputDto } from 'src/common/dto/pagination.dto';
 
-export interface PaginatedResult<T> {
+export interface IPaginatedResult<T> {
   data: T[];
   pagination: PaginationOutputDto;
 }

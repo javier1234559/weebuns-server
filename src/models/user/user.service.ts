@@ -1,10 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 
-import { Prisma } from '@prisma/client';
+import { AuthProvider, Prisma } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 
 import { PrismaService } from 'src/common/prisma/prisma.service';
-import { AuthProvider, UserRole } from 'src/common/type';
+import { UserRole } from 'src/common/type/enum';
 import { calculatePagination } from 'src/common/utils/pagination';
 import { generateRandomNumber } from 'src/common/utils/random';
 import { CreateUserDto } from 'src/models/user/dtos/create-user.dto';
@@ -25,7 +25,7 @@ export class UserService {
         ...userData,
         password_hash: hashedPassword,
         role: UserRole.USER,
-        auth_provider: AuthProvider.LOCAL,
+        auth_provider: AuthProvider.local,
       },
     });
 

@@ -3,7 +3,7 @@ import { Args, Int, Mutation, Query, Resolver } from '@nestjs/graphql';
 
 import { AuthGuard } from 'src/common/auth/auth.guard';
 import { Roles } from 'src/common/auth/role.guard';
-import { UserRole } from 'src/common/type';
+import { UserRole } from 'src/common/type/enum';
 import { CreateUserDto } from 'src/models/user/dtos/create-user.dto';
 import {
   FindAllUsersDto,

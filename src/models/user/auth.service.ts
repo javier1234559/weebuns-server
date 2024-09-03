@@ -8,10 +8,13 @@ import { JwtService } from '@nestjs/jwt';
 
 import { AuthProvider } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
+import { OAuth2Client, TokenPayload } from 'google-auth-library';
 
+import { IAuthPayload } from 'src/common/interface/auth-payload.interface';
 import { PrismaService } from 'src/common/prisma/prisma.service';
-import { UserRole } from 'src/common/type';
+import { UserRole } from 'src/common/type/enum';
 import { generateRandomNumber } from 'src/common/utils/random';
+import config from 'src/config';
 import { LoginGoogleDto } from 'src/models/user/dtos/login-google.dto';
 import { LoginDto } from 'src/models/user/dtos/login.dto';
 import { RegisterDto } from 'src/models/user/dtos/register.dto';
@@ -22,29 +25,26 @@ export class AuthService {
     private prisma: PrismaService,
     private readonly jwtService: JwtService,
   ) {}
-
-  async getCurrentUser(token: string) {
-    try {
-      const decoded = this.jwtService.verify(token);
-      return decoded;
-    } catch (error) {
-      return null;
-    }
-  }
-
-  private async verifyGoogleToken(token: string): Promise<any> {
-    // TODO: Implement Google token verification
-    // This is a placeholder. You need to implement actual Google token verification.
-    // You might want to use the google-auth-library for this.
-    throw new Error('Google token verification not implemented');
-  }
-
   private generateToken(user: any) {
-    const payload = { email: user.email, sub: user.id, role: user.role };
+    const payload = {
+      email: user.email,
+      sub: user.id,
+      role: user.role,
+    };
     return {
       access_token: this.jwtService.sign(payload),
       user,
     };
+  }
+
+  async getCurrentUser(authPayload: IAuthPayload) {
+    try {
+      return await this.prisma.user.findUnique({
+        where: { id: authPayload.sub },
+      });
+    } catch (error) {
+      return null;
+    }
   }
 
   async login(loginDto: LoginDto) {
@@ -60,11 +60,7 @@ export class AuthService {
       throw new UnauthorizedException('The password is incorrect');
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { password_hash: _, ...result } = user;
-    const token = this.generateToken(result);
-    console.log(token);
-    return token;
+    return this.generateToken(user);
   }
 
   async register(registerDto: RegisterDto) {
@@ -93,9 +89,7 @@ export class AuthService {
         },
       });
 
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { password_hash: _, ...user } = newUser;
-      return this.generateToken(user);
+      return this.generateToken(newUser);
     } catch (error) {
       throw new InternalServerErrorException(
         'Something went wrong when creating the user',
@@ -103,11 +97,45 @@ export class AuthService {
     }
   }
 
-  registerWithGoogle(registerDto: RegisterDto) {
-    throw new Error('Method not implemented.');
-  }
+  async loginGoogle(loginGoogleDto: LoginGoogleDto) {
+    try {
+      const clientId = config.googleClientID;
+      const token = loginGoogleDto.credentialToken;
 
-  loginGoogle(loginGoogleDto: LoginGoogleDto) {
-    throw new Error('Method not implemented.');
+      // Verify the token
+      const client = new OAuth2Client();
+      const ticket = await client.verifyIdToken({
+        idToken: token,
+        audience: clientId,
+      });
+
+      // Get the JSON with all the user info
+      const payload: TokenPayload = ticket.getPayload();
+      console.log(payload);
+
+      // Check if user exists
+      let user = await this.prisma.user.findUnique({
+        where: { email: payload.email },
+      });
+
+      if (!user) {
+        // Create new user
+        user = await this.prisma.user.create({
+          data: {
+            id: generateRandomNumber(1, 100),
+            email: payload.email,
+            username: payload.name,
+            first_name: payload.given_name,
+            role: UserRole.USER,
+            auth_provider: AuthProvider.google,
+            // avatar: payload.picture,
+          },
+        });
+      }
+      return this.generateToken(user);
+    } catch (error) {
+      console.error('Error during Google login:', error);
+      throw new Error('Google login failed');
+    }
   }
 }

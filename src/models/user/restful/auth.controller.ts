@@ -39,9 +39,4 @@ export class AuthController {
   async loginWithGoogle(@Body() loginDto: LoginGoogleDto) {
     return this.authService.loginGoogle(loginDto);
   }
-
-  @Post('register/google')
-  async registerWithGoogle(@Body() registerDto: RegisterDto) {
-    return this.authService.registerWithGoogle(registerDto);
-  }
 }
