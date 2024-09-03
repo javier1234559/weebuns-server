@@ -1,6 +1,10 @@
 import { config as dotenvConfig } from 'dotenv';
 
+import { logger } from 'src/common/utils/logger';
+
 dotenvConfig();
+
+export const MAX_AGE = '3d';
 
 const config = {
   mode: process.env.NODE_ENV,
@@ -16,8 +20,7 @@ const config = {
   },
   // JWT configuration
   jwt: {
-    privateKey: process.env.JWT_PRIVATE_KEY,
-    publicKey: process.env.JWT_PUBLIC_KEY,
+    jwtSecret: process.env.JWT_SECRET,
   },
   // AWS S3 configuration
   aws: {
@@ -30,7 +33,8 @@ const config = {
   },
   // Google OAuth configuration
   googleClientID: process.env.GOOGLE_AUTH_CLIENT_ID,
+  googleClientSecret: process.env.GOOGLE_AUTH_CLIENT_SECRET,
 };
 
-console.log(config);
+logger.info('Configuration loaded:', config);
 export default config;

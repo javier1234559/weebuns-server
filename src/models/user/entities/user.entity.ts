@@ -1,12 +1,11 @@
 import { Field, ID, ObjectType } from '@nestjs/graphql';
 
-import { $Enums, AuthProvider, UserRole } from '@prisma/client';
+import { $Enums } from '@prisma/client';
 
-import { Class } from '../../class/entities/class.entity';
-import { ClassMember } from '../../classMember/entities/classMember.entity';
+import { IUser } from 'src/models/user/user.interface';
 
-@ObjectType()
-export class User {
+@ObjectType() // object type is the return type of the resolver
+export class User implements IUser {
   @Field(() => ID)
   id: number;
 
@@ -19,11 +18,11 @@ export class User {
   @Field(() => String, { nullable: true })
   password_hash: string | null;
 
-  // @Field(() => $Enums.UserRole)
-  // role: $Enums.UserRole;
+  @Field(() => $Enums.UserRole)
+  role: $Enums.UserRole;
 
-  // @Field(() => $Enums.AuthProvider)
-  // auth_provider: $Enums.AuthProvider;
+  @Field(() => $Enums.AuthProvider)
+  auth_provider: $Enums.AuthProvider;
 
   @Field(() => String, { nullable: true })
   auth_provider_id: string | null;

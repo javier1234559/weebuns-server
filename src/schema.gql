@@ -2,11 +2,22 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+type PaginationOutputDto {
+  totalItems: Int!
+  currentPage: Int!
+  totalPages: Int!
+  itemsPerPage: Int!
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+}
+
 type User {
   id: ID!
   username: String!
   email: String!
   password_hash: String
+  role: UserRole!
+  auth_provider: AuthProvider!
   auth_provider_id: String
   first_name: String
   last_name: String
@@ -17,28 +28,115 @@ type User {
   updated_at: DateTime!
 }
 
+"""User roles in the system"""
+enum UserRole {
+  user
+  student
+  teacher
+  admin
+}
+
+"""Authentication providers"""
+enum AuthProvider {
+  local
+  google
+  facebook
+}
+
 """
 A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
 """
 scalar DateTime
 
+type UsersResponse {
+  data: [User!]!
+  pagination: PaginationOutputDto!
+}
+
+type Class {
+  id: ID!
+  name: String!
+  description: String
+  created_by: Float!
+  creator: User
+  is_trial: Boolean!
+  created_at: DateTime!
+  updated_at: DateTime!
+  members: [ClassMember!]
+}
+
+type ClassMember {
+  id: ID!
+  class_id: ID!
+  class: Class
+  user_id: ID!
+  user: User
+  role: ClassMemberRole!
+  joined_at: DateTime!
+}
+
+enum ClassMemberRole {
+  student
+  teacher
+}
+
 type Query {
-  users: [User!]!
+  users(findAllUsersDto: FindAllUsersDto!): UsersResponse!
   user(id: Int!): User!
+  class(id: Int!): Class!
+  classMember(id: Int!): ClassMember!
+}
+
+input FindAllUsersDto {
+  page: Int = 1
+  perPage: Int = 10
+  search: String
 }
 
 type Mutation {
-  createUser(createUserInput: CreateUserInput!): User!
-  updateUser(updateUserInput: UpdateUserInput!): User!
+  createUser(createUserInput: CreateUserDto!): User!
+  updateUser(id: Int!, updateUserInput: UpdateUserDto!): User!
   removeUser(id: Int!): User!
+  createClass(createClassInput: CreateClassInput!): Class!
+  updateClass(updateClassInput: UpdateClassInput!): Class!
+  removeClass(id: Int!): Class!
+  createClassMember(createClassMemberInput: CreateClassMemberInput!): ClassMember!
+  updateClassMember(updateClassMemberInput: UpdateClassMemberInput!): ClassMember!
+  removeClassMember(id: Int!): ClassMember!
 }
 
-input CreateUserInput {
+input CreateUserDto {
+  last_name: String
+  first_name: String
+  username: String!
+  email: String!
+  password: String!
+  profile_picture: String
+  role: UserRole
+  auth_provider: AuthProvider
+}
+
+input UpdateUserDto {
+  id: UserRole
+}
+
+input CreateClassInput {
   """Example field (placeholder)"""
   exampleField: Int!
 }
 
-input UpdateUserInput {
+input UpdateClassInput {
+  """Example field (placeholder)"""
+  exampleField: Int
+  id: Int!
+}
+
+input CreateClassMemberInput {
+  """Example field (placeholder)"""
+  exampleField: Int!
+}
+
+input UpdateClassMemberInput {
   """Example field (placeholder)"""
   exampleField: Int
   id: Int!
