@@ -2,7 +2,7 @@ import { UseGuards } from '@nestjs/common';
 import { Args, Int, Mutation, Query, Resolver } from '@nestjs/graphql';
 
 import { AuthGuard } from 'src/common/auth/auth.guard';
-import { Roles } from 'src/common/auth/role.guard';
+import { Roles, RolesGuard } from 'src/common/auth/role.guard';
 import { UserRole } from 'src/common/type/enum';
 import { CreateUserDto } from 'src/models/user/dtos/create-user.dto';
 import {
@@ -20,28 +20,32 @@ export class UserResolver {
 
   @Query(() => UsersResponse, { name: 'users' })
   @UseGuards(AuthGuard)
-  @Roles(UserRole.ADMIN)
+  // @UseGuards(RolesGuard)
+  // @Roles(UserRole.ADMIN)
   async findAll(@Args('findAllUsersDto') findAllUsersDto: FindAllUsersDto) {
     return this.userService.findAll(findAllUsersDto);
   }
 
   @Query(() => User, { name: 'user' })
   @UseGuards(AuthGuard)
-  @Roles(UserRole.ADMIN)
+  // @UseGuards(RolesGuard)
+  // @Roles(UserRole.ADMIN)
   async findOne(@Args('id', { type: () => Int }) id: number) {
     return this.userService.findOne(id);
   }
 
   @Mutation(() => User)
   @UseGuards(AuthGuard)
-  @Roles(UserRole.ADMIN)
+  // @UseGuards(RolesGuard)
+  // @Roles(UserRole.ADMIN)
   async createUser(@Args('createUserInput') createUserInput: CreateUserDto) {
     return this.userService.create(createUserInput);
   }
 
   @Mutation(() => User)
   @UseGuards(AuthGuard)
-  @Roles(UserRole.ADMIN)
+  // @UseGuards(RolesGuard)
+  // @Roles(UserRole.ADMIN)
   async updateUser(
     @Args('id', { type: () => Int }) id: number,
     @Args('updateUserInput') updateUserInput: UpdateUserDto,
@@ -51,7 +55,8 @@ export class UserResolver {
 
   @Mutation(() => User)
   @UseGuards(AuthGuard)
-  @Roles(UserRole.ADMIN)
+  // @UseGuards(RolesGuard)
+  // @Roles(UserRole.ADMIN)
   async removeUser(@Args('id', { type: () => Int }) id: number) {
     return this.userService.remove(id);
   }

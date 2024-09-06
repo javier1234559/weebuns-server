@@ -12,7 +12,7 @@ import {
 import { ApiTags } from '@nestjs/swagger';
 
 import { AuthGuard } from 'src/common/auth/auth.guard';
-import { Roles } from 'src/common/auth/role.guard';
+import { Roles, RolesGuard } from 'src/common/auth/role.guard';
 import { UserRole } from 'src/common/type/enum';
 import { CreateUserDto } from 'src/models/user/dtos/create-user.dto';
 import { FindAllUsersDto } from 'src/models/user/dtos/find-all-user.dto';
@@ -25,13 +25,15 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @UseGuards(AuthGuard)
-  // @Roles(UserRole.ADMIN)
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.ADMIN)
   @Get()
   async findAll(@Query() findAllUsersDto: FindAllUsersDto) {
     return this.userService.findAll(findAllUsersDto);
   }
 
   @UseGuards(AuthGuard)
+  // @UseGuards(RolesGuard)
   // @Roles(UserRole.ADMIN)
   @Get(':id')
   async findOne(@Param('id') id: string) {
@@ -39,6 +41,7 @@ export class UserController {
   }
 
   @UseGuards(AuthGuard)
+  // @UseGuards(RolesGuard)
   // @Roles(UserRole.ADMIN)
   @Post()
   async create(@Body() createUserDto: CreateUserDto) {
@@ -46,6 +49,7 @@ export class UserController {
   }
 
   @UseGuards(AuthGuard)
+  // @UseGuards(RolesGuard)
   // @Roles(UserRole.ADMIN)
   @Put(':id')
   async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
@@ -53,6 +57,7 @@ export class UserController {
   }
 
   @UseGuards(AuthGuard)
+  // @UseGuards(RolesGuard)
   // @Roles(UserRole.ADMIN)
   @Delete(':id')
   async remove(@Param('id') id: string) {
