@@ -24,9 +24,9 @@ import { UserService } from 'src/models/user/user.service';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @UseGuards(AuthGuard)
-  @UseGuards(RolesGuard)
-  @Roles(UserRole.ADMIN)
+  // @UseGuards(AuthGuard)
+  // @UseGuards(RolesGuard)
+  // @Roles(UserRole.ADMIN)
   @Get()
   async findAll(@Query() findAllUsersDto: FindAllUsersDto) {
     return this.userService.findAll(findAllUsersDto);

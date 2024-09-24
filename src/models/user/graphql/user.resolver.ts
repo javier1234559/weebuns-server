@@ -19,7 +19,7 @@ export class UserResolver {
   constructor(private readonly userService: UserService) {}
 
   @Query(() => UsersResponse, { name: 'users' })
-  @UseGuards(AuthGuard)
+  // @UseGuards(AuthGuard)
   // @UseGuards(RolesGuard)
   // @Roles(UserRole.ADMIN)
   async findAll(@Args('findAllUsersDto') findAllUsersDto: FindAllUsersDto) {
