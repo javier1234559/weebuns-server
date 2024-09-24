@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+
 import { CreateClassInput } from './dto/create-class.input';
 import { UpdateClassInput } from './dto/update-class.input';
 
