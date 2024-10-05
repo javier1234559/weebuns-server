@@ -33,14 +33,15 @@ export class AuthGuard implements CanActivate {
     const { req } = ctx.getContext();
 
     const token = this.extractTokenFromHeader(req);
-    console.log('Token extracted from header:', token);
+    // console.log('Token extracted from header:', token);
 
     if (!token) throw new UnauthorizedException('No token provided.');
 
-    const payload: IAuthPayload = await this.jwtService.verify(token);
-    console.log('Token verified:', JSON.stringify(payload));
     try {
+      const payload: IAuthPayload = await this.jwtService.verify(token);
       req.user = payload;
+      // console.log('User attached to request:', req.user);
+      // console.log('Payload:', payload);
 
       //update last login time
       this.prisma.user.update({

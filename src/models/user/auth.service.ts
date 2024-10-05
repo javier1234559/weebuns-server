@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   InternalServerErrorException,
@@ -7,9 +8,11 @@ import {
 import { JwtService } from '@nestjs/jwt';
 
 import { AuthProvider } from '@prisma/client';
+import axios from 'axios';
 import * as bcrypt from 'bcrypt';
-import { OAuth2Client, TokenPayload } from 'google-auth-library';
+import { Response } from 'express';
 
+// import { OAuth2Client, TokenPayload } from 'google-auth-library'
 import { IAuthPayload } from 'src/common/interface/auth-payload.interface';
 import { PrismaService } from 'src/common/prisma/prisma.service';
 import { UserRole } from 'src/common/type/enum';
@@ -25,16 +28,22 @@ export class AuthService {
     private prisma: PrismaService,
     private readonly jwtService: JwtService,
   ) {}
-  private generateToken(user: any) {
+
+  private generateTokens(user: any) {
     const payload = {
       email: user.email,
       sub: user.id,
       role: user.role,
     };
-    return {
-      access_token: this.jwtService.sign(payload),
-      user,
-    };
+    const accessToken = this.jwtService.sign(payload, {
+      secret: config.jwt.jwtAccessSecret,
+      expiresIn: '1d', // 15 minutes
+    });
+    const refreshToken = this.jwtService.sign(payload, {
+      secret: config.jwt.jwtRefreshSecret,
+      expiresIn: '7d', // 7 days
+    });
+    return { accessToken, refreshToken };
   }
 
   async getCurrentUser(authPayload: IAuthPayload) {
@@ -47,12 +56,16 @@ export class AuthService {
     }
   }
 
-  async login(loginDto: LoginDto) {
+  async login(loginDto: LoginDto, res: Response) {
     const { email, password } = loginDto;
     const user = await this.prisma.user.findUnique({ where: { email } });
 
-    if (!user || user.auth_provider !== AuthProvider.local) {
+    if (!user) {
       throw new UnauthorizedException('User not found');
+    }
+
+    if (user.auth_provider !== AuthProvider.local) {
+      throw new UnauthorizedException('User is not registered with local auth');
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password_hash);
@@ -60,10 +73,16 @@ export class AuthService {
       throw new UnauthorizedException('The password is incorrect');
     }
 
-    return this.generateToken(user);
+    const { accessToken, refreshToken } = this.generateTokens(user);
+    this.setRefreshTokenCookie(res, refreshToken);
+
+    return {
+      access_token: accessToken,
+      user,
+    };
   }
 
-  async register(registerDto: RegisterDto) {
+  async register(registerDto: RegisterDto, res: Response) {
     const { username, email, password, firstName, lastName } = registerDto;
 
     const existingUser = await this.prisma.user.findFirst({
@@ -89,7 +108,13 @@ export class AuthService {
         },
       });
 
-      return this.generateToken(newUser);
+      const { accessToken, refreshToken } = this.generateTokens(newUser);
+      this.setRefreshTokenCookie(res, refreshToken);
+
+      return {
+        access_token: accessToken,
+        user: newUser,
+      };
     } catch (error) {
       throw new InternalServerErrorException(
         'Something went wrong when creating the user',
@@ -97,45 +122,169 @@ export class AuthService {
     }
   }
 
-  async loginGoogle(loginGoogleDto: LoginGoogleDto) {
+  async loginGoogle(loginGoogleDto: LoginGoogleDto, res: Response) {
     try {
-      const clientId = config.googleClientID;
-      const token = loginGoogleDto.credentialToken;
+      const accessToken = loginGoogleDto.accessToken;
+      const { data: payload } = await axios.get(
+        'https://www.googleapis.com/oauth2/v3/userinfo',
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        },
+      );
 
-      // Verify the token
-      const client = new OAuth2Client();
-      const ticket = await client.verifyIdToken({
-        idToken: token,
-        audience: clientId,
+      if (!payload || !payload.email) {
+        throw new UnauthorizedException('Invalid Google token');
+      }
+
+      const user = await this.findOrCreateUser({
+        email: payload.email,
+        name: payload.name,
+        firstName: payload.given_name,
+        lastName: payload.family_name,
+        picture: payload.picture,
+        provider: AuthProvider.google,
       });
 
-      // Get the JSON with all the user info
-      const payload: TokenPayload = ticket.getPayload();
-      console.log(payload);
+      if (user.auth_provider !== AuthProvider.google) {
+        throw new BadRequestException(
+          'User is not registered with Google auth',
+        );
+      }
 
-      // Check if user exists
-      let user = await this.prisma.user.findUnique({
-        where: { email: payload.email },
+      return this.generateAuthResponse(user, res);
+    } catch (error) {
+      if (error instanceof BadRequestException) {
+        throw error; // Re-throw BadRequestException
+      }
+      console.error('Error during Google login:', error);
+      throw new UnauthorizedException('Google authentication failed');
+    }
+  }
+
+  async loginFacebook(loginFacebookDto: LoginGoogleDto, res: Response) {
+    try {
+      const accessToken = loginFacebookDto.accessToken;
+      const { data: verifiedUserInfo } = await axios.get(
+        'https://graph.facebook.com/me',
+        {
+          params: {
+            fields: 'id,name,email,picture',
+            access_token: accessToken,
+          },
+        },
+      );
+
+      if (!verifiedUserInfo || !verifiedUserInfo.email) {
+        throw new UnauthorizedException('Invalid Facebook token');
+      }
+
+      const nameParts = verifiedUserInfo.name.split(' ');
+      const user = await this.findOrCreateUser({
+        email: verifiedUserInfo.email,
+        name: verifiedUserInfo.name,
+        firstName: nameParts[0],
+        lastName: nameParts.slice(1).join(' '),
+        picture: verifiedUserInfo.picture?.data?.url,
+        provider: AuthProvider.facebook,
+      });
+
+      if (user.auth_provider !== AuthProvider.facebook) {
+        throw new BadRequestException(
+          'User is not registered with facebook auth',
+        );
+      }
+
+      return this.generateAuthResponse(user, res);
+    } catch (error) {
+      if (error instanceof BadRequestException) {
+        throw error; // Re-throw BadRequestException
+      }
+      console.error('Error during Google login:', error);
+      throw new UnauthorizedException('Google authentication failed');
+    }
+  }
+
+  private async findOrCreateUser(userData: {
+    email: string;
+    name: string;
+    firstName: string;
+    lastName: string;
+    picture: string;
+    provider: AuthProvider;
+  }) {
+    let user = await this.prisma.user.findUnique({
+      where: { email: userData.email },
+    });
+
+    if (!user) {
+      user = await this.prisma.user.create({
+        data: {
+          id: generateRandomNumber(1, 100),
+          email: userData.email,
+          username: userData.name,
+          first_name: userData.firstName,
+          last_name: userData.lastName,
+          role: UserRole.USER,
+          auth_provider: userData.provider,
+          profile_picture: userData.picture,
+        },
+      });
+    }
+
+    return user;
+  }
+
+  private generateAuthResponse(user: any, res: Response) {
+    const { accessToken, refreshToken } = this.generateTokens(user);
+    this.setRefreshTokenCookie(res, refreshToken);
+
+    return {
+      access_token: accessToken,
+      user,
+    };
+  }
+
+  async refreshToken(refreshToken: string, res: Response) {
+    try {
+      const payload = this.jwtService.verify(refreshToken, {
+        secret: config.jwt.jwtRefreshSecret,
+      });
+
+      const user = await this.prisma.user.findUnique({
+        where: { id: payload.sub },
       });
 
       if (!user) {
-        // Create new user
-        user = await this.prisma.user.create({
-          data: {
-            id: generateRandomNumber(1, 100),
-            email: payload.email,
-            username: payload.name,
-            first_name: payload.given_name,
-            role: UserRole.USER,
-            auth_provider: AuthProvider.google,
-            // avatar: payload.picture,
-          },
-        });
+        throw new UnauthorizedException('Invalid refresh token');
       }
-      return this.generateToken(user);
+
+      const { accessToken, refreshToken: newRefreshToken } =
+        this.generateTokens(user);
+
+      this.setRefreshTokenCookie(res, newRefreshToken);
+      console.log(newRefreshToken);
+
+      return {
+        access_token: accessToken,
+      };
     } catch (error) {
-      console.error('Error during Google login:', error);
-      throw new Error('Google login failed');
+      throw new UnauthorizedException('Invalid refresh token');
     }
+  }
+
+  private setRefreshTokenCookie(res: Response, refreshToken: string) {
+    res.cookie('refreshToken', refreshToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'none',
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
+  }
+
+  async logout(res: Response) {
+    res.clearCookie('refreshToken');
+    return { message: 'Logged out successfully' };
   }
 }
