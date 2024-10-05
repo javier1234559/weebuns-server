@@ -17,7 +17,6 @@ export class RolesGuard implements CanActivate {
       ROLES_KEY,
       [context.getHandler(), context.getClass()],
     );
-    console.log(requiredRoles);
 
     let user;
     if (context.getType() === 'http') {
@@ -29,6 +28,9 @@ export class RolesGuard implements CanActivate {
       const ctx = GqlExecutionContext.create(context);
       user = ctx.getContext().req.user;
     }
+
+    console.log('User role:', user);
+    console.log('Required role at this route:', requiredRoles);
 
     if (!user) {
       return false;
