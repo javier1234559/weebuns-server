@@ -1,16 +1,24 @@
-import { Prisma, PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 
-import { classes, users } from './data';
+// import { spaces } from './data';
 
 const prisma = new PrismaClient();
 
-async function seedUser() {
-  for (const user of users) {
-    await prisma.user.create({
-      data: user,
-    });
-  }
-}
+// async function seedUser() {
+//   for (const user of users) {
+//     await prisma.user.create({
+//       data: user,
+//     });
+//   }
+// }
+
+// async function seedSpace() {
+//   for (const space of spaces) {
+//     await prisma.space.create({
+//       data: space,
+//     });
+//   }
+// }
 
 async function main() {
   //delete all data , must delete in order reverse of creation due to foreign key constraints
@@ -18,6 +26,7 @@ async function main() {
 
   console.log('Starting seed...');
   //await seedUser();
+  // await seedSpace();
   console.log('Seed completed.');
   await prisma.$disconnect();
 }

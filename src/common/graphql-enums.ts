@@ -1,6 +1,6 @@
 import { registerEnumType } from '@nestjs/graphql';
 
-import { AuthProvider, ClassMemberRole, UserRole } from '@prisma/client';
+import { AuthProvider, UserRole } from '@prisma/client';
 
 // import { AssignmentStatus } from 'src/common/type';
 
@@ -12,11 +12,6 @@ registerEnumType(UserRole, {
 registerEnumType(AuthProvider, {
   name: 'AuthProvider',
   description: 'Authentication providers',
-});
-
-registerEnumType(ClassMemberRole, {
-  name: 'ClassMemberRole',
-  description: 'Roles of members in a class',
 });
 
 // registerEnumType(AssignmentStatus, {

@@ -9,10 +9,8 @@ import { join } from 'path';
 import { CommonModule } from 'src/common/common.module';
 import { HealthModule } from 'src/common/health/health.module';
 import { RemoveFieldInterceptor } from 'src/common/interceptors/remove-field';
-
-import { UserModule } from 'src/models/user/user.module';
-
 import { SpaceModule } from 'src/models/space/space.module';
+import { UserModule } from 'src/models/user/user.module';
 
 @Module({
   imports: [
@@ -24,8 +22,8 @@ import { SpaceModule } from 'src/models/space/space.module';
       plugins: [ApolloServerPluginLandingPageLocalDefault()],
     }),
     UserModule,
-    HealthModule,
     SpaceModule,
+    HealthModule,
   ],
   providers: [
     {

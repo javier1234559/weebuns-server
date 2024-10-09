@@ -5,12 +5,10 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import cookieParser from 'cookie-parser';
 
 import config from 'src/config';
-import { CreateUserDto } from 'src/models/user/dtos/create-user.dto';
-import { UpdateUserDto } from 'src/models/user/dtos/update-user.dto';
 import { CreateSpaceDto } from 'src/models/space/dto/create-space.dto';
 import { UpdateSpaceDto } from 'src/models/space/dto/update-space.dto';
-import { ReadSpaceDto } from 'src/models/space/dto/read-space.dto';
-import { DeleteSpaceDto } from 'src/models/space/dto/delete-space.dto';
+import { CreateUserDto } from 'src/models/user/dtos/create-user.dto';
+import { UpdateUserDto } from 'src/models/user/dtos/update-user.dto';
 
 import { AppModule } from './app.module';
 
@@ -48,13 +46,7 @@ async function bootstrap() {
     .build();
 
   const document = SwaggerModule.createDocument(app, swaggerConfig, {
-    extraModels: [
-      CreateUserDto,
-      UpdateUserDto,
-      CreateSpaceDto,
-      UpdateSpaceDto,
-      ReadSpaceDto,
-      DeleteSpaceDto],
+    extraModels: [CreateUserDto, UpdateUserDto, CreateSpaceDto, UpdateSpaceDto],
   });
   SwaggerModule.setup('api', app, document);
 
