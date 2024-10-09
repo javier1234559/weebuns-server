@@ -20,7 +20,8 @@ const config = {
   },
   // JWT configuration
   jwt: {
-    jwtSecret: process.env.JWT_SECRET,
+    jwtAccessSecret: process.env.JWT_SECRET,
+    jwtRefreshSecret: process.env.JWT_SECRET,
   },
   // AWS S3 configuration
   aws: {

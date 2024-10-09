@@ -2,6 +2,8 @@ import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
+import cookieParser from 'cookie-parser';
+
 import config from 'src/config';
 import { CreateUserDto } from 'src/models/user/dtos/create-user.dto';
 import { UpdateUserDto } from 'src/models/user/dtos/update-user.dto';
@@ -14,10 +16,27 @@ import { AppModule } from './app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
+
+  app.use(cookieParser());
+
   app.setGlobalPrefix('api');
+  // app.enableCors({
+  //   origin: '*',
+  //   credentials: true,
+  // });
   app.enableCors({
-    origin: '*',
+    origin: true,
     credentials: true,
+    methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
+    allowedHeaders: [
+      'Origin',
+      'X-Requested-With',
+      'Content-Type',
+      'Accept',
+      'Authorization',
+    ],
+    preflightContinue: false,
+    optionsSuccessStatus: 204,
   });
 
   const swaggerConfig = new DocumentBuilder()

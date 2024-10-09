@@ -2,9 +2,9 @@ import { ApiProperty } from '@nestjs/swagger';
 
 import { IsString } from 'class-validator';
 
-export class RegisterGoogleDto {
+export class LoginFacebookDto {
   @IsString()
   //docs
   @ApiProperty()
-  uuid: string;
+  accessToken: string;
 }

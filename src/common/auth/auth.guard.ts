@@ -4,6 +4,7 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
+import { GqlExecutionContext } from '@nestjs/graphql';
 import { JwtService } from '@nestjs/jwt';
 
 import { Request } from 'express';
@@ -28,16 +29,19 @@ export class AuthGuard implements CanActivate {
   }
 
   async canActivate(context: ExecutionContext) {
-    const request: Request = context.switchToHttp().getRequest();
-    const token = this.extractTokenFromHeader(request);
-    console.log('Token extracted from header:', token);
+    const ctx = GqlExecutionContext.create(context);
+    const { req } = ctx.getContext();
+
+    const token = this.extractTokenFromHeader(req);
+    // console.log('Token extracted from header:', token);
 
     if (!token) throw new UnauthorizedException('No token provided.');
 
-    const payload: IAuthPayload = await this.jwtService.verify(token);
-    console.log('Token verified:', JSON.stringify(payload));
     try {
-      request.user = payload;
+      const payload: IAuthPayload = await this.jwtService.verify(token);
+      req.user = payload;
+      // console.log('User attached to request:', req.user);
+      // console.log('Payload:', payload);
 
       //update last login time
       this.prisma.user.update({
