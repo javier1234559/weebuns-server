@@ -31,8 +31,6 @@ type User {
 """User roles in the system"""
 enum UserRole {
   user
-  student
-  teacher
   admin
 }
 
@@ -53,38 +51,9 @@ type UsersResponse {
   pagination: PaginationOutputDto!
 }
 
-type Class {
-  id: ID!
-  name: String!
-  description: String
-  created_by: Float!
-  creator: User
-  is_trial: Boolean!
-  created_at: DateTime!
-  updated_at: DateTime!
-  members: [ClassMember!]
-}
-
-type ClassMember {
-  id: ID!
-  class_id: ID!
-  class: Class
-  user_id: ID!
-  user: User
-  role: ClassMemberRole!
-  joined_at: DateTime!
-}
-
-enum ClassMemberRole {
-  student
-  teacher
-}
-
 type Query {
   users(findAllUsersDto: FindAllUsersDto!): UsersResponse!
   user(id: Int!): User!
-  class(id: Int!): Class!
-  classMember(id: Int!): ClassMember!
 }
 
 input FindAllUsersDto {
@@ -97,12 +66,6 @@ type Mutation {
   createUser(createUserInput: CreateUserDto!): User!
   updateUser(id: Int!, updateUserInput: UpdateUserDto!): User!
   removeUser(id: Int!): User!
-  createClass(createClassInput: CreateClassInput!): Class!
-  updateClass(updateClassInput: UpdateClassInput!): Class!
-  removeClass(id: Int!): Class!
-  createClassMember(createClassMemberInput: CreateClassMemberInput!): ClassMember!
-  updateClassMember(updateClassMemberInput: UpdateClassMemberInput!): ClassMember!
-  removeClassMember(id: Int!): ClassMember!
 }
 
 input CreateUserDto {
@@ -118,26 +81,4 @@ input CreateUserDto {
 
 input UpdateUserDto {
   id: UserRole
-}
-
-input CreateClassInput {
-  """Example field (placeholder)"""
-  exampleField: Int!
-}
-
-input UpdateClassInput {
-  """Example field (placeholder)"""
-  exampleField: Int
-  id: Int!
-}
-
-input CreateClassMemberInput {
-  """Example field (placeholder)"""
-  exampleField: Int!
-}
-
-input UpdateClassMemberInput {
-  """Example field (placeholder)"""
-  exampleField: Int
-  id: Int!
 }

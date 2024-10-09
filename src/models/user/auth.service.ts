@@ -19,6 +19,7 @@ import { UserRole } from 'src/common/type/enum';
 import { generateRandomNumber } from 'src/common/utils/random';
 import config from 'src/config';
 import { LoginGoogleDto } from 'src/models/user/dtos/login-google.dto';
+import { UserResponse } from 'src/models/user/dtos/login-response.dto';
 import { LoginDto } from 'src/models/user/dtos/login.dto';
 import { RegisterDto } from 'src/models/user/dtos/register.dto';
 
@@ -56,7 +57,7 @@ export class AuthService {
     }
   }
 
-  async login(loginDto: LoginDto, res: Response) {
+  async login(loginDto: LoginDto, res: Response): Promise<UserResponse> {
     const { email, password } = loginDto;
     const user = await this.prisma.user.findUnique({ where: { email } });
 
