@@ -12,23 +12,12 @@ async function seedUser() {
   }
 }
 
-async function seedClass() {
-  for (const cls of classes) {
-    await prisma.class.create({
-      data: cls,
-    });
-  }
-}
-
 async function main() {
   //delete all data , must delete in order reverse of creation due to foreign key constraints
-  await prisma.classMember.deleteMany();
-  await prisma.class.deleteMany();
   await prisma.user.deleteMany();
 
   console.log('Starting seed...');
-  await seedUser();
-  await seedClass();
+  //await seedUser();
   console.log('Seed completed.');
   await prisma.$disconnect();
 }

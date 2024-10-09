@@ -18,31 +18,25 @@
 //   fileNamingStyle                 = "kebab"
 // }
 
-generator client {
-  provider = "prisma-client-js"
-}
-
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
+generator client {
+  provider = "prisma-client-js"
+}
+
 enum UserRole {
   user
-  student
-  teacher
   admin
 }
 
-enum ClassMemberRole {
-  student
-  teacher
-}
-
-enum AssignmentStatus {
-  pending
-  submitted
-  graded
+enum EssayStatus {
+  draft
+  public
+  private
+  deleted
 }
 
 enum AuthProvider {
@@ -52,44 +46,114 @@ enum AuthProvider {
 }
 
 model User {
-  id                Int           @id
-  username          String        @unique
-  email             String        @unique
-  password_hash     String?
-  role              UserRole      @default(user)
-  auth_provider     AuthProvider  @default(local)
-  auth_provider_id  String?
-  first_name        String?
-  last_name         String?
-  profile_picture   String?
-  is_email_verified Boolean       @default(false)
-  last_login        DateTime?
-  created_at        DateTime      @default(now())
-  updated_at        DateTime      @updatedAt
-  created_classes   Class[]
-  class_memberships ClassMember[]
+  id               Int       @id @default(autoincrement())
+  username         String    @unique
+  email            String    @unique
+  password_hash    String?
+  role             UserRole  @default(user)
+  auth_provider    AuthProvider @default(local)
+  auth_provider_id String?
+  first_name       String?
+  last_name        String?
+  profile_picture  String?
+  is_email_verified Boolean  @default(false)
+  last_login       DateTime?
+  created_at       DateTime  @default(now())
+  updated_at       DateTime  @updatedAt
+  spaces           Space[]
+  essays           Essay[]
+  quizzes          Quiz[]
+  flash_cards      FlashCard[]
+  vocabularies     Vocabulary[]
+  followers        Follower[] @relation("Following")
+  followings       Follower[] @relation("Follower")
 }
 
-model Class {
-  id          Int           @id @default(autoincrement())
-  name        String
-  description String?
-  created_by  Int
-  creator     User          @relation(fields: [created_by], references: [id])
-  is_trial    Boolean       @default(false)
-  created_at  DateTime      @default(now())
-  updated_at  DateTime      @updatedAt
-  members     ClassMember[]
+model Follower {
+  id             Int      @id @default(autoincrement())
+  id_follower    Int
+  id_following   Int
+  followed_at    DateTime @default(now())
+  follower       User     @relation("Follower", fields: [id_follower], references: [id])
+  following      User     @relation("Following", fields: [id_following], references: [id])
 }
 
-model ClassMember {
-  id        Int             @id @default(autoincrement())
-  class_id  Int
-  class     Class           @relation(fields: [class_id], references: [id])
-  user_id   Int
-  user      User            @relation(fields: [user_id], references: [id])
-  role      ClassMemberRole
-  joined_at DateTime        @default(now())
+model Space {
+  id             Int      @id @default(autoincrement())
+  name           String
+  description    String?
+  essay_number   Int?
+  quiz_number    Int?
+  vocab_number   Int?
+  created_by     Int
+  created_at     DateTime @default(now())
+  updated_at     DateTime @updatedAt
+  user           User     @relation(fields: [created_by], references: [id])
+  essays         Essay[]
+}
 
-  @@unique([class_id, user_id])
+model Essay {
+  id             Int      @id @default(autoincrement())
+  space_id       Int
+  title          String
+  summary        String?
+  content        String?
+  thumbnail      String?
+  status         EssayStatus
+  created_by     Int
+  created_at     DateTime @default(now())
+  updated_at     DateTime @updatedAt
+  space          Space    @relation(fields: [space_id], references: [id])
+  user           User     @relation(fields: [created_by], references: [id])
+}
+
+model Quiz {
+  id             Int      @id @default(autoincrement())
+  user_id        Int
+  title          String
+  created_at     DateTime @default(now())
+  user           User     @relation(fields: [user_id], references: [id])
+  questions      QuizQuestion[]
+}
+
+model QuizQuestion {
+  id             Int      @id @default(autoincrement())
+  quiz_id        Int
+  question_text  String
+  correct_answer String
+  user_answer    String?
+  is_correct     Boolean
+  id_vocabulary  Int?
+  created_at     DateTime @default(now())
+  quiz           Quiz     @relation(fields: [quiz_id], references: [id])
+}
+
+model FlashCard {
+  id              Int      @id @default(autoincrement())
+  id_vocabulary   Int
+  id_user         Int
+  familiarity_level Int
+  review_date     DateTime @default(now())
+  user            User     @relation(fields: [id_user], references: [id])
+  vocabulary      Vocabulary @relation(fields: [id_vocabulary], references: [id])
+}
+
+model Vocabulary {
+  id              Int      @id @default(autoincrement())
+  created_by      Int
+  image           String?
+  word            String
+  definition      String
+  pronunciation   String
+  example         String
+  part_of_speech  String
+  mastery_level   String
+  is_need_review  Boolean
+  next_review_date DateTime?
+  ease_factor     Int
+  interval        Int
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
+  user            User     @relation(fields: [created_by], references: [id])
+  flash_cards     FlashCard[]
 }

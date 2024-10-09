@@ -9,10 +9,10 @@ import { join } from 'path';
 import { CommonModule } from 'src/common/common.module';
 import { HealthModule } from 'src/common/health/health.module';
 import { RemoveFieldInterceptor } from 'src/common/interceptors/remove-field';
+
 import { UserModule } from 'src/models/user/user.module';
 
-import { ClassMemberModule } from './models/class-member/class-member.module';
-import { ClassModule } from './models/class/class.module';
+import { SpaceModule } from 'src/models/space/space.module';
 
 @Module({
   imports: [
@@ -25,8 +25,7 @@ import { ClassModule } from './models/class/class.module';
     }),
     UserModule,
     HealthModule,
-    ClassModule,
-    ClassMemberModule,
+    SpaceModule,
   ],
   providers: [
     {

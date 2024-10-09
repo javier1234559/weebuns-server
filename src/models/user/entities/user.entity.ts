@@ -47,10 +47,4 @@ export class User implements IUser {
 
   @Field(() => Date)
   updated_at: Date;
-
-  // @Field(() => [Class], { nullable: true })
-  // created_classes?: Class[];
-
-  // @Field(() => [ClassMember], { nullable: true })
-  // class_memberships?: ClassMember[];
 }
