@@ -5,7 +5,7 @@ import { Prisma, Space } from '@prisma/client';
 import { PrismaService } from 'src/common/prisma/prisma.service';
 import { calculatePagination } from 'src/common/utils/pagination';
 import { CreateSpaceDto } from 'src/models/space/dto/create-space.dto';
-import { FindAllSpacesDto } from 'src/models/space/dto/find-all-space.dto';
+import { FindAllSpacesDto } from 'src/models/space/dto/find-all-spaces.dto';
 import { UpdateSpaceDto } from 'src/models/space/dto/update-space.dto';
 
 @Injectable()
