@@ -14,13 +14,15 @@ import { ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from 'src/common/auth/auth.guard';
 import { Roles, RolesGuard } from 'src/common/auth/role.guard';
 import { UserRole } from 'src/common/type/enum';
+import { CreateSpaceResponseDto } from 'src/models/space/dto/create-space-response.dto';
 import { CreateSpaceDto } from 'src/models/space/dto/create-space.dto';
+import { DeleteSpaceResponseDto } from 'src/models/space/dto/delete-space-response.dto';
 import { FindAllSpacesDto } from 'src/models/space/dto/find-all-spaces.dto';
+import { FindOneSpaceResponseDto } from 'src/models/space/dto/find-one-space-response.dto';
 import { FindOneSpaceDto } from 'src/models/space/dto/find-one-space.dto';
-import { SpaceResponse } from 'src/models/space/dto/space-response.dto';
 import { SpacesResponse } from 'src/models/space/dto/spaces-response.dto';
+import { UpdateSpaceResponseDto } from 'src/models/space/dto/update-space-response.dto';
 import { UpdateSpaceDto } from 'src/models/space/dto/update-space.dto';
-import { Space } from 'src/models/space/entities/space.entity';
 import { SpaceService } from 'src/models/space/space.service';
 
 @Controller('spaces')
@@ -40,15 +42,18 @@ export class SpaceController {
   @UseGuards(AuthGuard, RolesGuard)
   @Roles(UserRole.USER, UserRole.ADMIN)
   @Get(':id')
-  async findOne(@Param() params: FindOneSpaceDto): Promise<SpaceResponse> {
-    const space = await this.spaceService.findOne(params.id);
-    return { data: space };
+  async findOne(
+    @Param() params: FindOneSpaceDto,
+  ): Promise<FindOneSpaceResponseDto> {
+    return this.spaceService.findOne(params.id);
   }
 
   @UseGuards(AuthGuard, RolesGuard)
   @Roles(UserRole.USER, UserRole.ADMIN)
   @Post()
-  async create(@Body() createSpaceDto: CreateSpaceDto): Promise<Space> {
+  async create(
+    @Body() createSpaceDto: CreateSpaceDto,
+  ): Promise<CreateSpaceResponseDto> {
     return this.spaceService.create(createSpaceDto);
   }
 
@@ -56,16 +61,18 @@ export class SpaceController {
   @Roles(UserRole.USER, UserRole.ADMIN)
   @Put(':id')
   async update(
-    @Param('id') id: string,
+    @Param() params: FindOneSpaceDto,
     @Body() updateSpaceDto: UpdateSpaceDto,
-  ): Promise<Space> {
-    return this.spaceService.update(Number(id), updateSpaceDto);
+  ): Promise<UpdateSpaceResponseDto> {
+    return this.spaceService.update(params.id, updateSpaceDto);
   }
 
   @UseGuards(AuthGuard, RolesGuard)
   @Roles(UserRole.USER, UserRole.ADMIN)
   @Delete(':id')
-  async delete(@Param('id') id: string): Promise<Space> {
-    return this.spaceService.delete(Number(id));
+  async delete(
+    @Param() params: FindOneSpaceDto,
+  ): Promise<DeleteSpaceResponseDto> {
+    return this.spaceService.delete(params.id);
   }
 }
