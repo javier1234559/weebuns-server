@@ -19,33 +19,33 @@ export class UserResolver {
   constructor(private readonly userService: UserService) {}
 
   @Query(() => UsersResponse, { name: 'users' })
-  // @UseGuards(AuthGuard)
-  // @UseGuards(RolesGuard)
-  // @Roles(UserRole.ADMIN)
+  @UseGuards(AuthGuard)
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.ADMIN)
   async findAll(@Args('findAllUsersDto') findAllUsersDto: FindAllUsersDto) {
     return this.userService.findAll(findAllUsersDto);
   }
 
   @Query(() => User, { name: 'user' })
   @UseGuards(AuthGuard)
-  // @UseGuards(RolesGuard)
-  // @Roles(UserRole.ADMIN)
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.ADMIN)
   async findOne(@Args('id', { type: () => Int }) id: number) {
     return this.userService.findOne(id);
   }
 
   @Mutation(() => User)
   @UseGuards(AuthGuard)
-  // @UseGuards(RolesGuard)
-  // @Roles(UserRole.ADMIN)
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.ADMIN)
   async createUser(@Args('createUserInput') createUserInput: CreateUserDto) {
     return this.userService.create(createUserInput);
   }
 
   @Mutation(() => User)
   @UseGuards(AuthGuard)
-  // @UseGuards(RolesGuard)
-  // @Roles(UserRole.ADMIN)
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.ADMIN)
   async updateUser(
     @Args('id', { type: () => Int }) id: number,
     @Args('updateUserInput') updateUserInput: UpdateUserDto,
@@ -55,8 +55,8 @@ export class UserResolver {
 
   @Mutation(() => User)
   @UseGuards(AuthGuard)
-  // @UseGuards(RolesGuard)
-  // @Roles(UserRole.ADMIN)
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.ADMIN)
   async removeUser(@Args('id', { type: () => Int }) id: number) {
     return this.userService.remove(id);
   }

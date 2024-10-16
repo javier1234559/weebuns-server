@@ -9,6 +9,7 @@ import { join } from 'path';
 import { CommonModule } from 'src/common/common.module';
 import { HealthModule } from 'src/common/health/health.module';
 import { RemoveFieldInterceptor } from 'src/common/interceptors/remove-field';
+import { EssayModule } from 'src/models/essay/essay.module';
 import { SpaceModule } from 'src/models/space/space.module';
 import { UserModule } from 'src/models/user/user.module';
 
@@ -23,6 +24,7 @@ import { UserModule } from 'src/models/user/user.module';
     }),
     UserModule,
     SpaceModule,
+    EssayModule,
     HealthModule,
   ],
   providers: [
