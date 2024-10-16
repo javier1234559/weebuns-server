@@ -12,14 +12,19 @@ import axios from 'axios';
 import * as bcrypt from 'bcrypt';
 import { Response } from 'express';
 
-// import { OAuth2Client, TokenPayload } from 'google-auth-library'
 import { IAuthPayload } from 'src/common/interface/auth-payload.interface';
 import { PrismaService } from 'src/common/prisma/prisma.service';
 import { UserRole } from 'src/common/type/enum';
 import { generateRandomNumber } from 'src/common/utils/random';
 import config from 'src/config';
+import {
+  LogoutResponse,
+  UserLoginResponse,
+  UserRefreshTokenResponse,
+  UserRegisterResponse,
+  UserResponse,
+} from 'src/models/user/dtos/auth-response.dto';
 import { LoginGoogleDto } from 'src/models/user/dtos/login-google.dto';
-import { UserResponse } from 'src/models/user/dtos/login-response.dto';
 import { LoginDto } from 'src/models/user/dtos/login.dto';
 import { RegisterDto } from 'src/models/user/dtos/register.dto';
 
@@ -47,17 +52,18 @@ export class AuthService {
     return { accessToken, refreshToken };
   }
 
-  async getCurrentUser(authPayload: IAuthPayload) {
+  async getCurrentUser(authPayload: IAuthPayload): Promise<UserResponse> {
     try {
-      return await this.prisma.user.findUnique({
+      const user = await this.prisma.user.findUnique({
         where: { id: authPayload.sub },
       });
+      return { user };
     } catch (error) {
       return null;
     }
   }
 
-  async login(loginDto: LoginDto, res: Response): Promise<UserResponse> {
+  async login(loginDto: LoginDto, res: Response): Promise<UserLoginResponse> {
     const { email, password } = loginDto;
     const user = await this.prisma.user.findUnique({ where: { email } });
 
@@ -83,7 +89,10 @@ export class AuthService {
     };
   }
 
-  async register(registerDto: RegisterDto, res: Response) {
+  async register(
+    registerDto: RegisterDto,
+    res: Response,
+  ): Promise<UserRegisterResponse> {
     const { username, email, password, firstName, lastName } = registerDto;
 
     const existingUser = await this.prisma.user.findFirst({
@@ -123,7 +132,10 @@ export class AuthService {
     }
   }
 
-  async loginGoogle(loginGoogleDto: LoginGoogleDto, res: Response) {
+  async loginGoogle(
+    loginGoogleDto: LoginGoogleDto,
+    res: Response,
+  ): Promise<UserLoginResponse> {
     try {
       const accessToken = loginGoogleDto.accessToken;
       const { data: payload } = await axios.get(
@@ -164,7 +176,10 @@ export class AuthService {
     }
   }
 
-  async loginFacebook(loginFacebookDto: LoginGoogleDto, res: Response) {
+  async loginFacebook(
+    loginFacebookDto: LoginGoogleDto,
+    res: Response,
+  ): Promise<UserLoginResponse> {
     try {
       const accessToken = loginFacebookDto.accessToken;
       const { data: verifiedUserInfo } = await axios.get(
@@ -237,7 +252,7 @@ export class AuthService {
     return user;
   }
 
-  private generateAuthResponse(user: any, res: Response) {
+  private generateAuthResponse(user: any, res: Response): UserLoginResponse {
     const { accessToken, refreshToken } = this.generateTokens(user);
     this.setRefreshTokenCookie(res, refreshToken);
 
@@ -247,7 +262,10 @@ export class AuthService {
     };
   }
 
-  async refreshToken(refreshToken: string, res: Response) {
+  async refreshToken(
+    refreshToken: string,
+    res: Response,
+  ): Promise<UserRefreshTokenResponse> {
     try {
       const payload = this.jwtService.verify(refreshToken, {
         secret: config.jwt.jwtRefreshSecret,
@@ -269,6 +287,7 @@ export class AuthService {
 
       return {
         access_token: accessToken,
+        refresh_token: newRefreshToken,
       };
     } catch (error) {
       throw new UnauthorizedException('Invalid refresh token');
@@ -284,7 +303,7 @@ export class AuthService {
     });
   }
 
-  async logout(res: Response) {
+  async logout(res: Response): Promise<LogoutResponse> {
     res.clearCookie('refreshToken');
     return { message: 'Logged out successfully' };
   }

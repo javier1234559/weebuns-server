@@ -1,5 +1,3 @@
-
-  export class ConnectFlashCardDto {
-    id: number;
-  }
-  
+export class ConnectFlashCardDto {
+  id: number;
+}

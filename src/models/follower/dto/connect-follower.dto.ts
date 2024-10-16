@@ -1,5 +1,3 @@
-
-  export class ConnectFollowerDto {
-    id: number;
-  }
-  
+export class ConnectFollowerDto {
+  id: number;
+}

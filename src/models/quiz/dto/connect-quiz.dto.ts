@@ -1,5 +1,3 @@
-
-  export class ConnectQuizDto {
-    id: number;
-  }
-  
+export class ConnectQuizDto {
+  id: number;
+}

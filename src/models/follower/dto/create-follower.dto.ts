@@ -1,9 +1,1 @@
-
-
-
-
-
-
-export class CreateFollowerDto {
-  
-}
+export class CreateFollowerDto {}

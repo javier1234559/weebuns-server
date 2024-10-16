@@ -10,12 +10,19 @@ import { generateRandomNumber } from 'src/common/utils/random';
 import { CreateUserDto } from 'src/models/user/dtos/create-user.dto';
 import { FindAllUsersDto } from 'src/models/user/dtos/find-all-user.dto';
 import { UpdateUserDto } from 'src/models/user/dtos/update-user.dto';
+import {
+  CreateUserResponse,
+  DeleteUserResponse,
+  UpdateUserResponse,
+  UserResponse,
+  UsersResponse,
+} from 'src/models/user/dtos/user-response.dto';
 
 @Injectable()
 export class UserService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(createUserInput: CreateUserDto) {
+  async create(createUserInput: CreateUserDto): Promise<CreateUserResponse> {
     const { password, ...userData } = createUserInput;
     const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -29,11 +36,12 @@ export class UserService {
       },
     });
 
-    const { ...userWithoutPassword } = newUser;
-    return userWithoutPassword;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { password_hash, ...userWithoutPassword } = newUser;
+    return { user: userWithoutPassword };
   }
 
-  async findAll(findAllUsersDto: FindAllUsersDto) {
+  async findAll(findAllUsersDto: FindAllUsersDto): Promise<UsersResponse> {
     const { page, perPage, search } = findAllUsersDto;
     const skip = (page - 1) * perPage || 0;
 
@@ -64,12 +72,15 @@ export class UserService {
 
     return {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      data: users.map(({ password_hash, ...user }) => user),
-      pagination,
+      users: users.map(({ password_hash, ...user }) => user),
+      pagination: {
+        ...pagination,
+        itemCount: users.length,
+      },
     };
   }
 
-  async findOne(id: number) {
+  async findOne(id: number): Promise<UserResponse> {
     const user = await this.prisma.user.findUnique({
       where: { id },
     });
@@ -80,27 +91,30 @@ export class UserService {
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password_hash, ...userWithoutPassword } = user;
-    return userWithoutPassword;
+    return { user: userWithoutPassword };
   }
 
-  async update(id: number, updateUserInput: UpdateUserDto) {
-    const { ...updateData } = updateUserInput;
-
+  async update(
+    id: number,
+    updateUserInput: UpdateUserDto,
+  ): Promise<UpdateUserResponse> {
     const updatedUser = await this.prisma.user.update({
       where: { id },
-      data: updateData,
+      data: updateUserInput,
     });
 
-    const { ...userWithoutPassword } = updatedUser;
-    return userWithoutPassword;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { password_hash, ...userWithoutPassword } = updatedUser;
+    return { user: userWithoutPassword };
   }
 
-  async remove(id: number) {
+  async remove(id: number): Promise<DeleteUserResponse> {
     const deletedUser = await this.prisma.user.delete({
       where: { id },
     });
 
-    const { ...userWithoutPassword } = deletedUser;
-    return userWithoutPassword;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { password_hash, ...userWithoutPassword } = deletedUser;
+    return { user: userWithoutPassword };
   }
 }

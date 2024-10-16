@@ -26,4 +26,8 @@ export class CreateSpaceDto {
   @IsNumber()
   @IsOptional()
   vocab_number?: number;
+
+  @ApiProperty()
+  @IsNumber()
+  userId: number;
 }

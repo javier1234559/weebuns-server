@@ -13,6 +13,13 @@ import { Request, Response } from 'express';
 
 import { AuthGuard } from 'src/common/auth/auth.guard';
 import { AuthService } from 'src/models/user/auth.service';
+import {
+  LogoutResponse,
+  UserLoginResponse,
+  UserRefreshTokenResponse,
+  UserRegisterResponse,
+  UserResponse,
+} from 'src/models/user/dtos/auth-response.dto';
 import { LoginFacebookDto } from 'src/models/user/dtos/login-facebook.dto';
 import { LoginGoogleDto } from 'src/models/user/dtos/login-google.dto';
 import { LoginDto } from 'src/models/user/dtos/login.dto';
@@ -25,7 +32,7 @@ export class AuthController {
 
   @UseGuards(AuthGuard)
   @Get('me')
-  async me(@Req() req: Request) {
+  async me(@Req() req: Request): Promise<UserResponse> {
     return this.authService.getCurrentUser(req.user);
   }
 
@@ -33,7 +40,7 @@ export class AuthController {
   async register(
     @Body() registerDto: RegisterDto,
     @Res({ passthrough: true }) res: Response,
-  ) {
+  ): Promise<UserRegisterResponse> {
     return this.authService.register(registerDto, res);
   }
 
@@ -41,7 +48,7 @@ export class AuthController {
   async login(
     @Body() loginDto: LoginDto,
     @Res({ passthrough: true }) res: Response,
-  ) {
+  ): Promise<UserLoginResponse> {
     return this.authService.login(loginDto, res);
   }
 
@@ -49,7 +56,7 @@ export class AuthController {
   async loginWithGoogle(
     @Body() loginDto: LoginGoogleDto,
     @Res({ passthrough: true }) res: Response,
-  ) {
+  ): Promise<UserLoginResponse> {
     return this.authService.loginGoogle(loginDto, res);
   }
 
@@ -57,7 +64,7 @@ export class AuthController {
   async loginWithFacebook(
     @Body() loginDto: LoginFacebookDto,
     @Res({ passthrough: true }) res: Response,
-  ) {
+  ): Promise<UserLoginResponse> {
     return this.authService.loginFacebook(loginDto, res);
   }
 
@@ -65,13 +72,15 @@ export class AuthController {
   async refreshToken(
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
-  ) {
+  ): Promise<UserRefreshTokenResponse> {
     const refreshToken = req.cookies['refreshToken'];
     return this.authService.refreshToken(refreshToken, res);
   }
 
   @Post('logout')
-  async logout(@Res({ passthrough: true }) res: Response) {
+  async logout(
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<LogoutResponse> {
     return this.authService.logout(res);
   }
 }
