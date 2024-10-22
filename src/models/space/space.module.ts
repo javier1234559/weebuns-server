@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 
-import { SpaceController } from 'src/models/space/restful/space.controler';
+import { SpaceController } from 'src/models/space/restful/space.controller';
 import { SpaceService } from 'src/models/space/space.service';
 
 @Module({

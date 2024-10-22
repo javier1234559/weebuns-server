@@ -19,22 +19,22 @@ export class SpaceService {
   async create(
     createSpaceDto: CreateSpaceDto,
   ): Promise<CreateSpaceResponseDto> {
-    const { userId, ...data } = createSpaceDto;
+    const { created_by, ...data } = createSpaceDto;
 
     // Kiểm tra sự tồn tại của userId
     const user = await this.prisma.user.findUnique({
-      where: { id: userId },
+      where: { id: created_by },
     });
 
     if (!user) {
-      throw new NotFoundException(`User with ID ${userId} not found`);
+      throw new NotFoundException(`User with ID ${created_by} not found`);
     }
 
     const space = await this.prisma.space.create({
       data: {
         ...data,
-        user: {
-          connect: { id: userId },
+        creator: {
+          connect: { id: created_by },
         },
       },
     });
@@ -47,7 +47,6 @@ export class SpaceService {
       essay_number: space.essay_number,
       quiz_number: space.quiz_number,
       vocab_number: space.vocab_number,
-      user,
     };
   }
 
@@ -80,12 +79,10 @@ export class SpaceService {
       pagination,
     };
   }
+
   async findOne(id: number): Promise<FindOneSpaceResponseDto> {
     const space = await this.prisma.space.findUnique({
       where: { id },
-      include: {
-        user: true,
-      },
     });
 
     if (!space) {
@@ -94,7 +91,6 @@ export class SpaceService {
 
     return {
       space,
-      user: space.user,
     };
   }
 
@@ -105,9 +101,6 @@ export class SpaceService {
     const space = await this.prisma.space.update({
       where: { id },
       data: updateSpaceDto,
-      include: {
-        user: true,
-      },
     });
 
     if (!space) {
@@ -121,16 +114,12 @@ export class SpaceService {
       essay_number: space.essay_number,
       quiz_number: space.quiz_number,
       vocab_number: space.vocab_number,
-      user: space.user,
     };
   }
 
   async delete(id: number): Promise<DeleteSpaceResponseDto> {
     const space = await this.prisma.space.findUnique({
       where: { id },
-      include: {
-        user: true,
-      },
     });
 
     if (!space) {
@@ -143,7 +132,6 @@ export class SpaceService {
 
     return {
       space,
-      user: space.user,
     };
   }
 }

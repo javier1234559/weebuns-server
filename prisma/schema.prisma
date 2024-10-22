@@ -4,19 +4,19 @@
 // Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
-// generator nestjsDto {
-//   provider                        = "prisma-generator-nestjs-dto"
-//   output                          = "../src/models"
-//   outputToNestJsResourceStructure = "true"
-//   exportRelationModifierClasses   = "true"
-//   reExport                        = "false"
-//   createDtoPrefix                 = "Create"
-//   updateDtoPrefix                 = "Update"
-//   dtoSuffix                       = "Dto"
-//   entityPrefix                    = ""
-//   entitySuffix                    = ""
-//   fileNamingStyle                 = "kebab"
-// }
+generator nestjsDto {
+  provider                        = "prisma-generator-nestjs-dto"
+  output                          = "../src/migration"
+  outputToNestJsResourceStructure = "true"
+  exportRelationModifierClasses   = "true"
+  reExport                        = "false"
+  createDtoPrefix                 = "Create"
+  updateDtoPrefix                 = "Update"
+  dtoSuffix                       = "Dto"
+  entityPrefix                    = ""
+  entitySuffix                    = ""
+  fileNamingStyle                 = "kebab"
+}
 
 datasource db {
   provider = "postgresql"
@@ -47,7 +47,7 @@ enum AuthProvider {
 
 model User {
   id                Int          @id @default(autoincrement())
-  username          String       @unique
+  username          String?      @unique
   email             String       @unique
   password_hash     String?
   role              UserRole     @default(user)
@@ -60,13 +60,31 @@ model User {
   last_login        DateTime?
   created_at        DateTime     @default(now())
   updated_at        DateTime     @updatedAt
-  spaces            Space[]
-  essays            Essay[]
-  quizzes           Quiz[]
-  flash_cards       FlashCard[]
-  vocabularies      Vocabulary[]
-  followers         Follower[]   @relation("Following")
-  followings        Follower[]   @relation("Follower")
+
+  // Relations
+  languages          UserLanguage[]
+  followedBy         Follower[]        @relation("Following")
+  following          Follower[]        @relation("Follower")
+  spaces             Space[]
+  essays             Essay[]
+  quizzes            Quiz[]
+  vocabularies       Vocabulary[]
+  flash_cards        FlashCard[]
+  corrections        Correction[]      @relation("CorrectionCreator")
+  correction_replies CorrectionReply[] @relation("ReplyCreator")
+}
+
+model UserLanguage {
+  id                Int      @id @default(autoincrement())
+  user_id           Int
+  language          String
+  proficiency_level String
+  is_native         Boolean  @default(false)
+  created_at        DateTime @default(now())
+  updated_at        DateTime @updatedAt
+  user              User     @relation(fields: [user_id], references: [id])
+
+  @@unique([user_id, language])
 }
 
 model Follower {
@@ -88,32 +106,109 @@ model Space {
   created_by   Int
   created_at   DateTime @default(now())
   updated_at   DateTime @updatedAt
-  user         User     @relation(fields: [created_by], references: [id])
+
+  // Relations
+  creator      User         @relation(fields: [created_by], references: [id])
   essays       Essay[]
+  quizzes      Quiz[]
+  vocabularies Vocabulary[]
 }
 
 model Essay {
   id         Int         @id @default(autoincrement())
-  space_id   Int
+  id_space   Int
   title      String
   summary    String?
-  content    String?
-  thumbnail  String?
+  content    String
+  cover_url  String?
   status     EssayStatus
+  language   String
   created_by Int
   created_at DateTime    @default(now())
   updated_at DateTime    @updatedAt
-  space      Space       @relation(fields: [space_id], references: [id])
-  user       User        @relation(fields: [created_by], references: [id])
+
+  // Relations
+  space       Space          @relation(fields: [id_space], references: [id])
+  author      User           @relation(fields: [created_by], references: [id])
+  hashtags    EssayHashtag[]
+  corrections Correction[]
+}
+
+model Hashtag {
+  id          Int            @id @default(autoincrement())
+  name        String         @unique
+  usage_count Int            @default(0)
+  created_at  DateTime       @default(now())
+  updated_at  DateTime       @updatedAt
+  essays      EssayHashtag[]
+}
+
+model EssayHashtag {
+  id         Int      @id @default(autoincrement())
+  essay_id   Int
+  hashtag_id Int
+  created_at DateTime @default(now())
+
+  essay   Essay   @relation(fields: [essay_id], references: [id])
+  hashtag Hashtag @relation(fields: [hashtag_id], references: [id])
+
+  @@unique([essay_id, hashtag_id])
+}
+
+model Correction {
+  id              Int      @id @default(autoincrement())
+  essay_id        Int
+  overall_comment String?
+  rating          Int?
+  created_by      Int
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
+
+  // Relations
+  essay     Essay                @relation(fields: [essay_id], references: [id])
+  creator   User                 @relation("CorrectionCreator", fields: [created_by], references: [id])
+  sentences CorrectionSentence[]
+  replies   CorrectionReply[]
+}
+
+model CorrectionSentence {
+  id             Int      @id @default(autoincrement())
+  id_correction  Int
+  original_text  String
+  corrected_text String?
+  explanation    String?
+  is_correct     Boolean  @default(false)
+  rating         Int?
+  created_at     DateTime @default(now())
+  updated_at     DateTime @updatedAt
+
+  correction Correction @relation(fields: [id_correction], references: [id])
+}
+
+model CorrectionReply {
+  id            Int      @id @default(autoincrement())
+  correction_id Int
+  comment       String
+  created_by    Int
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+
+  correction Correction @relation(fields: [correction_id], references: [id])
+  creator    User       @relation("ReplyCreator", fields: [created_by], references: [id])
 }
 
 model Quiz {
-  id         Int            @id @default(autoincrement())
-  user_id    Int
+  id         Int      @id @default(autoincrement())
+  id_space   Int
   title      String
-  created_at DateTime       @default(now())
-  user       User           @relation(fields: [user_id], references: [id])
-  questions  QuizQuestion[]
+  created_by Int
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  // Relations
+  space     Space          @relation(fields: [id_space], references: [id])
+  creator   User           @relation(fields: [created_by], references: [id])
+  questions QuizQuestion[]
 }
 
 model QuizQuestion {
@@ -125,35 +220,47 @@ model QuizQuestion {
   is_correct     Boolean
   id_vocabulary  Int?
   created_at     DateTime @default(now())
-  quiz           Quiz     @relation(fields: [quiz_id], references: [id])
-}
+  updated_at     DateTime @updatedAt
 
-model FlashCard {
-  id                Int        @id @default(autoincrement())
-  id_vocabulary     Int
-  id_user           Int
-  familiarity_level Int
-  review_date       DateTime   @default(now())
-  user              User       @relation(fields: [id_user], references: [id])
-  vocabulary        Vocabulary @relation(fields: [id_vocabulary], references: [id])
+  quiz Quiz @relation(fields: [quiz_id], references: [id])
 }
 
 model Vocabulary {
-  id               Int         @id @default(autoincrement())
-  created_by       Int
-  image            String?
+  id               Int      @id @default(autoincrement())
+  image_url        String?
   word             String
-  definition       String
-  pronunciation    String
-  example          String
-  part_of_speech   String
-  mastery_level    String
-  is_need_review   Boolean
-  next_review_date DateTime?
-  ease_factor      Int
-  interval         Int
-  created_at       DateTime    @default(now())
-  updated_at       DateTime    @updatedAt
-  user             User        @relation(fields: [created_by], references: [id])
-  flash_cards      FlashCard[]
+  part_of_speech   String?
+  definition       String?
+  pronunciation    String?
+  example          String?
+  reference_link   String?
+  id_essay_link    String?
+  id_space         Int?
+  mastery_level    String?
+  is_need_review   Boolean?
+  next_review_date String?
+  ease_factor      Int?
+  interval         Int?
+  created_by       Int
+  created_at       DateTime @default(now())
+  updated_at       DateTime @updatedAt
+
+  // Relations
+  creator     User        @relation(fields: [created_by], references: [id])
+  space       Space?      @relation(fields: [id_space], references: [id])
+  flash_cards FlashCard[]
+}
+
+model FlashCard {
+  id                Int      @id @default(autoincrement())
+  id_vocabulary     Int
+  familiarity_level Int
+  review_date       DateTime
+  created_by        Int
+  created_at        DateTime @default(now())
+  updated_at        DateTime @updatedAt
+
+  // Relations
+  vocabulary Vocabulary @relation(fields: [id_vocabulary], references: [id])
+  creator    User       @relation(fields: [created_by], references: [id])
 }

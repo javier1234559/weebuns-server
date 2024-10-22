@@ -29,5 +29,5 @@ export class CreateSpaceDto {
 
   @ApiProperty()
   @IsNumber()
-  userId: number;
+  created_by: number;
 }

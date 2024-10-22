@@ -1,8 +1,6 @@
 import { Field, ObjectType } from '@nestjs/graphql';
 import { ApiProperty } from '@nestjs/swagger';
 
-import { User } from 'src/models/user/entities/user.entity';
-
 @ObjectType()
 export class UpdateSpaceResponseDto {
   @Field()
@@ -28,8 +26,4 @@ export class UpdateSpaceResponseDto {
   @Field({ nullable: true })
   @ApiProperty()
   vocab_number?: number;
-
-  @Field(() => User)
-  @ApiProperty({ type: () => User })
-  user: User;
 }

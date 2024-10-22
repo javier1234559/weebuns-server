@@ -4,8 +4,8 @@ import {
   Delete,
   Get,
   Param,
+  Patch,
   Post,
-  Put,
   Query,
   UseGuards,
 } from '@nestjs/common';
@@ -45,7 +45,8 @@ export class SpaceController {
   async findOne(
     @Param() params: FindOneSpaceDto,
   ): Promise<FindOneSpaceResponseDto> {
-    return this.spaceService.findOne(params.id);
+    const id = Number(params.id);
+    return this.spaceService.findOne(id);
   }
 
   @UseGuards(AuthGuard, RolesGuard)
@@ -59,12 +60,13 @@ export class SpaceController {
 
   @UseGuards(AuthGuard, RolesGuard)
   @Roles(UserRole.USER, UserRole.ADMIN)
-  @Put(':id')
+  @Patch(':id')
   async update(
     @Param() params: FindOneSpaceDto,
     @Body() updateSpaceDto: UpdateSpaceDto,
   ): Promise<UpdateSpaceResponseDto> {
-    return this.spaceService.update(params.id, updateSpaceDto);
+    const id = Number(params.id);
+    return this.spaceService.update(id, updateSpaceDto);
   }
 
   @UseGuards(AuthGuard, RolesGuard)
@@ -73,6 +75,7 @@ export class SpaceController {
   async delete(
     @Param() params: FindOneSpaceDto,
   ): Promise<DeleteSpaceResponseDto> {
-    return this.spaceService.delete(params.id);
+    const id = Number(params.id);
+    return this.spaceService.delete(id);
   }
 }
