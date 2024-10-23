@@ -1,3 +1,5 @@
-export class ConnectEssayDto {
-  id: number;
-}
+
+  export class ConnectEssayDto {
+    id: number;
+  }
+  

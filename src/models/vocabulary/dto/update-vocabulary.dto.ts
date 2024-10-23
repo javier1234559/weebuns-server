@@ -1,13 +1,15 @@
 export class UpdateVocabularyDto {
-  image?: string;
+  image_url?: string;
   word?: string;
+  part_of_speech?: string;
   definition?: string;
   pronunciation?: string;
   example?: string;
-  part_of_speech?: string;
+  reference_link?: string;
+  id_essay_link?: string;
   mastery_level?: string;
   is_need_review?: boolean;
-  next_review_date?: Date;
+  next_review_date?: string;
   ease_factor?: number;
   interval?: number;
 }

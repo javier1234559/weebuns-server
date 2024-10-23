@@ -1,13 +1,18 @@
 export class CreateVocabularyDto {
-  image?: string;
+  image_url?: string;
   word: string;
-  definition: string;
-  pronunciation: string;
-  example: string;
-  part_of_speech: string;
-  mastery_level: string;
-  is_need_review: boolean;
-  next_review_date?: Date;
-  ease_factor: number;
-  interval: number;
+  part_of_speech?: string;
+  definition?: string;
+  pronunciation?: string;
+  example?: string;
+  reference_link?: string;
+  id_essay_link?: string;
+  mastery_level?: string;
+  is_need_review?: boolean;
+  next_review_date?: string;
+  ease_factor?: number;
+  interval?: number;
+
+  spaceId: number;
+  created_by: number;
 }
