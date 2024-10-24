@@ -2,11 +2,12 @@ import { $Enums } from '@prisma/client';
 
 import { Correction } from 'src/models/correction/entities/correction.entity';
 import { EssayHashtag } from 'src/models/essay-hashtag/entities/essay-hashtag.entity';
+import { IEssay } from 'src/models/essay/essay.interface';
 
 import { Space } from '../../space/entities/space.entity';
 import { User } from '../../user/entities/user.entity';
 
-export class Essay {
+export class Essay implements IEssay {
   id: number;
   id_space: number;
   title: string;

@@ -1,8 +1,10 @@
+import { IVocabulary } from 'src/models/vocabulary/vocabulary.interface';
+
 import { FlashCard } from '../../flash-card/entities/flash-card.entity';
 import { Space } from '../../space/entities/space.entity';
 import { User } from '../../user/entities/user.entity';
 
-export class Vocabulary {
+export class Vocabulary implements IVocabulary {
   id: number;
   image_url: string | null;
   word: string;
