@@ -1,5 +1,5 @@
 
   export class ConnectSpaceDto {
-    id: number;
+    id: string;
   }
   

@@ -1,6 +1,6 @@
 
   export class ConnectUserDto {
-    id?: number;
+    id?: string;
 username?: string;
 email?: string;
   }

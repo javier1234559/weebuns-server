@@ -3,9 +3,9 @@ import {User} from '../../user/entities/user.entity'
 
 
 export class Follower {
-  id: number ;
-id_follower: number ;
-id_following: number ;
+  id: string ;
+id_follower: string ;
+id_following: string ;
 followed_at: Date ;
 follower?: User ;
 following?: User ;

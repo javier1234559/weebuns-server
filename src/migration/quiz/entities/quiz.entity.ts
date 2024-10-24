@@ -5,10 +5,10 @@ import {QuizQuestion} from '../../quiz-question/entities/quiz-question.entity'
 
 
 export class Quiz {
-  id: number ;
-id_space: number ;
+  id: string ;
+id_space: string ;
 title: string ;
-created_by: number ;
+created_by: string ;
 created_at: Date ;
 updated_at: Date ;
 space?: Space ;

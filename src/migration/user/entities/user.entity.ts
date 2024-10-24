@@ -12,7 +12,7 @@ import {CorrectionReply} from '../../correction-reply/entities/correction-reply.
 
 
 export class User {
-  id: number ;
+  id: string ;
 username: string  | null;
 email: string ;
 password_hash: string  | null;

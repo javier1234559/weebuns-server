@@ -1,5 +1,5 @@
 
   export class ConnectFollowerDto {
-    id: number;
+    id: string;
   }
   

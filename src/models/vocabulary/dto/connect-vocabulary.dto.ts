@@ -1,3 +1,3 @@
 export class ConnectVocabularyDto {
-  id: number;
+  id: string;
 }

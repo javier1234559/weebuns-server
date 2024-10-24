@@ -1,9 +1,8 @@
 import { UseGuards } from '@nestjs/common';
-import { Args, Int, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 
 import { AuthGuard } from 'src/common/auth/auth.guard';
-import { Roles, RolesGuard } from 'src/common/auth/role.guard';
-import { UserRole } from 'src/common/type/enum';
+import { Roles, RolesGuard, UserRole } from 'src/common/auth/role.guard';
 import { CreateUserDto } from 'src/models/user/dtos/create-user.dto';
 import {
   FindAllUsersDto,
@@ -30,7 +29,7 @@ export class UserResolver {
   @UseGuards(AuthGuard)
   @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN)
-  async findOne(@Args('id', { type: () => Int }) id: number) {
+  async findOne(@Args('id', { type: () => String }) id: string) {
     return this.userService.findOne(id);
   }
 
@@ -47,7 +46,7 @@ export class UserResolver {
   @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN)
   async updateUser(
-    @Args('id', { type: () => Int }) id: number,
+    @Args('id', { type: () => String }) id: string,
     @Args('updateUserInput') updateUserInput: UpdateUserDto,
   ) {
     return this.userService.update(id, updateUserInput);
@@ -57,7 +56,7 @@ export class UserResolver {
   @UseGuards(AuthGuard)
   @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN)
-  async removeUser(@Args('id', { type: () => Int }) id: number) {
+  async removeUser(@Args('id', { type: () => String }) id: string) {
     return this.userService.remove(id);
   }
 }

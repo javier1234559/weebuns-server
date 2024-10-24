@@ -1,5 +1,5 @@
 
   export class ConnectCorrectionSentenceDto {
-    id: number;
+    id: string;
   }
   

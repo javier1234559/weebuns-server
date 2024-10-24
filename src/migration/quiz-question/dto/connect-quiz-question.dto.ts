@@ -1,5 +1,5 @@
 
   export class ConnectQuizQuestionDto {
-    id: number;
+    id: string;
   }
   

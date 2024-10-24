@@ -9,5 +9,5 @@ export class CreateQuizQuestionDto {
 correct_answer: string;
 user_answer?: string;
 is_correct: boolean;
-id_vocabulary?: number;
+id_vocabulary?: string;
 }

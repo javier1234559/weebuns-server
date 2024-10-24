@@ -5,7 +5,7 @@ import { ApiProperty } from '@nestjs/swagger';
 export class UpdateVocabularyResponseDto {
   @Field()
   @ApiProperty()
-  id: number;
+  id: string;
 
   @Field({ nullable: true })
   @ApiProperty({ required: false })
@@ -41,7 +41,7 @@ export class UpdateVocabularyResponseDto {
 
   @Field({ nullable: true })
   @ApiProperty({ required: false })
-  id_space?: number;
+  id_space?: string;
 
   @Field({ nullable: true })
   @ApiProperty({ required: false })
@@ -65,7 +65,7 @@ export class UpdateVocabularyResponseDto {
 
   @Field()
   @ApiProperty()
-  created_by: number;
+  created_by: string;
 
   @Field()
   @ApiProperty()

@@ -6,13 +6,13 @@ import {Vocabulary} from '../../vocabulary/entities/vocabulary.entity'
 
 
 export class Space {
-  id: number ;
+  id: string ;
 name: string ;
 description: string  | null;
 essay_number: number  | null;
 quiz_number: number  | null;
 vocab_number: number  | null;
-created_by: number ;
+created_by: string ;
 created_at: Date ;
 updated_at: Date ;
 creator?: User ;

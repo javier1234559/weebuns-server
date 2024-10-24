@@ -6,11 +6,11 @@ import {CorrectionReply} from '../../correction-reply/entities/correction-reply.
 
 
 export class Correction {
-  id: number ;
-essay_id: number ;
+  id: string ;
+essay_id: string ;
 overall_comment: string  | null;
 rating: number  | null;
-created_by: number ;
+created_by: string ;
 created_at: Date ;
 updated_at: Date ;
 essay?: Essay ;

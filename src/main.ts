@@ -2,22 +2,20 @@ import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
-import cookieParser from 'cookie-parser';
+import * as cookieParser from 'cookie-parser';
 
 import config from 'src/config';
-import { CreateSpaceDto } from 'src/models/space/dto/create-space.dto';
-import { UpdateSpaceDto } from 'src/models/space/dto/update-space.dto';
-import { CreateUserDto } from 'src/models/user/dtos/create-user.dto';
-import { UpdateUserDto } from 'src/models/user/dtos/update-user.dto';
 
 import { AppModule } from './app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
+  console.log(cookieParser());
   app.use(cookieParser());
 
   app.setGlobalPrefix('api');
+
   // app.enableCors({
   //   origin: '*',
   //   credentials: true,
@@ -46,7 +44,13 @@ async function bootstrap() {
     .build();
 
   const document = SwaggerModule.createDocument(app, swaggerConfig, {
-    extraModels: [CreateUserDto, UpdateUserDto, CreateSpaceDto, UpdateSpaceDto],
+    // extraModels: [
+    //   CreateUserDto,
+    //   UpdateUserDto,
+    //   CreateSpaceDto,
+    //   UpdateSpaceDto,
+    //   UserLoginResponse,
+    // ],
   });
   SwaggerModule.setup('api', app, document);
 

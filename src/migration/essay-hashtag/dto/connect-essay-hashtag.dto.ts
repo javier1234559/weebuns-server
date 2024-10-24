@@ -1,5 +1,5 @@
 
   export class ConnectEssayHashtagDto {
-    id: number;
+    id: string;
   }
   

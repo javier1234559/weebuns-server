@@ -41,7 +41,7 @@ export class SpaceService {
 
     // Trả về thông tin của space vừa được tạo và thông tin người dùng
     return {
-      id: space.id.toString(),
+      id: space.id,
       name: space.name,
       description: space.description,
       essay_number: space.essay_number,
@@ -80,7 +80,7 @@ export class SpaceService {
     };
   }
 
-  async findOne(id: number): Promise<FindOneSpaceResponseDto> {
+  async findOne(id: string): Promise<FindOneSpaceResponseDto> {
     const space = await this.prisma.space.findUnique({
       where: { id },
     });
@@ -95,7 +95,7 @@ export class SpaceService {
   }
 
   async update(
-    id: number,
+    id: string,
     updateSpaceDto: UpdateSpaceDto,
   ): Promise<UpdateSpaceResponseDto> {
     const space = await this.prisma.space.update({
@@ -108,7 +108,7 @@ export class SpaceService {
     }
 
     return {
-      id: space.id.toString(),
+      id: space.id,
       name: space.name,
       description: space.description,
       essay_number: space.essay_number,
@@ -117,7 +117,7 @@ export class SpaceService {
     };
   }
 
-  async delete(id: number): Promise<DeleteSpaceResponseDto> {
+  async delete(id: string): Promise<DeleteSpaceResponseDto> {
     const space = await this.prisma.space.findUnique({
       where: { id },
     });

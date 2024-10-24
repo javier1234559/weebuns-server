@@ -1,5 +1,5 @@
 
   export class ConnectCorrectionReplyDto {
-    id: number;
+    id: string;
   }
   

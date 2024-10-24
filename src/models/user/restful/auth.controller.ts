@@ -2,12 +2,13 @@ import {
   Body,
   Controller,
   Get,
+  HttpStatus,
   Post,
   Req,
   Res,
   UseGuards,
 } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 import { Request, Response } from 'express';
 
@@ -32,11 +33,35 @@ export class AuthController {
 
   @UseGuards(AuthGuard)
   @Get('me')
+  @ApiOperation({ summary: 'Get current user profile' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'User profile retrieved successfully',
+    type: UserResponse,
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Unauthorized access',
+  })
   async me(@Req() req: Request): Promise<UserResponse> {
     return this.authService.getCurrentUser(req.user);
   }
 
   @Post('register')
+  @ApiOperation({ summary: 'Register new user' })
+  @ApiResponse({
+    status: HttpStatus.CREATED,
+    description: 'User registered successfully',
+    type: UserRegisterResponse,
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Invalid registration data',
+  })
+  @ApiResponse({
+    status: HttpStatus.CONFLICT,
+    description: 'Email already exists',
+  })
   async register(
     @Body() registerDto: RegisterDto,
     @Res({ passthrough: true }) res: Response,
@@ -45,6 +70,16 @@ export class AuthController {
   }
 
   @Post('login')
+  @ApiOperation({ summary: 'Login with email and password' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Login successful',
+    type: UserLoginResponse,
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Invalid credentials',
+  })
   async login(
     @Body() loginDto: LoginDto,
     @Res({ passthrough: true }) res: Response,
@@ -53,6 +88,16 @@ export class AuthController {
   }
 
   @Post('login/google')
+  @ApiOperation({ summary: 'Login with Google' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Google login successful',
+    type: UserLoginResponse,
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Invalid Google token',
+  })
   async loginWithGoogle(
     @Body() loginDto: LoginGoogleDto,
     @Res({ passthrough: true }) res: Response,
@@ -61,6 +106,16 @@ export class AuthController {
   }
 
   @Post('login/facebook')
+  @ApiOperation({ summary: 'Login with Facebook' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Facebook login successful',
+    type: UserLoginResponse,
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Invalid Facebook token',
+  })
   async loginWithFacebook(
     @Body() loginDto: LoginFacebookDto,
     @Res({ passthrough: true }) res: Response,
@@ -69,6 +124,16 @@ export class AuthController {
   }
 
   @Post('refresh-token')
+  @ApiOperation({ summary: 'Refresh access token' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Token refreshed successfully',
+    type: UserRefreshTokenResponse,
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Invalid refresh token',
+  })
   async refreshToken(
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
@@ -78,6 +143,12 @@ export class AuthController {
   }
 
   @Post('logout')
+  @ApiOperation({ summary: 'Logout user' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Logout successful',
+    type: LogoutResponse,
+  })
   async logout(
     @Res({ passthrough: true }) res: Response,
   ): Promise<LogoutResponse> {

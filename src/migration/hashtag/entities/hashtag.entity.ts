@@ -3,7 +3,7 @@ import {EssayHashtag} from '../../essay-hashtag/entities/essay-hashtag.entity'
 
 
 export class Hashtag {
-  id: number ;
+  id: string ;
 name: string ;
 usage_count: number ;
 created_at: Date ;

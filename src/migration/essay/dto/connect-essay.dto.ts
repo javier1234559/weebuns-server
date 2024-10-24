@@ -1,5 +1,5 @@
 
   export class ConnectEssayDto {
-    id: number;
+    id: string;
   }
   

@@ -49,7 +49,7 @@ export class EssayService {
       },
     });
 
-    //increase the essay count of the space
+    // Increase the essay count of the space
     if (essay) {
       await this.prisma.space.update({
         where: { id: spaceId },
@@ -96,7 +96,7 @@ export class EssayService {
     };
   }
 
-  async findOne(id: number): Promise<FindOneEssayResponseDto> {
+  async findOne(id: string): Promise<FindOneEssayResponseDto> {
     const essay = await this.prisma.essay.findUnique({
       where: { id },
     });
@@ -111,7 +111,7 @@ export class EssayService {
   }
 
   async update(
-    id: number,
+    id: string,
     updateEssayDto: UpdateEssayDto,
   ): Promise<UpdateEssayResponseDto> {
     const essay = await this.prisma.essay.update({
@@ -128,7 +128,7 @@ export class EssayService {
     };
   }
 
-  async delete(id: number): Promise<DeleteEssayResponseDto> {
+  async delete(id: string): Promise<DeleteEssayResponseDto> {
     const essay = await this.prisma.essay.findUnique({
       where: { id },
     });

@@ -4,11 +4,11 @@ import {User} from '../../user/entities/user.entity'
 
 
 export class FlashCard {
-  id: number ;
-id_vocabulary: number ;
+  id: string ;
+id_vocabulary: string ;
 familiarity_level: number ;
 review_date: Date ;
-created_by: number ;
+created_by: string ;
 created_at: Date ;
 updated_at: Date ;
 vocabulary?: Vocabulary ;

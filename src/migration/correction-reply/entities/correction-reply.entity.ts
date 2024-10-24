@@ -4,10 +4,10 @@ import {User} from '../../user/entities/user.entity'
 
 
 export class CorrectionReply {
-  id: number ;
-correction_id: number ;
+  id: string ;
+correction_id: string ;
 comment: string ;
-created_by: number ;
+created_by: string ;
 created_at: Date ;
 updated_at: Date ;
 correction?: Correction ;

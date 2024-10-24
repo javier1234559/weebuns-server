@@ -3,8 +3,8 @@ import {User} from '../../user/entities/user.entity'
 
 
 export class UserLanguage {
-  id: number ;
-user_id: number ;
+  id: string ;
+user_id: string ;
 language: string ;
 proficiency_level: string ;
 is_native: boolean ;

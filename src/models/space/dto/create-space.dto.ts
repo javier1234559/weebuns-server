@@ -28,6 +28,6 @@ export class CreateSpaceDto {
   vocab_number?: number;
 
   @ApiProperty()
-  @IsNumber()
-  created_by: number;
+  @IsString()
+  created_by: string;
 }

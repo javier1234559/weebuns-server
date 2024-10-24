@@ -11,6 +11,6 @@ export class CreateEssayDto {
   status: EssayStatus;
   language: string;
 
-  spaceId: number;
-  created_by: number;
+  spaceId: string;
+  created_by: string;
 }

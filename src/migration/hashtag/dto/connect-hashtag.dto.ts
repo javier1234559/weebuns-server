@@ -1,6 +1,6 @@
 
   export class ConnectHashtagDto {
-    id?: number;
+    id?: string;
 name?: string;
   }
   
