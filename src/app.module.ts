@@ -10,6 +10,8 @@ import { CommonModule } from 'src/common/common.module';
 import { HealthModule } from 'src/common/health/health.module';
 import { RemoveFieldInterceptor } from 'src/common/interceptors/remove-field';
 import { EssayModule } from 'src/models/essay/essay.module';
+import { QuizQuestionModule } from 'src/models/quiz-question/quiz-question.module';
+import { QuizModule } from 'src/models/quiz/quiz.module';
 import { SpaceModule } from 'src/models/space/space.module';
 import { UserModule } from 'src/models/user/user.module';
 import { VocabularyModule } from 'src/models/vocabulary/vocabulary.module';
@@ -27,6 +29,8 @@ import { VocabularyModule } from 'src/models/vocabulary/vocabulary.module';
     SpaceModule,
     EssayModule,
     VocabularyModule,
+    QuizModule,
+    QuizQuestionModule,
     HealthModule,
   ],
   providers: [

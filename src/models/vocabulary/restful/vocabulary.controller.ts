@@ -17,11 +17,11 @@ import { UserRole } from 'src/common/type/enum';
 import { CreateVocabularyResponseDto } from 'src/models/vocabulary/dto/create-vocabulary-response.dto';
 import { CreateVocabularyDto } from 'src/models/vocabulary/dto/create-vocabulary.dto';
 import { DeleteVocabularyResponseDto } from 'src/models/vocabulary/dto/delete-vocabulary-response.dto';
-import { FindAllVocabulariesDto } from 'src/models/vocabulary/dto/find-all-vocabulary.dto';
+import { FindAllVocabularyDto } from 'src/models/vocabulary/dto/find-all-vocabulary.dto';
 import { FindOneVocabularyResponseDto } from 'src/models/vocabulary/dto/find-one-vocabulary-response.dto';
 import { UpdateVocabularyResponseDto } from 'src/models/vocabulary/dto/update-vocabulary-response.dto';
 import { UpdateVocabularyDto } from 'src/models/vocabulary/dto/update-vocabulary.dto';
-import { VocabulariesResponse } from 'src/models/vocabulary/dto/vocabulary-response.dto';
+import { VocabularyResponse } from 'src/models/vocabulary/dto/vocabulary-response.dto';
 import { VocabularyService } from 'src/models/vocabulary/vocabulary.service';
 
 @Controller('vocabularys')
@@ -52,11 +52,11 @@ export class VocabularyController {
   @ApiResponse({
     status: 200,
     description: 'Return all vocabularies.',
-    type: VocabulariesResponse,
+    type: VocabularyResponse,
   })
   async findAll(
-    @Query() findAllVocabulariesDto: FindAllVocabulariesDto,
-  ): Promise<VocabulariesResponse> {
+    @Query() findAllVocabulariesDto: FindAllVocabularyDto,
+  ): Promise<VocabularyResponse> {
     return this.vocabularyService.findAll(findAllVocabulariesDto);
   }
 

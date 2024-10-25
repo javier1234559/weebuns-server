@@ -7,11 +7,11 @@ import { calculatePagination } from 'src/common/utils/pagination';
 import { CreateVocabularyResponseDto } from 'src/models/vocabulary/dto/create-vocabulary-response.dto';
 import { CreateVocabularyDto } from 'src/models/vocabulary/dto/create-vocabulary.dto';
 import { DeleteVocabularyResponseDto } from 'src/models/vocabulary/dto/delete-vocabulary-response.dto';
-import { FindAllVocabulariesDto } from 'src/models/vocabulary/dto/find-all-vocabulary.dto';
+import { FindAllVocabularyDto } from 'src/models/vocabulary/dto/find-all-vocabulary.dto';
 import { FindOneVocabularyResponseDto } from 'src/models/vocabulary/dto/find-one-vocabulary-response.dto';
 import { UpdateVocabularyResponseDto } from 'src/models/vocabulary/dto/update-vocabulary-response.dto';
 import { UpdateVocabularyDto } from 'src/models/vocabulary/dto/update-vocabulary.dto';
-import { VocabulariesResponse } from 'src/models/vocabulary/dto/vocabulary-response.dto';
+import { VocabularyResponse } from 'src/models/vocabulary/dto/vocabulary-response.dto';
 
 @Injectable()
 export class VocabularyService {
@@ -90,9 +90,9 @@ export class VocabularyService {
   }
 
   async findAll(
-    findAllVocabulariesDto: FindAllVocabulariesDto,
-  ): Promise<VocabulariesResponse> {
-    const { page, perPage, search } = findAllVocabulariesDto;
+    findAllVocabularyDto: FindAllVocabularyDto,
+  ): Promise<VocabularyResponse> {
+    const { page, perPage, search } = findAllVocabularyDto;
     const skip = (page - 1) * perPage || 0;
 
     let where: Prisma.VocabularyWhereInput = {};
@@ -103,7 +103,7 @@ export class VocabularyService {
       };
     }
 
-    const [vocabularies, totalItems] = await Promise.all([
+    const [vocabulary, totalItems] = await Promise.all([
       this.prisma.vocabulary.findMany({
         where,
         skip,
@@ -113,10 +113,10 @@ export class VocabularyService {
       this.prisma.vocabulary.count({ where }),
     ]);
 
-    const pagination = calculatePagination(totalItems, findAllVocabulariesDto);
+    const pagination = calculatePagination(totalItems, findAllVocabularyDto);
 
     return {
-      data: vocabularies,
+      data: vocabulary,
       pagination,
     };
   }

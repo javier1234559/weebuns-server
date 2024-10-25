@@ -2,13 +2,14 @@ import { Field, ObjectType } from '@nestjs/graphql';
 import { ApiProperty } from '@nestjs/swagger';
 
 import { PaginationOutputDto } from 'src/common/dto/pagination.dto';
-import { Vocabulary } from 'src/models/vocabulary/entities/vocabulary.entity';
+
+import { Quiz } from './../../../migration/quiz/entities/quiz.entity';
 
 @ObjectType()
-export class VocabularyResponse {
-  @Field(() => [Vocabulary])
+export class QuizResponse {
+  @Field(() => [Quiz])
   @ApiProperty()
-  data: Vocabulary[];
+  data: Quiz[];
 
   @Field(() => PaginationOutputDto)
   @ApiProperty()
