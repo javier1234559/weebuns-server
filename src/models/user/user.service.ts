@@ -1,10 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 
-import { AuthProvider, Prisma } from '@prisma/client';
+import { AuthProvider, Prisma, UserRole } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 
 import { PrismaService } from 'src/common/prisma/prisma.service';
-import { UserRole } from 'src/common/type/enum';
 import { calculatePagination } from 'src/common/utils/pagination';
 import { generateRandomNumber } from 'src/common/utils/random';
 import { CreateUserDto } from 'src/models/user/dtos/create-user.dto';
@@ -31,7 +30,7 @@ export class UserService {
         id: generateRandomNumber(1, 100),
         ...userData,
         password_hash: hashedPassword,
-        role: UserRole.USER,
+        role: UserRole.user,
         auth_provider: AuthProvider.local,
       },
     });
@@ -73,14 +72,11 @@ export class UserService {
     return {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       users: users.map(({ password_hash, ...user }) => user),
-      pagination: {
-        ...pagination,
-        itemCount: users.length,
-      },
+      pagination,
     };
   }
 
-  async findOne(id: number): Promise<UserResponse> {
+  async findOne(id: string): Promise<UserResponse> {
     const user = await this.prisma.user.findUnique({
       where: { id },
     });
@@ -95,7 +91,7 @@ export class UserService {
   }
 
   async update(
-    id: number,
+    id: string,
     updateUserInput: UpdateUserDto,
   ): Promise<UpdateUserResponse> {
     const updatedUser = await this.prisma.user.update({
@@ -108,7 +104,7 @@ export class UserService {
     return { user: userWithoutPassword };
   }
 
-  async remove(id: number): Promise<DeleteUserResponse> {
+  async remove(id: string): Promise<DeleteUserResponse> {
     const deletedUser = await this.prisma.user.delete({
       where: { id },
     });

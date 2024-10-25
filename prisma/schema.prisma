@@ -27,6 +27,7 @@ generator client {
   provider = "prisma-client-js"
 }
 
+// Enums remain the same
 enum UserRole {
   user
   admin
@@ -46,7 +47,7 @@ enum AuthProvider {
 }
 
 model User {
-  id                Int          @id @default(autoincrement())
+  id                String       @id @default(uuid()) @db.Uuid
   username          String?      @unique
   email             String       @unique
   password_hash     String?
@@ -61,7 +62,6 @@ model User {
   created_at        DateTime     @default(now())
   updated_at        DateTime     @updatedAt
 
-  // Relations
   languages          UserLanguage[]
   followedBy         Follower[]        @relation("Following")
   following          Follower[]        @relation("Follower")
@@ -75,8 +75,8 @@ model User {
 }
 
 model UserLanguage {
-  id                Int      @id @default(autoincrement())
-  user_id           Int
+  id                String   @id @default(uuid()) @db.Uuid
+  user_id           String   @db.Uuid
   language          String
   proficiency_level String
   is_native         Boolean  @default(false)
@@ -88,26 +88,25 @@ model UserLanguage {
 }
 
 model Follower {
-  id           Int      @id @default(autoincrement())
-  id_follower  Int
-  id_following Int
+  id           String   @id @default(uuid()) @db.Uuid
+  id_follower  String   @db.Uuid
+  id_following String   @db.Uuid
   followed_at  DateTime @default(now())
   follower     User     @relation("Follower", fields: [id_follower], references: [id])
   following    User     @relation("Following", fields: [id_following], references: [id])
 }
 
 model Space {
-  id           Int      @id @default(autoincrement())
+  id           String   @id @default(uuid()) @db.Uuid
   name         String
   description  String?
   essay_number Int?
   quiz_number  Int?
   vocab_number Int?
-  created_by   Int
+  created_by   String   @db.Uuid
   created_at   DateTime @default(now())
   updated_at   DateTime @updatedAt
 
-  // Relations
   creator      User         @relation(fields: [created_by], references: [id])
   essays       Essay[]
   quizzes      Quiz[]
@@ -115,19 +114,18 @@ model Space {
 }
 
 model Essay {
-  id         Int         @id @default(autoincrement())
-  id_space   Int
+  id         String      @id @default(uuid()) @db.Uuid
+  id_space   String      @db.Uuid
   title      String
   summary    String?
   content    String
   cover_url  String?
-  status     EssayStatus
+  status     EssayStatus @default(draft)
   language   String
-  created_by Int
+  created_by String      @db.Uuid
   created_at DateTime    @default(now())
   updated_at DateTime    @updatedAt
 
-  // Relations
   space       Space          @relation(fields: [id_space], references: [id])
   author      User           @relation(fields: [created_by], references: [id])
   hashtags    EssayHashtag[]
@@ -135,7 +133,7 @@ model Essay {
 }
 
 model Hashtag {
-  id          Int            @id @default(autoincrement())
+  id          String         @id @default(uuid()) @db.Uuid
   name        String         @unique
   usage_count Int            @default(0)
   created_at  DateTime       @default(now())
@@ -144,9 +142,9 @@ model Hashtag {
 }
 
 model EssayHashtag {
-  id         Int      @id @default(autoincrement())
-  essay_id   Int
-  hashtag_id Int
+  id         String   @id @default(uuid()) @db.Uuid
+  essay_id   String   @db.Uuid
+  hashtag_id String   @db.Uuid
   created_at DateTime @default(now())
 
   essay   Essay   @relation(fields: [essay_id], references: [id])
@@ -156,15 +154,14 @@ model EssayHashtag {
 }
 
 model Correction {
-  id              Int      @id @default(autoincrement())
-  essay_id        Int
+  id              String   @id @default(uuid()) @db.Uuid
+  essay_id        String   @db.Uuid
   overall_comment String?
   rating          Int?
-  created_by      Int
+  created_by      String   @db.Uuid
   created_at      DateTime @default(now())
   updated_at      DateTime @updatedAt
 
-  // Relations
   essay     Essay                @relation(fields: [essay_id], references: [id])
   creator   User                 @relation("CorrectionCreator", fields: [created_by], references: [id])
   sentences CorrectionSentence[]
@@ -172,8 +169,8 @@ model Correction {
 }
 
 model CorrectionSentence {
-  id             Int      @id @default(autoincrement())
-  id_correction  Int
+  id             String   @id @default(uuid()) @db.Uuid
+  id_correction  String   @db.Uuid
   original_text  String
   corrected_text String?
   explanation    String?
@@ -186,10 +183,10 @@ model CorrectionSentence {
 }
 
 model CorrectionReply {
-  id            Int      @id @default(autoincrement())
-  correction_id Int
+  id            String   @id @default(uuid()) @db.Uuid
+  correction_id String   @db.Uuid
   comment       String
-  created_by    Int
+  created_by    String   @db.Uuid
   created_at    DateTime @default(now())
   updated_at    DateTime @updatedAt
 
@@ -198,27 +195,26 @@ model CorrectionReply {
 }
 
 model Quiz {
-  id         Int      @id @default(autoincrement())
-  id_space   Int
+  id         String   @id @default(uuid()) @db.Uuid
+  id_space   String   @db.Uuid
   title      String
-  created_by Int
+  created_by String   @db.Uuid
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
-  // Relations
   space     Space          @relation(fields: [id_space], references: [id])
   creator   User           @relation(fields: [created_by], references: [id])
   questions QuizQuestion[]
 }
 
 model QuizQuestion {
-  id             Int      @id @default(autoincrement())
-  quiz_id        Int
+  id             String   @id @default(uuid()) @db.Uuid
+  quiz_id        String   @db.Uuid
   question_text  String
   correct_answer String
   user_answer    String?
   is_correct     Boolean
-  id_vocabulary  Int?
+  id_vocabulary  String?  @db.Uuid
   created_at     DateTime @default(now())
   updated_at     DateTime @updatedAt
 
@@ -226,7 +222,7 @@ model QuizQuestion {
 }
 
 model Vocabulary {
-  id               Int      @id @default(autoincrement())
+  id               String   @id @default(uuid()) @db.Uuid
   image_url        String?
   word             String
   part_of_speech   String?
@@ -234,33 +230,31 @@ model Vocabulary {
   pronunciation    String?
   example          String?
   reference_link   String?
-  id_essay_link    String?
-  id_space         Int?
+  id_essay_link    String?  @db.Uuid
+  id_space         String?  @db.Uuid
   mastery_level    String?
   is_need_review   Boolean?
   next_review_date String?
   ease_factor      Int?
   interval         Int?
-  created_by       Int
+  created_by       String   @db.Uuid
   created_at       DateTime @default(now())
   updated_at       DateTime @updatedAt
 
-  // Relations
   creator     User        @relation(fields: [created_by], references: [id])
   space       Space?      @relation(fields: [id_space], references: [id])
   flash_cards FlashCard[]
 }
 
 model FlashCard {
-  id                Int      @id @default(autoincrement())
-  id_vocabulary     Int
+  id                String   @id @default(uuid()) @db.Uuid
+  id_vocabulary     String   @db.Uuid
   familiarity_level Int
   review_date       DateTime
-  created_by        Int
+  created_by        String   @db.Uuid
   created_at        DateTime @default(now())
   updated_at        DateTime @updatedAt
 
-  // Relations
   vocabulary Vocabulary @relation(fields: [id_vocabulary], references: [id])
   creator    User       @relation(fields: [created_by], references: [id])
 }

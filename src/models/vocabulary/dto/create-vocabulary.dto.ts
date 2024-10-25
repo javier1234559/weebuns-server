@@ -13,6 +13,6 @@ export class CreateVocabularyDto {
   ease_factor?: number;
   interval?: number;
 
-  spaceId: number;
-  created_by: number;
+  created_id: string;
+  space_id: string;
 }

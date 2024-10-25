@@ -1,47 +1,61 @@
 import { Field, InputType, Int, ObjectType } from '@nestjs/graphql';
-import { ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
-import { Type } from 'class-transformer';
-import { IsInt, IsOptional, Min } from 'class-validator';
+import { Transform } from 'class-transformer';
+import { IsNumber, IsOptional } from 'class-validator';
 
 @InputType()
 export class PaginationInputDto {
-  @Field(() => Int, { nullable: true, defaultValue: 1 })
-  @IsInt()
-  @Min(1)
+  @Field(() => Int)
+  @Transform(({ value }) => parseInt(value) || 1)
+  @IsNumber()
   @IsOptional()
-  @Type(() => Number)
-  //docs
-  @ApiPropertyOptional()
-  page?: number = 1;
+  @ApiPropertyOptional({
+    default: 1,
+    type: Number,
+  })
+  page: number = 1;
 
-  @Field(() => Int, { nullable: true, defaultValue: 10 })
-  @IsInt()
-  @Min(1)
+  @Field(() => Int)
+  @Transform(({ value }) => parseInt(value) || 10)
+  @IsNumber()
   @IsOptional()
-  @Type(() => Number)
-  //docs
-  @ApiPropertyOptional()
-  perPage?: number = 10;
+  @ApiPropertyOptional({
+    default: 10,
+    type: Number,
+  })
+  perPage: number = 10;
 }
 
 @ObjectType()
 export class PaginationOutputDto {
   @Field(() => Int)
+  @ApiProperty({ example: 100, description: 'Total number of items' })
   totalItems: number;
 
   @Field(() => Int)
+  @ApiProperty({ example: 1, description: 'Current page number' })
   currentPage: number;
 
   @Field(() => Int)
+  @ApiProperty({ example: 10, description: 'Total number of pages' })
   totalPages: number;
 
   @Field(() => Int)
+  @ApiProperty({ example: 10, description: 'Number of items per page' })
   itemsPerPage: number;
 
   @Field(() => Boolean)
+  @ApiProperty({
+    example: true,
+    description: 'Indicates if there is a next page',
+  })
   hasNextPage: boolean;
 
   @Field(() => Boolean)
+  @ApiProperty({
+    example: false,
+    description: 'Indicates if there is a previous page',
+  })
   hasPreviousPage: boolean;
 }

@@ -7,6 +7,7 @@ import { calculatePagination } from 'src/common/utils/pagination';
 import { CreateEssayResponseDto } from 'src/models/essay/dto/create-essay-response.dto';
 import { CreateEssayDto } from 'src/models/essay/dto/create-essay.dto';
 import { DeleteEssayResponseDto } from 'src/models/essay/dto/delete-space-response.dto';
+import { EssaysResponse } from 'src/models/essay/dto/essay-response';
 import { FindAllEssaysDto } from 'src/models/essay/dto/find-all-essay.dto';
 import { FindOneEssayResponseDto } from 'src/models/essay/dto/find-one-essay-reponse.dto';
 import { UpdateEssayDto } from 'src/models/essay/dto/update-essay.dto';
@@ -49,7 +50,7 @@ export class EssayService {
       },
     });
 
-    //increase the essay count of the space
+    // Increase the essay count of the space
     if (essay) {
       await this.prisma.space.update({
         where: { id: spaceId },
@@ -66,7 +67,7 @@ export class EssayService {
     };
   }
 
-  async findAll(findAllEssaysDto: FindAllEssaysDto) {
+  async findAll(findAllEssaysDto: FindAllEssaysDto): Promise<EssaysResponse> {
     const { page, perPage, search } = findAllEssaysDto;
     const skip = (page - 1) * perPage || 0;
 
@@ -88,15 +89,17 @@ export class EssayService {
       this.prisma.essay.count({ where }),
     ]);
 
+    console.log(findAllEssaysDto);
     const pagination = calculatePagination(totalItems, findAllEssaysDto);
 
+    console.log(pagination);
     return {
       data: essays,
       pagination,
     };
   }
 
-  async findOne(id: number): Promise<FindOneEssayResponseDto> {
+  async findOne(id: string): Promise<FindOneEssayResponseDto> {
     const essay = await this.prisma.essay.findUnique({
       where: { id },
     });
@@ -111,7 +114,7 @@ export class EssayService {
   }
 
   async update(
-    id: number,
+    id: string,
     updateEssayDto: UpdateEssayDto,
   ): Promise<UpdateEssayResponseDto> {
     const essay = await this.prisma.essay.update({
@@ -128,7 +131,7 @@ export class EssayService {
     };
   }
 
-  async delete(id: number): Promise<DeleteEssayResponseDto> {
+  async delete(id: string): Promise<DeleteEssayResponseDto> {
     const essay = await this.prisma.essay.findUnique({
       where: { id },
     });

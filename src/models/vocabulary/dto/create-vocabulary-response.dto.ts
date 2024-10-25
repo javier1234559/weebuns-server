@@ -9,7 +9,7 @@ import { User } from '../../user/entities/user.entity';
 export class CreateVocabularyResponseDto {
   @Field()
   @ApiProperty()
-  id: number;
+  id: string;
 
   @Field({ nullable: true })
   @ApiProperty({ required: false })
@@ -45,7 +45,7 @@ export class CreateVocabularyResponseDto {
 
   @Field({ nullable: true })
   @ApiProperty({ required: false })
-  id_space?: number;
+  id_space?: string;
 
   @Field({ nullable: true })
   @ApiProperty({ required: false })
@@ -69,7 +69,7 @@ export class CreateVocabularyResponseDto {
 
   @Field()
   @ApiProperty()
-  created_by: number;
+  created_by: string;
 
   @Field()
   @ApiProperty()

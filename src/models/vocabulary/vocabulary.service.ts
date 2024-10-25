@@ -20,31 +20,31 @@ export class VocabularyService {
   async create(
     createVocabularyDto: CreateVocabularyDto,
   ): Promise<CreateVocabularyResponseDto> {
-    const { created_by, spaceId, ...data } = createVocabularyDto;
+    const { created_id, space_id, ...data } = createVocabularyDto;
 
     // Kiểm tra sự tồn tại của spaceId
     const space = await this.prisma.space.findUnique({
-      where: { id: spaceId },
+      where: { id: space_id },
     });
 
     if (!space) {
-      throw new NotFoundException(`Space with ID ${spaceId} not found`);
+      throw new NotFoundException(`Space with ID ${space_id} not found`);
     }
 
     // Kiểm tra sự tồn tại của created_by
     const user = await this.prisma.user.findUnique({
-      where: { id: created_by },
+      where: { id: created_id },
     });
 
     if (!user) {
-      throw new NotFoundException(`User with ID ${created_by} not found`);
+      throw new NotFoundException(`User with ID ${created_id} not found`);
     }
 
     const vocabulary = await this.prisma.vocabulary.create({
       data: {
         ...data,
-        created_by,
-        id_space: spaceId,
+        created_by: created_id,
+        id_space: space_id,
       },
       include: {
         creator: true,
@@ -55,7 +55,7 @@ export class VocabularyService {
     // Tăng số lượng từ vựng của space
     if (vocabulary) {
       await this.prisma.space.update({
-        where: { id: spaceId },
+        where: { id: space_id },
         data: {
           vocab_number: {
             increment: 1,
@@ -121,7 +121,7 @@ export class VocabularyService {
     };
   }
 
-  async findOne(id: number): Promise<FindOneVocabularyResponseDto> {
+  async findOne(id: string): Promise<FindOneVocabularyResponseDto> {
     const vocabulary = await this.prisma.vocabulary.findUnique({
       where: { id },
       include: {
@@ -138,7 +138,7 @@ export class VocabularyService {
   }
 
   async update(
-    id: number,
+    id: string,
     updateVocabularyDto: UpdateVocabularyDto,
   ): Promise<UpdateVocabularyResponseDto> {
     const vocabulary = await this.prisma.vocabulary.update({
@@ -172,7 +172,7 @@ export class VocabularyService {
     };
   }
 
-  async delete(id: number): Promise<DeleteVocabularyResponseDto> {
+  async delete(id: string): Promise<DeleteVocabularyResponseDto> {
     const vocabulary = await this.prisma.vocabulary.findUnique({
       where: { id },
     });

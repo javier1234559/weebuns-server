@@ -5,5 +5,5 @@ import { IsInt } from 'class-validator';
 export class DeleteVocabularyDto {
   @ApiProperty()
   @IsInt()
-  id: number;
+  id: string;
 }

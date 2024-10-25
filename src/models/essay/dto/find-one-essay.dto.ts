@@ -8,5 +8,5 @@ export class FindOneEssayDto {
   @ApiProperty()
   @Field()
   @IsInt()
-  id: number;
+  id: string;
 }
