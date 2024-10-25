@@ -7,10 +7,10 @@ import { Space } from 'src/models/space/entities/space.entity';
 @ObjectType()
 export class SpacesResponse {
   @Field(() => [Space])
-  @ApiProperty()
+  @ApiProperty({ type: [Space] })
   data: Space[];
 
   @Field(() => PaginationOutputDto)
-  @ApiProperty()
+  @ApiProperty({ type: PaginationOutputDto })
   pagination: PaginationOutputDto;
 }

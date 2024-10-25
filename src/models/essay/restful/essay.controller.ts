@@ -64,9 +64,11 @@ export class EssayController {
     status: HttpStatus.BAD_REQUEST,
     description: 'Invalid query parameters',
   })
+  // @UsePipes(new ValidationPipe({ transform: true }))
   async findAll(
     @Query() findAllEssaysDto: FindAllEssaysDto,
   ): Promise<EssaysResponse> {
+    console.log('findAllEssaysDto', findAllEssaysDto);
     return this.essayService.findAll(findAllEssaysDto);
   }
 

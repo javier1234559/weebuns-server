@@ -161,8 +161,8 @@ type Query {
 }
 
 input FindAllUsersDto {
-  page: Int = 1
-  perPage: Int = 10
+  page: Int! = 1
+  perPage: Int! = 10
   search: String
 }
 

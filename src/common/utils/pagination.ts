@@ -11,9 +11,9 @@ export function calculatePagination(
   const totalPages = Math.ceil(totalItems / perPage);
 
   return {
-    totalItems,
+    totalItems: totalItems,
     currentPage: page,
-    totalPages,
+    totalPages: totalPages,
     itemsPerPage: perPage,
     hasNextPage: page < totalPages,
     hasPreviousPage: page > 1,

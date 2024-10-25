@@ -7,10 +7,10 @@ import { Essay } from 'src/models/essay/entities/essay.entity';
 @ObjectType()
 export class EssaysResponse {
   @Field(() => [Essay])
-  @ApiProperty()
+  @ApiProperty({ type: [Essay] })
   data: Essay[];
 
   @Field(() => PaginationOutputDto)
-  @ApiProperty()
+  @ApiProperty({ type: PaginationOutputDto })
   pagination: PaginationOutputDto;
 }

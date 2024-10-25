@@ -72,10 +72,7 @@ export class UserService {
     return {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       users: users.map(({ password_hash, ...user }) => user),
-      pagination: {
-        ...pagination,
-        itemCount: users.length,
-      },
+      pagination,
     };
   }
 

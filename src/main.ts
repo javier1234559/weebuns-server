@@ -1,3 +1,4 @@
+import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
@@ -11,15 +12,14 @@ import { AppModule } from './app.module';
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
-  console.log(cookieParser());
   app.use(cookieParser());
-
   app.setGlobalPrefix('api');
 
   // app.enableCors({
   //   origin: '*',
   //   credentials: true,
   // });
+
   app.enableCors({
     origin: true,
     credentials: true,
@@ -34,6 +34,23 @@ async function bootstrap() {
     preflightContinue: false,
     optionsSuccessStatus: 204,
   });
+
+  app.useGlobalPipes(
+    new ValidationPipe({
+      // Enable transformation of incoming data to DTO instance
+      // This allows default values in DTOs to be applied
+      // Example: class UserDto { @IsOptional() age: number = 0; }
+      // Request without age will have age set to 0
+      transform: true,
+      transformOptions: {
+        // Automatically convert primitive types
+        // Example: "1" (string) becomes 1 (number) if the DTO property is number
+        // Works with: numbers, booleans, and simple arrays
+        // Query: ?age=25 (string) -> { age: 25 } (number)
+        enableImplicitConversion: true,
+      },
+    }),
+  );
 
   const swaggerConfig = new DocumentBuilder()
     .setTitle('Weebuns lms api')

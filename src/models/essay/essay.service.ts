@@ -7,6 +7,7 @@ import { calculatePagination } from 'src/common/utils/pagination';
 import { CreateEssayResponseDto } from 'src/models/essay/dto/create-essay-response.dto';
 import { CreateEssayDto } from 'src/models/essay/dto/create-essay.dto';
 import { DeleteEssayResponseDto } from 'src/models/essay/dto/delete-space-response.dto';
+import { EssaysResponse } from 'src/models/essay/dto/essay-response';
 import { FindAllEssaysDto } from 'src/models/essay/dto/find-all-essay.dto';
 import { FindOneEssayResponseDto } from 'src/models/essay/dto/find-one-essay-reponse.dto';
 import { UpdateEssayDto } from 'src/models/essay/dto/update-essay.dto';
@@ -66,7 +67,7 @@ export class EssayService {
     };
   }
 
-  async findAll(findAllEssaysDto: FindAllEssaysDto) {
+  async findAll(findAllEssaysDto: FindAllEssaysDto): Promise<EssaysResponse> {
     const { page, perPage, search } = findAllEssaysDto;
     const skip = (page - 1) * perPage || 0;
 
@@ -88,8 +89,10 @@ export class EssayService {
       this.prisma.essay.count({ where }),
     ]);
 
+    console.log(findAllEssaysDto);
     const pagination = calculatePagination(totalItems, findAllEssaysDto);
 
+    console.log(pagination);
     return {
       data: essays,
       pagination,

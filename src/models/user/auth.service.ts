@@ -14,7 +14,6 @@ import { Response } from 'express';
 
 import { IAuthPayload } from 'src/common/interface/auth-payload.interface';
 import { PrismaService } from 'src/common/prisma/prisma.service';
-import { generateRandomNumber } from 'src/common/utils/random';
 import config from 'src/config';
 import {
   LogoutResponse,
@@ -235,7 +234,6 @@ export class AuthService {
     if (!user) {
       user = await this.prisma.user.create({
         data: {
-          id: generateRandomNumber(1, 100),
           email: userData.email,
           username: userData.name,
           first_name: userData.firstName,
