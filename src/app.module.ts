@@ -41,7 +41,6 @@ import { VocabularyModule } from 'src/models/vocabulary/vocabulary.module';
       provide: APP_INTERCEPTOR,
       useClass: RemoveFieldInterceptor,
     },
-    // các provider toàn cục khác...
   ],
 })
 export class AppModule {}

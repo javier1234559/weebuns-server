@@ -11,13 +11,7 @@ const config = {
   port: Number(process.env.PORT),
   host: process.env.HOST,
   // Database configuration
-  database: {
-    host: process.env.DB_HOST,
-    port: Number(process.env.DB_PORT),
-    username: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    name: process.env.DB_NAME,
-  },
+  database: process.env.DATABASE_URL,
   // JWT configuration
   jwt: {
     jwtAccessSecret: process.env.JWT_SECRET,
