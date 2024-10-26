@@ -82,7 +82,7 @@ model UserLanguage {
   is_native         Boolean  @default(false)
   created_at        DateTime @default(now())
   updated_at        DateTime @updatedAt
-  user              User     @relation(fields: [user_id], references: [id])
+  user              User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@unique([user_id, language])
 }
@@ -92,20 +92,18 @@ model Follower {
   id_follower  String   @db.Uuid
   id_following String   @db.Uuid
   followed_at  DateTime @default(now())
-  follower     User     @relation("Follower", fields: [id_follower], references: [id])
-  following    User     @relation("Following", fields: [id_following], references: [id])
+
+  follower  User @relation("Follower", fields: [id_follower], references: [id], onDelete: Cascade)
+  following User @relation("Following", fields: [id_following], references: [id], onDelete: Cascade)
 }
 
 model Space {
-  id           String   @id @default(uuid()) @db.Uuid
-  name         String
-  description  String?
-  essay_number Int?
-  quiz_number  Int?
-  vocab_number Int?
-  created_by   String   @db.Uuid
-  created_at   DateTime @default(now())
-  updated_at   DateTime @updatedAt
+  id          String   @id @default(uuid()) @db.Uuid
+  name        String
+  description String?
+  created_by  String   @db.Uuid
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
 
   creator      User         @relation(fields: [created_by], references: [id])
   essays       Essay[]
@@ -114,19 +112,20 @@ model Space {
 }
 
 model Essay {
-  id         String      @id @default(uuid()) @db.Uuid
-  id_space   String      @db.Uuid
-  title      String
-  summary    String?
-  content    String
-  cover_url  String?
-  status     EssayStatus @default(draft)
-  language   String
-  created_by String      @db.Uuid
-  created_at DateTime    @default(now())
-  updated_at DateTime    @updatedAt
+  id           String      @id @default(uuid()) @db.Uuid
+  id_space     String      @db.Uuid
+  title        String
+  summary      String?
+  content      String
+  upvote_count Int         @default(0)
+  cover_url    String?
+  status       EssayStatus @default(draft)
+  language     String
+  created_by   String      @db.Uuid
+  created_at   DateTime    @default(now())
+  updated_at   DateTime    @updatedAt
 
-  space       Space          @relation(fields: [id_space], references: [id])
+  space       Space          @relation(fields: [id_space], references: [id], onDelete: Cascade)
   author      User           @relation(fields: [created_by], references: [id])
   hashtags    EssayHashtag[]
   corrections Correction[]
@@ -147,7 +146,7 @@ model EssayHashtag {
   hashtag_id String   @db.Uuid
   created_at DateTime @default(now())
 
-  essay   Essay   @relation(fields: [essay_id], references: [id])
+  essay   Essay   @relation(fields: [essay_id], references: [id], onDelete: Cascade)
   hashtag Hashtag @relation(fields: [hashtag_id], references: [id])
 
   @@unique([essay_id, hashtag_id])
@@ -162,7 +161,7 @@ model Correction {
   created_at      DateTime @default(now())
   updated_at      DateTime @updatedAt
 
-  essay     Essay                @relation(fields: [essay_id], references: [id])
+  essay     Essay                @relation(fields: [essay_id], references: [id], onDelete: Cascade)
   creator   User                 @relation("CorrectionCreator", fields: [created_by], references: [id])
   sentences CorrectionSentence[]
   replies   CorrectionReply[]
@@ -179,7 +178,7 @@ model CorrectionSentence {
   created_at     DateTime @default(now())
   updated_at     DateTime @updatedAt
 
-  correction Correction @relation(fields: [id_correction], references: [id])
+  correction Correction @relation(fields: [id_correction], references: [id], onDelete: Cascade)
 }
 
 model CorrectionReply {
@@ -190,7 +189,7 @@ model CorrectionReply {
   created_at    DateTime @default(now())
   updated_at    DateTime @updatedAt
 
-  correction Correction @relation(fields: [correction_id], references: [id])
+  correction Correction @relation(fields: [correction_id], references: [id], onDelete: Cascade)
   creator    User       @relation("ReplyCreator", fields: [created_by], references: [id])
 }
 
@@ -202,7 +201,7 @@ model Quiz {
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
-  space     Space          @relation(fields: [id_space], references: [id])
+  space     Space          @relation(fields: [id_space], references: [id], onDelete: Cascade)
   creator   User           @relation(fields: [created_by], references: [id])
   questions QuizQuestion[]
 }
@@ -218,7 +217,7 @@ model QuizQuestion {
   created_at     DateTime @default(now())
   updated_at     DateTime @updatedAt
 
-  quiz Quiz @relation(fields: [quiz_id], references: [id])
+  quiz Quiz @relation(fields: [quiz_id], references: [id], onDelete: Cascade)
 }
 
 model Vocabulary {
@@ -242,7 +241,7 @@ model Vocabulary {
   updated_at       DateTime @updatedAt
 
   creator     User        @relation(fields: [created_by], references: [id])
-  space       Space?      @relation(fields: [id_space], references: [id])
+  space       Space?      @relation(fields: [id_space], references: [id], onDelete: SetNull)
   flash_cards FlashCard[]
 }
 
@@ -255,6 +254,6 @@ model FlashCard {
   created_at        DateTime @default(now())
   updated_at        DateTime @updatedAt
 
-  vocabulary Vocabulary @relation(fields: [id_vocabulary], references: [id])
+  vocabulary Vocabulary @relation(fields: [id_vocabulary], references: [id], onDelete: Cascade)
   creator    User       @relation(fields: [created_by], references: [id])
 }

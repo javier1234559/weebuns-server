@@ -2,6 +2,7 @@ import { Field, ID, Int, ObjectType } from '@nestjs/graphql';
 import { ApiProperty } from '@nestjs/swagger';
 
 import { IEssayHashtag } from 'src/models/essay-hashtag/essay-hashtag.interface';
+import { Hashtag } from 'src/models/hashtag/entities/hashtag.entity';
 
 import { Essay } from '../../essay/entities/essay.entity';
 
@@ -93,15 +94,17 @@ export class EssayHashtag implements IEssayHashtag {
   essay?: Essay;
 
   // Commented out but preserved for future implementation
-  // @Field(() => Hashtag, {
-  //   nullable: true,
-  //   description: 'The associated hashtag details. Only populated when explicitly requested.'
-  // })
-  // @ApiProperty({
-  //   type: () => Hashtag,
-  //   nullable: true,
-  //   description: 'The associated hashtag details. Only populated when explicitly requested.',
-  //   required: false
-  // })
-  // hashtag?: Hashtag;
+  @Field(() => Hashtag, {
+    nullable: true,
+    description:
+      'The associated hashtag details. Only populated when explicitly requested.',
+  })
+  @ApiProperty({
+    type: () => Hashtag,
+    nullable: true,
+    description:
+      'The associated hashtag details. Only populated when explicitly requested.',
+    required: false,
+  })
+  hashtag?: Hashtag;
 }

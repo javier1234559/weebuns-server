@@ -64,7 +64,6 @@ export class EssayController {
     status: HttpStatus.BAD_REQUEST,
     description: 'Invalid query parameters',
   })
-  // @UsePipes(new ValidationPipe({ transform: true }))
   async findAll(
     @Query() findAllEssaysDto: FindAllEssaysDto,
   ): Promise<EssaysResponse> {
@@ -73,7 +72,7 @@ export class EssayController {
   }
 
   @Get(':id')
-  @Roles(UserRole.USER, UserRole.ADMIN)
+  @Roles(UserRole.USER)
   @ApiOperation({
     summary: 'Get essay by ID',
     description: 'Retrieves detailed information about a specific essay',
@@ -100,7 +99,7 @@ export class EssayController {
   }
 
   @Post()
-  @Roles(UserRole.USER, UserRole.ADMIN)
+  @Roles(UserRole.USER)
   @ApiOperation({
     summary: 'Create a new essay',
     description: 'Creates a new essay with the provided content and metadata',
@@ -125,7 +124,7 @@ export class EssayController {
   }
 
   @Patch(':id')
-  @Roles(UserRole.USER, UserRole.ADMIN)
+  @Roles(UserRole.USER)
   @ApiOperation({
     summary: 'Update essay by ID',
     description: 'Updates an existing essay with new content or metadata',
@@ -157,11 +156,12 @@ export class EssayController {
     @Param() params: FindOneEssayDto,
     @Body() updateEssayDto: UpdateEssayDto,
   ): Promise<UpdateEssayResponseDto> {
+    console.log('updateEssayDto', updateEssayDto);
     return this.essayService.update(params.id, updateEssayDto);
   }
 
   @Delete(':id')
-  @Roles(UserRole.USER, UserRole.ADMIN)
+  @Roles(UserRole.USER)
   @ApiOperation({
     summary: 'Delete essay by ID',
     description: 'Permanently removes an essay and its associated content',

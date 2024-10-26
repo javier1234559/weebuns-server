@@ -23,11 +23,11 @@ import { Roles, RolesGuard, UserRole } from 'src/common/auth/role.guard';
 import { CreateVocabularyResponseDto } from 'src/models/vocabulary/dto/create-vocabulary-response.dto';
 import { CreateVocabularyDto } from 'src/models/vocabulary/dto/create-vocabulary.dto';
 import { DeleteVocabularyResponseDto } from 'src/models/vocabulary/dto/delete-vocabulary-response.dto';
-import { FindAllVocabulariesDto } from 'src/models/vocabulary/dto/find-all-vocabulary.dto';
+import { FindAllVocabularyDto } from 'src/models/vocabulary/dto/find-all-vocabulary.dto';
 import { FindOneVocabularyResponseDto } from 'src/models/vocabulary/dto/find-one-vocabulary-response.dto';
 import { UpdateVocabularyResponseDto } from 'src/models/vocabulary/dto/update-vocabulary-response.dto';
 import { UpdateVocabularyDto } from 'src/models/vocabulary/dto/update-vocabulary.dto';
-import { VocabulariesResponse } from 'src/models/vocabulary/dto/vocabulary-response.dto';
+import { VocabularyResponse } from 'src/models/vocabulary/dto/vocabulary-response.dto';
 import { VocabularyService } from 'src/models/vocabulary/vocabulary.service';
 
 @Controller('vocabularies')
@@ -80,21 +80,25 @@ export class VocabularyController {
       'Retrieves all vocabularies with pagination and filtering options',
   })
   @ApiQuery({
-    type: FindAllVocabulariesDto,
+    type: FindAllVocabularyDto,
     description: 'Query parameters for filtering and pagination',
   })
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'Vocabularies retrieved successfully',
-    type: VocabulariesResponse,
+    type: FindAllVocabularyDto,
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Invalid query parameters',
   })
   @ApiResponse({
     status: HttpStatus.BAD_REQUEST,
     description: 'Invalid query parameters',
   })
   async findAll(
-    @Query() findAllVocabulariesDto: FindAllVocabulariesDto,
-  ): Promise<VocabulariesResponse> {
+    @Query() findAllVocabulariesDto: FindAllVocabularyDto,
+  ): Promise<VocabularyResponse> {
     return this.vocabularyService.findAll(findAllVocabulariesDto);
   }
 

@@ -3,6 +3,7 @@ import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
+import { useContainer } from 'class-validator';
 import * as cookieParser from 'cookie-parser';
 
 import config from 'src/config';
@@ -34,6 +35,9 @@ async function bootstrap() {
     preflightContinue: false,
     optionsSuccessStatus: 204,
   });
+
+  // Enabling service container for custom validator constraint classes (class-validator)
+  useContainer(app.select(AppModule), { fallbackOnErrors: true });
 
   app.useGlobalPipes(
     new ValidationPipe({

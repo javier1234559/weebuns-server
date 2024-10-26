@@ -6,7 +6,7 @@ import { IsOptional, IsString } from 'class-validator';
 import { PaginationInputDto } from 'src/common/dto/pagination.dto';
 
 @InputType()
-export class FindAllVocabulariesDto extends PaginationInputDto {
+export class FindAllVocabularyDto extends PaginationInputDto {
   @ApiPropertyOptional()
   @Field({ nullable: true })
   @IsOptional()

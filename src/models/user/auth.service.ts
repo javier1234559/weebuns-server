@@ -123,6 +123,7 @@ export class AuthService {
         user: newUser,
       };
     } catch (error) {
+      console.error('Error creating user:', error);
       throw new InternalServerErrorException(
         `Something went wrong when creating the user ${error}`,
       );

@@ -17,26 +17,22 @@ import { UpdateEssayResponseDto } from 'src/models/essay/dto/update-space-respon
 export class EssayService {
   constructor(private readonly prisma: PrismaService) {}
 
+  private readonly defaultInclude = {
+    author: true,
+    hashtags: {
+      include: {
+        hashtag: true,
+      },
+    },
+    _count: {
+      select: { corrections: true },
+    },
+  } as const;
+
   async create(
     createEssayDto: CreateEssayDto,
   ): Promise<CreateEssayResponseDto> {
-    const { created_by, spaceId, ...data } = createEssayDto;
-
-    const space = await this.prisma.space.findUnique({
-      where: { id: spaceId },
-    });
-
-    if (!space) {
-      throw new NotFoundException(`Space with ID ${spaceId} not found`);
-    }
-
-    const user = await this.prisma.user.findUnique({
-      where: { id: created_by },
-    });
-
-    if (!user) {
-      throw new NotFoundException(`User with ID ${created_by} not found`);
-    }
+    const { created_by, spaceId, hashtag_ids, ...data } = createEssayDto;
 
     const essay = await this.prisma.essay.create({
       data: {
@@ -47,23 +43,33 @@ export class EssayService {
         space: {
           connect: { id: spaceId },
         },
+        // Create hashtag connections if hashtag_ids exist
+        ...(hashtag_ids?.length && {
+          hashtags: {
+            create: hashtag_ids.map((hashtag_id) => ({
+              hashtag: {
+                connect: { id: hashtag_id },
+              },
+            })),
+          },
+        }),
       },
+      // Include related data in response
+      include: this.defaultInclude,
     });
 
-    // Increase the essay count of the space
-    if (essay) {
-      await this.prisma.space.update({
-        where: { id: spaceId },
-        data: {
-          essay_number: {
-            increment: 1,
-          },
-        },
-      });
-    }
-
     return {
-      essay,
+      id: essay.id,
+      id_space: essay.id_space,
+      title: essay.title,
+      summary: essay.summary,
+      upvote_count: essay.upvote_count,
+      content: essay.content,
+      cover_url: essay.cover_url,
+      status: essay.status,
+      language: essay.language,
+      hashtags: essay.hashtags,
+      author: essay.author,
     };
   }
 
@@ -85,6 +91,7 @@ export class EssayService {
         skip,
         take: perPage,
         orderBy: { created_at: 'desc' },
+        include: this.defaultInclude,
       }),
       this.prisma.essay.count({ where }),
     ]);
@@ -117,9 +124,24 @@ export class EssayService {
     id: string,
     updateEssayDto: UpdateEssayDto,
   ): Promise<UpdateEssayResponseDto> {
+    const { hashtag_ids, ...updateData } = updateEssayDto;
+
     const essay = await this.prisma.essay.update({
       where: { id },
-      data: updateEssayDto,
+      // Create hashtag connections if hashtag_ids exist
+      data: {
+        ...updateData,
+        ...(hashtag_ids?.length && {
+          hashtags: {
+            deleteMany: {}, // Remove existing connections
+            create: hashtag_ids?.map((hashtag_id) => ({
+              hashtag: {
+                connect: { id: hashtag_id },
+              },
+            })),
+          },
+        }),
+      },
     });
 
     if (!essay) {
@@ -132,20 +154,23 @@ export class EssayService {
   }
 
   async delete(id: string): Promise<DeleteEssayResponseDto> {
-    const essay = await this.prisma.essay.findUnique({
-      where: { id },
+    return await this.prisma.$transaction(async (tx) => {
+      // Get the essay with its relations
+      const essay = await tx.essay.findUnique({
+        where: { id },
+        include: this.defaultInclude,
+      });
+
+      if (!essay) {
+        throw new NotFoundException(`Essay with ID ${id} not found`);
+      }
+
+      // Delete the essay
+      await tx.essay.delete({
+        where: { id },
+      });
+
+      return { essay };
     });
-
-    if (!essay) {
-      throw new NotFoundException(`Essay with ID ${id} not found`);
-    }
-
-    await this.prisma.essay.delete({
-      where: { id },
-    });
-
-    return {
-      essay,
-    };
   }
 }

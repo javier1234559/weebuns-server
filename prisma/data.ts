@@ -10,6 +10,7 @@ interface GeneratedIds {
   vocabularies: string[];
   corrections: string[];
   quizzes: string[];
+  essayHashtags: string[];
 }
 
 // Store generated IDs
@@ -21,7 +22,46 @@ export const generatedIds: GeneratedIds = {
   vocabularies: [],
   corrections: [],
   quizzes: [],
+  essayHashtags: [],
 };
+
+export const createEssayHashtags = (essayIds: string[], hashtagIds: string[]) =>
+  [
+    // Connect first essay with 'english' and 'learning' hashtags
+    {
+      essay: {
+        connect: { id: essayIds[0] },
+      },
+      hashtag: {
+        connect: { id: hashtagIds[0] }, // english
+      },
+    },
+    {
+      essay: {
+        connect: { id: essayIds[0] },
+      },
+      hashtag: {
+        connect: { id: hashtagIds[3] }, // learning
+      },
+    },
+    // Connect second essay with 'japanese' and 'learning' hashtags
+    {
+      essay: {
+        connect: { id: essayIds[1] },
+      },
+      hashtag: {
+        connect: { id: hashtagIds[2] }, // japanese
+      },
+    },
+    {
+      essay: {
+        connect: { id: essayIds[1] },
+      },
+      hashtag: {
+        connect: { id: hashtagIds[3] }, // learning
+      },
+    },
+  ] as Prisma.EssayHashtagCreateInput[];
 
 // Base entities
 export const users: Prisma.UserCreateInput[] = [
@@ -61,9 +101,6 @@ export const createSpaces = (userIds: string[]) =>
     {
       name: 'English Learning',
       description: 'Space for learning English',
-      essay_number: 0,
-      quiz_number: 0,
-      vocab_number: 0,
       creator: {
         connect: { id: userIds[0] },
       },
@@ -71,9 +108,6 @@ export const createSpaces = (userIds: string[]) =>
     {
       name: 'Japanese Study',
       description: 'Space for learning Japanese',
-      essay_number: 0,
-      quiz_number: 0,
-      vocab_number: 0,
       creator: {
         connect: { id: userIds[1] },
       },
@@ -83,10 +117,15 @@ export const createSpaces = (userIds: string[]) =>
 export const createEssays = (spaceIds: string[], userIds: string[]) =>
   [
     {
-      title: 'My First English Essay',
+      title: 'My First English Essay And How I Learned It',
       summary: 'A simple essay about learning English',
-      content:
-        'This is the content of my first essay about learning English...',
+      content: `This is the content of my first essay about learning English...
+orem ipsum dolor sit amet consectetur, adipisicing elit. Illum necessitatibus odit atque inventore deleniti enim corrupti molestiae, porro, fugit ea reiciendis velit ipsam officiis facere ipsum mollitia doloremque natus maiores.
+ Lorem ipsum dolor sit amet consectetur, adipisicing elit. Illum necessitatibus odit atque inventore deleniti enim corrupti molestiae, porro, fugit ea reiciendis velit ipsam officiis facere ipsum mollitia doloremque natus maiores.
+  Lorem ipsum dolor sit amet consectetur, adipisicing elit. Illum necessitatibus odit atque inventore deleniti enim corrupti molestiae, porro, fugit ea reiciendis velit ipsam officiis facere ipsum mollitia doloremque natus maiores.
+Lorem ipsum dolor sit amet consectetur, adipisicing elit. Illum necessitatibus odit atque inventore deleniti enim corrupti molestiae, porro, fugit ea reiciendis velit ipsam officiis facere ipsum mollitia doloremque natus maiores.
+  Lorem ipsum dolor sit amet consectetur, adipisicing elit. Illum necessitatibus odit atque inventore deleniti enim corrupti molestiae, porro, fugit ea reiciendis velit ipsam officiis facere ipsum mollitia doloremque natus maiores.
+        `,
       status: EssayStatus.public,
       language: 'en',
       space: {
@@ -99,7 +138,14 @@ export const createEssays = (spaceIds: string[], userIds: string[]) =>
     {
       title: 'Japanese Learning Journey',
       summary: 'My experience learning Japanese',
-      content: 'Here is my journey learning Japanese...',
+      content: `Here is my journey learning Japanese...
+      This is the content of my first essay about learning English...
+orem ipsum dolor sit amet consectetur, adipisicing elit. Illum necessitatibus odit atque inventore deleniti enim corrupti molestiae, porro, fugit ea reiciendis velit ipsam officiis facere ipsum mollitia doloremque natus maiores.
+ Lorem ipsum dolor sit amet consectetur, adipisicing elit. Illum necessitatibus odit atque inventore deleniti enim corrupti molestiae, porro, fugit ea reiciendis velit ipsam officiis facere ipsum mollitia doloremque natus maiores.
+  Lorem ipsum dolor sit amet consectetur, adipisicing elit. Illum necessitatibus odit atque inventore deleniti enim corrupti molestiae, porro, fugit ea reiciendis velit ipsam officiis facere ipsum mollitia doloremque natus maiores.
+Lorem ipsum dolor sit amet consectetur, adipisicing elit. Illum necessitatibus odit atque inventore deleniti enim corrupti molestiae, porro, fugit ea reiciendis velit ipsam officiis facere ipsum mollitia doloremque natus maiores.
+  Lorem ipsum dolor sit amet consectetur, adipisicing elit. Illum necessitatibus odit atque inventore deleniti enim corrupti molestiae, porro, fugit ea reiciendis velit ipsam officiis facere ipsum mollitia doloremque natus maiores.
+       `,
       status: EssayStatus.draft,
       language: 'ja',
       space: {

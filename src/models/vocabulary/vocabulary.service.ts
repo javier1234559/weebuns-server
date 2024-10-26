@@ -7,11 +7,11 @@ import { calculatePagination } from 'src/common/utils/pagination';
 import { CreateVocabularyResponseDto } from 'src/models/vocabulary/dto/create-vocabulary-response.dto';
 import { CreateVocabularyDto } from 'src/models/vocabulary/dto/create-vocabulary.dto';
 import { DeleteVocabularyResponseDto } from 'src/models/vocabulary/dto/delete-vocabulary-response.dto';
-import { FindAllVocabulariesDto } from 'src/models/vocabulary/dto/find-all-vocabulary.dto';
+import { FindAllVocabularyDto } from 'src/models/vocabulary/dto/find-all-vocabulary.dto';
 import { FindOneVocabularyResponseDto } from 'src/models/vocabulary/dto/find-one-vocabulary-response.dto';
 import { UpdateVocabularyResponseDto } from 'src/models/vocabulary/dto/update-vocabulary-response.dto';
 import { UpdateVocabularyDto } from 'src/models/vocabulary/dto/update-vocabulary.dto';
-import { VocabulariesResponse } from 'src/models/vocabulary/dto/vocabulary-response.dto';
+import { VocabularyResponse } from 'src/models/vocabulary/dto/vocabulary-response.dto';
 
 @Injectable()
 export class VocabularyService {
@@ -22,7 +22,6 @@ export class VocabularyService {
   ): Promise<CreateVocabularyResponseDto> {
     const { created_id, space_id, ...data } = createVocabularyDto;
 
-    // Kiểm tra sự tồn tại của spaceId
     const space = await this.prisma.space.findUnique({
       where: { id: space_id },
     });
@@ -52,18 +51,6 @@ export class VocabularyService {
       },
     });
 
-    // Tăng số lượng từ vựng của space
-    if (vocabulary) {
-      await this.prisma.space.update({
-        where: { id: space_id },
-        data: {
-          vocab_number: {
-            increment: 1,
-          },
-        },
-      });
-    }
-
     return {
       id: vocabulary.id,
       image_url: vocabulary.image_url,
@@ -85,14 +72,13 @@ export class VocabularyService {
       updated_at: vocabulary.updated_at,
       creator: vocabulary.creator,
       space: vocabulary.space,
-      // flash_cards: vocabulary.flash_cards,
     };
   }
 
   async findAll(
-    findAllVocabulariesDto: FindAllVocabulariesDto,
-  ): Promise<VocabulariesResponse> {
-    const { page, perPage, search } = findAllVocabulariesDto;
+    findAllVocabularyDto: FindAllVocabularyDto,
+  ): Promise<VocabularyResponse> {
+    const { page, perPage, search } = findAllVocabularyDto;
     const skip = (page - 1) * perPage || 0;
 
     let where: Prisma.VocabularyWhereInput = {};
@@ -103,7 +89,7 @@ export class VocabularyService {
       };
     }
 
-    const [vocabularies, totalItems] = await Promise.all([
+    const [vocabulary, totalItems] = await Promise.all([
       this.prisma.vocabulary.findMany({
         where,
         skip,
@@ -113,10 +99,10 @@ export class VocabularyService {
       this.prisma.vocabulary.count({ where }),
     ]);
 
-    const pagination = calculatePagination(totalItems, findAllVocabulariesDto);
+    const pagination = calculatePagination(totalItems, findAllVocabularyDto);
 
     return {
-      data: vocabularies,
+      data: vocabulary,
       pagination,
     };
   }

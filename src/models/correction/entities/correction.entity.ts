@@ -1,6 +1,8 @@
 import { Field, ID, Int, ObjectType } from '@nestjs/graphql';
 import { ApiProperty } from '@nestjs/swagger';
 
+import { CorrectionReply } from 'src/models/correction-reply/entities/correction-reply.entity';
+import { CorrectionSentence } from 'src/models/correction-sentence/entities/correction-sentence.entity';
 import { ICorrection } from 'src/models/correction/correction.interface';
 import { Essay } from 'src/models/essay/entities/essay.entity';
 
@@ -57,11 +59,11 @@ export class Correction implements ICorrection {
   @ApiProperty({ type: () => User, nullable: true })
   creator?: User;
 
-  // @Field(() => [CorrectionSentence], { nullable: true })
-  // @ApiProperty({ type: () => [CorrectionSentence], nullable: true })
-  // sentences?: CorrectionSentence[];
+  @Field(() => [CorrectionSentence], { nullable: true })
+  @ApiProperty({ type: () => [CorrectionSentence], nullable: true })
+  sentences?: CorrectionSentence[];
 
-  // @Field(() => [CorrectionReply], { nullable: true })
-  // @ApiProperty({ type: () => [CorrectionReply], nullable: true })
-  // replies?: CorrectionReply[];
+  @Field(() => [CorrectionReply], { nullable: true })
+  @ApiProperty({ type: () => [CorrectionReply], nullable: true })
+  replies?: CorrectionReply[];
 }

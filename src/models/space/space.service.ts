@@ -9,6 +9,7 @@ import { CreateSpaceDto } from 'src/models/space/dto/create-space.dto';
 import { DeleteSpaceResponseDto } from 'src/models/space/dto/delete-space-response.dto';
 import { FindAllSpacesDto } from 'src/models/space/dto/find-all-spaces.dto';
 import { FindOneSpaceResponseDto } from 'src/models/space/dto/find-one-space-response.dto';
+import { SpacesResponse } from 'src/models/space/dto/spaces-response.dto';
 import { UpdateSpaceResponseDto } from 'src/models/space/dto/update-space-response.dto';
 import { UpdateSpaceDto } from 'src/models/space/dto/update-space.dto';
 
@@ -21,7 +22,6 @@ export class SpaceService {
   ): Promise<CreateSpaceResponseDto> {
     const { created_by, ...data } = createSpaceDto;
 
-    // Kiểm tra sự tồn tại của userId
     const user = await this.prisma.user.findUnique({
       where: { id: created_by },
     });
@@ -39,18 +39,17 @@ export class SpaceService {
       },
     });
 
-    // Trả về thông tin của space vừa được tạo và thông tin người dùng
     return {
       id: space.id,
       name: space.name,
       description: space.description,
-      essay_number: space.essay_number,
-      quiz_number: space.quiz_number,
-      vocab_number: space.vocab_number,
+      essay_number: 0,
+      quiz_number: 0,
+      vocab_number: 0,
     };
   }
 
-  async findAll(findAllSpacesDto: FindAllSpacesDto) {
+  async findAll(findAllSpacesDto: FindAllSpacesDto): Promise<SpacesResponse> {
     const { page, perPage, search } = findAllSpacesDto;
     const skip = (page - 1) * perPage || 0;
 
@@ -68,6 +67,15 @@ export class SpaceService {
         skip,
         take: perPage,
         orderBy: { created_at: 'desc' },
+        include: {
+          _count: {
+            select: {
+              essays: true,
+              vocabularies: true,
+              quizzes: true,
+            },
+          },
+        },
       }),
       this.prisma.space.count({ where }),
     ]);
@@ -83,6 +91,15 @@ export class SpaceService {
   async findOne(id: string): Promise<FindOneSpaceResponseDto> {
     const space = await this.prisma.space.findUnique({
       where: { id },
+      include: {
+        _count: {
+          select: {
+            essays: true,
+            vocabularies: true,
+            quizzes: true,
+          },
+        },
+      },
     });
 
     if (!space) {
@@ -100,6 +117,15 @@ export class SpaceService {
   ): Promise<UpdateSpaceResponseDto> {
     const space = await this.prisma.space.update({
       where: { id },
+      include: {
+        _count: {
+          select: {
+            essays: true,
+            vocabularies: true,
+            quizzes: true,
+          },
+        },
+      },
       data: updateSpaceDto,
     });
 
@@ -111,9 +137,9 @@ export class SpaceService {
       id: space.id,
       name: space.name,
       description: space.description,
-      essay_number: space.essay_number,
-      quiz_number: space.quiz_number,
-      vocab_number: space.vocab_number,
+      essay_number: space._count.essays,
+      quiz_number: space._count.quizzes,
+      vocab_number: space._count.vocabularies,
     };
   }
 

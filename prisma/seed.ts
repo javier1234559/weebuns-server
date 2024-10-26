@@ -3,6 +3,7 @@ import { PrismaClient } from '@prisma/client';
 
 import {
   createCorrections,
+  createEssayHashtags,
   createEssays,
   createFlashCards,
   createFollowers,
@@ -137,6 +138,20 @@ async function seedCorrections() {
   }
 }
 
+async function seedEssayHashtags() {
+  console.log('Seeding essay hashtags...');
+  const essayHashtags = createEssayHashtags(
+    generatedIds.essays,
+    generatedIds.hashtags,
+  );
+  for (const essayHashtag of essayHashtags) {
+    const createdEssayHashtag = await prisma.essayHashtag.create({
+      data: essayHashtag,
+    });
+    generatedIds.essayHashtags.push(createdEssayHashtag.id);
+  }
+}
+
 async function seedFlashCards() {
   console.log('Seeding flash cards...');
   const flashCards = createFlashCards(
@@ -161,6 +176,7 @@ async function seedAll() {
     await seedSpaces();
     await seedHashtags();
     await seedEssays();
+    await seedEssayHashtags();
     await seedVocabularies();
     await seedFollowers();
     await seedQuizzes();
