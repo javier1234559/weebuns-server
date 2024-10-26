@@ -8,5 +8,5 @@ export class FindOneVocabularyDto {
   @ApiProperty()
   @Field()
   @IsInt()
-  id: number;
+  id: string;
 }

@@ -3,17 +3,23 @@ import {
   Controller,
   Delete,
   Get,
+  HttpStatus,
   Param,
   Patch,
   Post,
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiOperation,
+  ApiParam,
+  ApiQuery,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 
 import { AuthGuard } from 'src/common/auth/auth.guard';
-import { Roles, RolesGuard } from 'src/common/auth/role.guard';
-import { UserRole } from 'src/common/type/enum';
+import { Roles, RolesGuard, UserRole } from 'src/common/auth/role.guard';
 import { CreateVocabularyResponseDto } from 'src/models/vocabulary/dto/create-vocabulary-response.dto';
 import { CreateVocabularyDto } from 'src/models/vocabulary/dto/create-vocabulary.dto';
 import { DeleteVocabularyResponseDto } from 'src/models/vocabulary/dto/delete-vocabulary-response.dto';
@@ -24,35 +30,67 @@ import { UpdateVocabularyDto } from 'src/models/vocabulary/dto/update-vocabulary
 import { VocabularyResponse } from 'src/models/vocabulary/dto/vocabulary-response.dto';
 import { VocabularyService } from 'src/models/vocabulary/vocabulary.service';
 
-@Controller('vocabularys')
-@ApiTags('vocabularys')
+@Controller('vocabularies')
+@ApiTags('vocabularies')
+@UseGuards(AuthGuard, RolesGuard)
+@Roles(UserRole.USER)
+@ApiResponse({
+  status: HttpStatus.UNAUTHORIZED,
+  description: 'Unauthorized - Invalid or missing authentication token',
+})
+@ApiResponse({
+  status: HttpStatus.FORBIDDEN,
+  description: 'Forbidden - User does not have required roles',
+})
 export class VocabularyController {
   constructor(private readonly vocabularyService: VocabularyService) {}
 
-  @UseGuards(AuthGuard, RolesGuard)
-  @Roles(UserRole.USER)
   @Post()
-  @ApiOperation({ summary: 'Create a new vocabulary' })
+  @ApiOperation({
+    summary: 'Create a new vocabulary',
+    description: 'Creates a new vocabulary entry in the specified space',
+  })
   @ApiResponse({
-    status: 201,
-    description: 'The vocabulary has been successfully created.',
+    status: HttpStatus.CREATED,
+    description: 'Vocabulary created successfully',
     type: CreateVocabularyResponseDto,
   })
-  @ApiResponse({ status: 404, description: 'User or Space not found.' })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Invalid vocabulary data provided',
+  })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+    description: 'User or Space not found',
+  })
+  @ApiResponse({
+    status: HttpStatus.CONFLICT,
+    description: 'Vocabulary with the same name already exists in the space',
+  })
   async create(
     @Body() createVocabularyDto: CreateVocabularyDto,
   ): Promise<CreateVocabularyResponseDto> {
     return this.vocabularyService.create(createVocabularyDto);
   }
 
-  @UseGuards(AuthGuard, RolesGuard)
-  @Roles(UserRole.USER)
   @Get()
-  @ApiOperation({ summary: 'Get all vocabularies' })
+  @ApiOperation({
+    summary: 'Get all vocabularies',
+    description:
+      'Retrieves all vocabularies with pagination and filtering options',
+  })
+  @ApiQuery({
+    type: FindAllVocabularyDto,
+    description: 'Query parameters for filtering and pagination',
+  })
   @ApiResponse({
-    status: 200,
-    description: 'Return all vocabularies.',
-    type: VocabularyResponse,
+    status: HttpStatus.OK,
+    description: 'Vocabularies retrieved successfully',
+    type: FindAllVocabularyDto,
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Invalid query parameters',
   })
   async findAll(
     @Query() findAllVocabulariesDto: FindAllVocabularyDto,
@@ -60,53 +98,88 @@ export class VocabularyController {
     return this.vocabularyService.findAll(findAllVocabulariesDto);
   }
 
-  @UseGuards(AuthGuard, RolesGuard)
-  @Roles(UserRole.USER)
   @Get(':id')
-  @ApiOperation({ summary: 'Get a vocabulary by ID' })
+  @ApiOperation({
+    summary: 'Get vocabulary by ID',
+    description: 'Retrieves detailed information about a specific vocabulary',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'Vocabulary ID',
+    type: String,
+    required: true,
+  })
   @ApiResponse({
-    status: 200,
-    description: 'Return the vocabulary.',
+    status: HttpStatus.OK,
+    description: 'Vocabulary found successfully',
     type: FindOneVocabularyResponseDto,
   })
-  @ApiResponse({ status: 404, description: 'Vocabulary not found.' })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+    description: 'Vocabulary not found',
+  })
   async findOne(
     @Param('id') id: string,
   ): Promise<FindOneVocabularyResponseDto> {
-    const vocabularyId = parseInt(id, 10); // Chuyển đổi id từ chuỗi thành số nguyên
-    return this.vocabularyService.findOne(vocabularyId);
+    return this.vocabularyService.findOne(id);
   }
 
-  @UseGuards(AuthGuard, RolesGuard)
-  @Roles(UserRole.USER)
   @Patch(':id')
-  @ApiOperation({ summary: 'Update a vocabulary by ID' })
+  @ApiOperation({
+    summary: 'Update vocabulary by ID',
+    description: 'Updates an existing vocabulary with new data',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'Vocabulary ID',
+    type: String,
+    required: true,
+  })
   @ApiResponse({
-    status: 200,
-    description: 'The vocabulary has been successfully updated.',
+    status: HttpStatus.OK,
+    description: 'Vocabulary updated successfully',
     type: UpdateVocabularyResponseDto,
   })
-  @ApiResponse({ status: 404, description: 'Vocabulary not found.' })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Invalid update data provided',
+  })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+    description: 'Vocabulary not found',
+  })
+  @ApiResponse({
+    status: HttpStatus.CONFLICT,
+    description: 'Update would create a duplicate vocabulary name in the space',
+  })
   async update(
     @Param('id') id: string,
     @Body() updateVocabularyDto: UpdateVocabularyDto,
   ): Promise<UpdateVocabularyResponseDto> {
-    const vocabularyId = parseInt(id, 10); // Chuyển đổi id từ chuỗi thành số nguyên
-    return this.vocabularyService.update(vocabularyId, updateVocabularyDto);
+    return this.vocabularyService.update(id, updateVocabularyDto);
   }
 
-  @UseGuards(AuthGuard, RolesGuard)
-  @Roles(UserRole.USER)
   @Delete(':id')
-  @ApiOperation({ summary: 'Delete a vocabulary by ID' })
+  @ApiOperation({
+    summary: 'Delete vocabulary by ID',
+    description: 'Permanently removes a vocabulary entry',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'Vocabulary ID',
+    type: String,
+    required: true,
+  })
   @ApiResponse({
-    status: 200,
-    description: 'The vocabulary has been successfully deleted.',
+    status: HttpStatus.OK,
+    description: 'Vocabulary deleted successfully',
     type: DeleteVocabularyResponseDto,
   })
-  @ApiResponse({ status: 404, description: 'Vocabulary not found.' })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+    description: 'Vocabulary not found',
+  })
   async delete(@Param('id') id: string): Promise<DeleteVocabularyResponseDto> {
-    const vocabularyId = parseInt(id, 10); // Lấy id từ DTO
-    return this.vocabularyService.delete(vocabularyId);
+    return this.vocabularyService.delete(id);
   }
 }

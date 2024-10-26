@@ -4,10 +4,10 @@ import { Quiz } from 'src/models/quiz/entities/quiz.entity';
 
 export class UpdateQuizQuestionResponseDto {
   @ApiProperty()
-  id: number;
+  id: string;
 
   @ApiProperty()
-  quiz_id: number;
+  quiz_id: string;
 
   @ApiProperty()
   question_text: string;
@@ -22,7 +22,7 @@ export class UpdateQuizQuestionResponseDto {
   is_correct: boolean;
 
   @ApiProperty({ required: false })
-  id_vocabulary: number | null;
+  id_vocabulary: string | null;
 
   @ApiProperty()
   created_at: Date;

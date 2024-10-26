@@ -12,8 +12,7 @@ import {
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 import { AuthGuard } from 'src/common/auth/auth.guard';
-import { Roles, RolesGuard } from 'src/common/auth/role.guard';
-import { UserRole } from 'src/common/type/enum';
+import { Roles, RolesGuard, UserRole } from 'src/common/auth/role.guard';
 import { CreateQuizQuestionResponseDto } from 'src/models/quiz-question/dto/create-quiz-question-response.dto';
 import { CreateQuizQuestionDto } from 'src/models/quiz-question/dto/create-quiz-question.dto';
 import { DeleteQuizQuestionResponseDto } from 'src/models/quiz-question/dto/delete-quiz-question-response.dto';
@@ -43,8 +42,10 @@ export class QuizQuestionController {
     @Param('quizId') quizId: string,
     @Body() createQuizQuestionDto: CreateQuizQuestionDto,
   ): Promise<CreateQuizQuestionResponseDto> {
-    const id = parseInt(quizId, 10); // Chuyển đổi quizId từ chuỗi thành số nguyên
-    return this.quizQuestionService.createQuestion(id, createQuizQuestionDto);
+    return this.quizQuestionService.createQuestion(
+      quizId,
+      createQuizQuestionDto,
+    );
   }
 
   @UseGuards(AuthGuard, RolesGuard)
@@ -60,8 +61,7 @@ export class QuizQuestionController {
     @Param('quizId') quizId: string,
     @Query() findAllQuizQuestionDto: FindAllQuizQuestionDto,
   ): Promise<QuizQuestionResponse> {
-    const id = parseInt(quizId, 10); // Chuyển đổi quizId từ chuỗi thành số nguyên
-    return this.quizQuestionService.findAll(id, findAllQuizQuestionDto);
+    return this.quizQuestionService.findAll(quizId, findAllQuizQuestionDto);
   }
 
   @UseGuards(AuthGuard, RolesGuard)
@@ -78,9 +78,7 @@ export class QuizQuestionController {
     @Param('quizId') quizId: string,
     @Param('id') id: string,
   ): Promise<FindOneQuizQuestionResponseDto> {
-    const quizIdNumber = parseInt(quizId, 10); // Chuyển đổi quizId từ chuỗi thành số nguyên
-    const idNumber = parseInt(id, 10); // Chuyển đổi id từ chuỗi thành số nguyên
-    return this.quizQuestionService.findOne(quizIdNumber, idNumber);
+    return this.quizQuestionService.findOne(quizId, id);
   }
 
   @UseGuards(AuthGuard, RolesGuard)
@@ -97,8 +95,7 @@ export class QuizQuestionController {
     @Param('id') id: string,
     @Body() updateQuizQuestionDto: UpdateQuizQuestionDto,
   ): Promise<UpdateQuizQuestionResponseDto> {
-    const idNumber = parseInt(id, 10); // Chuyển đổi id từ chuỗi thành số nguyên
-    return this.quizQuestionService.update(idNumber, updateQuizQuestionDto);
+    return this.quizQuestionService.update(id, updateQuizQuestionDto);
   }
 
   @UseGuards(AuthGuard, RolesGuard)
@@ -114,7 +111,6 @@ export class QuizQuestionController {
   async delete(
     @Param('id') id: string,
   ): Promise<DeleteQuizQuestionResponseDto> {
-    const idNumber = parseInt(id, 10); // Chuyển đổi id từ chuỗi thành số nguyên
-    return this.quizQuestionService.delete(idNumber);
+    return this.quizQuestionService.delete(id);
   }
 }

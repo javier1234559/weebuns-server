@@ -7,7 +7,7 @@ import { Vocabulary } from 'src/models/vocabulary/entities/vocabulary.entity';
 @ObjectType()
 export class VocabularyResponse {
   @Field(() => [Vocabulary])
-  @ApiProperty()
+  @ApiProperty({ type: Vocabulary })
   data: Vocabulary[];
 
   @Field(() => PaginationOutputDto)

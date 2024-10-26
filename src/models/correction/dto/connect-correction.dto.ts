@@ -1,5 +1,3 @@
-
-  export class ConnectCorrectionDto {
-    id: number;
-  }
-  
+export class ConnectCorrectionDto {
+  id: number;
+}

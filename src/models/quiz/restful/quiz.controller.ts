@@ -12,8 +12,7 @@ import {
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 import { AuthGuard } from 'src/common/auth/auth.guard';
-import { Roles, RolesGuard } from 'src/common/auth/role.guard';
-import { UserRole } from 'src/common/type/enum';
+import { Roles, RolesGuard, UserRole } from 'src/common/auth/role.guard';
 import { CreateQuizResponseDto } from 'src/models/quiz/dto/create-quiz-response.dto';
 import { CreateQuizDto } from 'src/models/quiz/dto/create-quiz.dto';
 import { DeleteQuizResponseDto } from 'src/models/quiz/dto/delete-quiz-response.dto';
@@ -71,8 +70,7 @@ export class QuizController {
   })
   @ApiResponse({ status: 404, description: 'Quiz not found.' })
   async findOne(@Param('id') id: string): Promise<FindOneQuizResponseDto> {
-    const quizId = parseInt(id, 10); // Chuyển đổi id từ chuỗi thành số nguyên
-    return this.quizService.findOne(quizId);
+    return this.quizService.findOne(id);
   }
 
   @UseGuards(AuthGuard, RolesGuard)
@@ -89,8 +87,7 @@ export class QuizController {
     @Param('id') id: string,
     @Body() updateQuizDto: UpdateQuizDto,
   ): Promise<UpdateQuizResponseDto> {
-    const quizId = parseInt(id, 10); // Chuyển đổi id từ chuỗi thành số nguyên
-    return this.quizService.update(quizId, updateQuizDto);
+    return this.quizService.update(id, updateQuizDto);
   }
 
   @UseGuards(AuthGuard, RolesGuard)
@@ -104,7 +101,6 @@ export class QuizController {
   })
   @ApiResponse({ status: 404, description: 'Quiz not found.' })
   async delete(@Param('id') id: string): Promise<DeleteQuizResponseDto> {
-    const quizId = parseInt(id, 10); // Lấy id từ DTO
-    return this.quizService.delete(quizId);
+    return this.quizService.delete(id);
   }
 }

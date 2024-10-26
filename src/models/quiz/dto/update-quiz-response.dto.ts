@@ -5,30 +5,61 @@ import { Space } from 'src/models/space/entities/space.entity';
 import { User } from 'src/models/user/entities/user.entity';
 
 export class UpdateQuizResponseDto {
-  @ApiProperty()
-  id: number;
+  @ApiProperty({
+    description: 'Quiz ID',
+    example: 1,
+  })
+  id: string;
 
-  @ApiProperty()
-  id_space: number;
+  @ApiProperty({
+    description: 'Space ID that quiz belongs to',
+    example: 1,
+  })
+  id_space: string;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'Quiz title',
+    example: 'JavaScript Fundamentals Quiz',
+  })
   title: string;
 
-  @ApiProperty()
-  created_by: number;
+  @ApiProperty({
+    description: 'ID of user who created the quiz',
+    example: 1,
+  })
+  created_by: string;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'Creation timestamp',
+    example: '2024-10-25T10:30:00Z',
+  })
   created_at: Date;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'Last update timestamp',
+    example: '2024-10-25T10:30:00Z',
+  })
   updated_at: Date;
 
-  @ApiProperty({ type: () => Space, required: false })
+  @ApiProperty({
+    type: () => Space,
+    required: false,
+    description: 'Space details that quiz belongs to',
+  })
   space?: Space;
 
-  @ApiProperty({ type: () => User, required: false })
+  @ApiProperty({
+    type: () => User,
+    required: false,
+    description: 'Creator details',
+  })
   creator?: User;
 
-  @ApiProperty({ type: () => [QuizQuestion], required: false })
+  @ApiProperty({
+    type: () => [QuizQuestion],
+    required: false,
+    description: 'List of questions in the quiz',
+    isArray: true,
+  })
   questions?: QuizQuestion[];
 }

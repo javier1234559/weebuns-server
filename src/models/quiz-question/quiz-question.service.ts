@@ -18,7 +18,7 @@ export class QuizQuestionService {
   constructor(private readonly prisma: PrismaService) {}
 
   async createQuestion(
-    quizId: number,
+    quizId: string,
     createQuizQuestionDto: CreateQuizQuestionDto,
   ): Promise<CreateQuizQuestionResponseDto> {
     const quiz = await this.prisma.quiz.findUnique({
@@ -31,7 +31,7 @@ export class QuizQuestionService {
 
     const quizQuestion = await this.prisma.quizQuestion.create({
       data: {
-        quiz_id: quizId,
+        quiz: { connect: { id: quizId } },
         ...createQuizQuestionDto,
       },
       include: {
@@ -46,15 +46,14 @@ export class QuizQuestionService {
       correct_answer: quizQuestion.correct_answer,
       user_answer: quizQuestion.user_answer,
       is_correct: quizQuestion.is_correct,
-      id_vocabulary: quizQuestion.id_vocabulary,
+      id_vocabulary: quizQuestion.id_vocabulary?.toString(),
       created_at: quizQuestion.created_at,
       updated_at: quizQuestion.updated_at,
-      quiz: quizQuestion.quiz,
     };
   }
 
   async findAll(
-    quizId: number,
+    quizId: string,
     findAllQuizQuestionDto: FindAllQuizQuestionDto,
   ): Promise<QuizQuestionResponse> {
     const { page, perPage, search } = findAllQuizQuestionDto;
@@ -88,8 +87,8 @@ export class QuizQuestionService {
   }
 
   async findOne(
-    quizId: number,
-    id: number,
+    quizId: string,
+    id: string,
   ): Promise<FindOneQuizQuestionResponseDto> {
     const quizQuestion = await this.prisma.quizQuestion.findFirst({
       where: { id, quiz_id: quizId },
@@ -108,7 +107,7 @@ export class QuizQuestionService {
   }
 
   async update(
-    id: number,
+    id: string,
     updateQuizQuestionDto: UpdateQuizQuestionDto,
   ): Promise<UpdateQuizQuestionResponseDto> {
     const quizQuestion = await this.prisma.quizQuestion.findUnique({
@@ -140,7 +139,7 @@ export class QuizQuestionService {
     };
   }
 
-  async delete(id: number): Promise<DeleteQuizQuestionResponseDto> {
+  async delete(id: string): Promise<DeleteQuizQuestionResponseDto> {
     const quizQuestion = await this.prisma.quizQuestion.findUnique({
       where: { id },
     });

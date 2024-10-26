@@ -7,15 +7,13 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 
-import { AuthProvider } from '@prisma/client';
+import { AuthProvider, UserRole } from '@prisma/client';
 import axios from 'axios';
 import * as bcrypt from 'bcrypt';
 import { Response } from 'express';
 
 import { IAuthPayload } from 'src/common/interface/auth-payload.interface';
 import { PrismaService } from 'src/common/prisma/prisma.service';
-import { UserRole } from 'src/common/type/enum';
-import { generateRandomNumber } from 'src/common/utils/random';
 import config from 'src/config';
 import {
   LogoutResponse,
@@ -55,7 +53,7 @@ export class AuthService {
   async getCurrentUser(authPayload: IAuthPayload): Promise<UserResponse> {
     try {
       const user = await this.prisma.user.findUnique({
-        where: { id: authPayload.sub },
+        where: { id: String(authPayload.sub) },
       });
       return { user };
     } catch (error) {
@@ -72,7 +70,7 @@ export class AuthService {
     }
 
     if (user.auth_provider !== AuthProvider.local) {
-      throw new UnauthorizedException('User is not registered with local auth');
+      throw new UnauthorizedException('User is not registered with.local auth');
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password_hash);
@@ -107,13 +105,12 @@ export class AuthService {
       const hashedPassword = await bcrypt.hash(password, 10);
       const newUser = await this.prisma.user.create({
         data: {
-          id: generateRandomNumber(1, 100),
           username,
           email,
           password_hash: hashedPassword,
           first_name: firstName,
           last_name: lastName,
-          role: UserRole.USER,
+          role: UserRole.user,
           auth_provider: AuthProvider.local,
         },
       });
@@ -128,7 +125,7 @@ export class AuthService {
     } catch (error) {
       console.error('Error creating user:', error);
       throw new InternalServerErrorException(
-        'Something went wrong when creating the user',
+        `Something went wrong when creating the user ${error}`,
       );
     }
   }
@@ -238,12 +235,11 @@ export class AuthService {
     if (!user) {
       user = await this.prisma.user.create({
         data: {
-          id: generateRandomNumber(1, 100),
           email: userData.email,
           username: userData.name,
           first_name: userData.firstName,
           last_name: userData.lastName,
-          role: UserRole.USER,
+          role: UserRole.user,
           auth_provider: userData.provider,
           profile_picture: userData.picture,
         },

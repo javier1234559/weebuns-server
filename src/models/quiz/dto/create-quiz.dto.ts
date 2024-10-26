@@ -9,9 +9,9 @@ export class CreateQuizDto {
 
   @ApiProperty()
   @IsInt()
-  id_space: number;
+  id_space: string;
 
   @ApiProperty()
   @IsInt()
-  created_by: number;
+  created_by: string;
 }

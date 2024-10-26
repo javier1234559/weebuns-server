@@ -2,8 +2,7 @@ import { Field, ObjectType } from '@nestjs/graphql';
 import { ApiProperty } from '@nestjs/swagger';
 
 import { PaginationOutputDto } from 'src/common/dto/pagination.dto';
-
-import { Quiz } from './../../../migration/quiz/entities/quiz.entity';
+import { Quiz } from 'src/models/quiz/entities/quiz.entity';
 
 @ObjectType()
 export class QuizResponse {

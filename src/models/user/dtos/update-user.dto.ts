@@ -3,7 +3,7 @@ import { OmitType, PartialType } from '@nestjs/swagger';
 import { ApiProperty } from '@nestjs/swagger';
 
 import { UserRole } from '@prisma/client';
-import { IsInt } from 'class-validator';
+import { IsString } from 'class-validator';
 
 import { CreateUserDto } from './create-user.dto';
 
@@ -12,10 +12,10 @@ export class UpdateUserDto extends PartialType(
   OmitType(CreateUserDto, ['password'] as const),
 ) {
   // validation
-  @IsInt()
+  @IsString()
   // docs
   @ApiProperty({ type: Number, nullable: true })
   // graphql
   @Field(() => UserRole, { nullable: true })
-  id: number;
+  id: string;
 }

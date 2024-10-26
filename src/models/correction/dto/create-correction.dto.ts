@@ -1,10 +1,4 @@
-
-
-
-
-
-
 export class CreateCorrectionDto {
   overall_comment?: string;
-rating?: number;
+  rating?: number;
 }

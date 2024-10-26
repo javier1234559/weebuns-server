@@ -26,5 +26,5 @@ export class UpdateQuizQuestionDto {
   @ApiPropertyOptional()
   @IsOptional()
   @IsInt()
-  id_vocabulary?: number;
+  id_vocabulary?: string;
 }

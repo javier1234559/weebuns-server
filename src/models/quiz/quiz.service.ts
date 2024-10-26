@@ -20,7 +20,6 @@ export class QuizService {
   async create(createQuizDto: CreateQuizDto): Promise<CreateQuizResponseDto> {
     const { id_space, created_by, title } = createQuizDto;
 
-    // Kiểm tra sự tồn tại của spaceId
     const space = await this.prisma.space.findUnique({
       where: { id: id_space },
     });
@@ -28,10 +27,10 @@ export class QuizService {
       throw new NotFoundException(`Space with ID ${id_space} not found`);
     }
 
-    // Kiểm tra sự tồn tại của created_by
     const user = await this.prisma.user.findUnique({
       where: { id: created_by },
     });
+
     if (!user) {
       throw new NotFoundException(`User with ID ${created_by} not found`);
     }
@@ -58,7 +57,6 @@ export class QuizService {
       updated_at: quiz.updated_at,
       space: quiz.space,
       creator: quiz.creator,
-      questions: quiz.questions,
     };
   }
 
@@ -92,7 +90,7 @@ export class QuizService {
     };
   }
 
-  async findOne(id: number): Promise<FindOneQuizResponseDto> {
+  async findOne(id: string): Promise<FindOneQuizResponseDto> {
     const quiz = await this.prisma.quiz.findUnique({
       where: { id },
       include: {
@@ -109,7 +107,7 @@ export class QuizService {
   }
 
   async update(
-    id: number,
+    id: string,
     updateQuizDto: UpdateQuizDto,
   ): Promise<UpdateQuizResponseDto> {
     const quiz = await this.prisma.quiz.findUnique({
@@ -137,13 +135,12 @@ export class QuizService {
       created_by: updatedQuiz.created_by,
       created_at: updatedQuiz.created_at,
       updated_at: updatedQuiz.updated_at,
-      space: updatedQuiz.space,
-      creator: updatedQuiz.creator,
-      questions: updatedQuiz.questions,
+      space: updatedQuiz.space || undefined,
+      creator: updatedQuiz.creator || undefined,
     };
   }
 
-  async delete(id: number): Promise<DeleteQuizResponseDto> {
+  async delete(id: string): Promise<DeleteQuizResponseDto> {
     const quiz = await this.prisma.quiz.findUnique({
       where: { id },
     });

@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 
+import { PaginationOutputDto } from 'src/common/dto/pagination.dto';
 import { User } from 'src/models/user/entities/user.entity';
 
 export class UserResponse {
@@ -12,26 +13,24 @@ export class UsersResponse {
   users: Omit<User, 'password_hash'>[];
 
   @ApiProperty()
-  pagination: {
-    totalItems: number;
-    itemCount: number;
-    itemsPerPage: number;
-    totalPages: number;
-    currentPage: number;
-  };
+  @ApiProperty({ type: PaginationOutputDto })
+  pagination: PaginationOutputDto;
 }
 
 export class CreateUserResponse {
   @ApiProperty()
+  @ApiProperty({ type: User })
   user: Omit<User, 'password_hash'>;
 }
 
 export class UpdateUserResponse {
   @ApiProperty()
+  @ApiProperty({ type: User })
   user: Omit<User, 'password_hash'>;
 }
 
 export class DeleteUserResponse {
   @ApiProperty()
+  @ApiProperty({ type: User })
   user: Omit<User, 'password_hash'>;
 }

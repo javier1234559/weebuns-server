@@ -7,6 +7,7 @@ import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin
 import { join } from 'path';
 
 import { CommonModule } from 'src/common/common.module';
+import { ValidationModule } from 'src/common/decorators/validation.module';
 import { HealthModule } from 'src/common/health/health.module';
 import { RemoveFieldInterceptor } from 'src/common/interceptors/remove-field';
 import { EssayModule } from 'src/models/essay/essay.module';
@@ -19,6 +20,8 @@ import { VocabularyModule } from 'src/models/vocabulary/vocabulary.module';
 @Module({
   imports: [
     CommonModule,
+    ValidationModule,
+
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
       autoSchemaFile: join(process.cwd(), 'src/schema.gql'),

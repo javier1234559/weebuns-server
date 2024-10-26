@@ -7,16 +7,16 @@ import { User } from 'src/models/user/entities/user.entity';
 
 export class CreateQuizResponseDto {
   @ApiProperty()
-  id: number;
+  id: string;
 
   @ApiProperty()
-  id_space: number;
+  id_space: string;
 
   @ApiProperty()
   title: string;
 
   @ApiProperty()
-  created_by: number;
+  created_by: string;
 
   @ApiProperty()
   created_at: Date;

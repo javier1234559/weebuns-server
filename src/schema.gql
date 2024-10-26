@@ -2,18 +2,149 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
-type PaginationOutputDto {
-  totalItems: Int!
-  currentPage: Int!
-  totalPages: Int!
-  itemsPerPage: Int!
-  hasNextPage: Boolean!
-  hasPreviousPage: Boolean!
+type Space {
+  id: ID!
+  name: String!
+  description: String
+  created_by: String!
+  created_at: DateTime!
+  updated_at: DateTime!
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type UserLanguage {
+  id: ID!
+  user_id: String!
+  language: String!
+  proficiency_level: String!
+  is_native: Boolean!
+  created_at: DateTime!
+  updated_at: DateTime!
+}
+
+type CorrectionReply {
+  id: ID!
+  correction_id: String!
+  comment: String!
+  created_by: String!
+  created_at: DateTime!
+  updated_at: DateTime!
+  creator: User
+}
+
+type CorrectionSentence {
+  id: ID!
+  id_correction: String!
+  original_text: String!
+  corrected_text: String
+  explanation: String
+  is_correct: Boolean!
+  rating: Float
+  created_at: DateTime!
+  updated_at: DateTime!
+  correction: Correction
+}
+
+type Correction {
+  id: ID!
+  essay_id: String!
+  overall_comment: String
+  rating: Int
+  created_by: String!
+  created_at: DateTime!
+  updated_at: DateTime!
+  essay: Essay
+  creator: User
+  sentences: [CorrectionSentence!]
+  replies: [CorrectionReply!]
+}
+
+"""Association between essays and hashtags"""
+type EssayHashtag {
+  """Unique identifier for the essay-hashtag association"""
+  id: ID!
+
+  """Name of the hashtag"""
+  name: String!
+
+  """ID of the associated essay"""
+  essay_id: ID!
+
+  """ID of the associated hashtag"""
+  hashtag_id: ID!
+
+  """Number of times this hashtag has been used in essays"""
+  usage_count: Int!
+
+  """Timestamp when the association was created"""
+  created_at: DateTime!
+
+  """Timestamp when the association was last updated"""
+  updated_at: DateTime!
+
+  """
+  The associated essay details. Only populated when explicitly requested.
+  """
+  essay: Essay
+
+  """
+  The associated hashtag details. Only populated when explicitly requested.
+  """
+  hashtag: Hashtag
+}
+
+type Hashtag {
+  id: ID!
+  name: String!
+  usage_count: Int!
+  created_at: DateTime!
+  updated_at: DateTime!
+  essays: [EssayHashtag!]
+}
+
+type Essay {
+  id: ID!
+  id_space: String!
+  title: String!
+  summary: String
+  content: String!
+  upvote_count: Float!
+  cover_url: String
+  status: EssayStatus!
+  language: String!
+  created_by: String!
+  created_at: DateTime!
+  updated_at: DateTime!
+  space: Space
+  author: User
+  corrections: [Correction!]
+  hashtags: [Hashtag!]
+}
+
+"""The status of an essay"""
+enum EssayStatus {
+  draft
+  public
+  private
+  deleted
+}
+
+type Follower {
+  id: ID!
+  id_follower: String!
+  id_following: String!
+  followed_at: DateTime!
+  follower: User
+  following: User
 }
 
 type User {
   id: ID!
-  username: String!
+  username: String
   email: String!
   password_hash: String
   role: UserRole!
@@ -26,6 +157,11 @@ type User {
   last_login: DateTime
   created_at: DateTime!
   updated_at: DateTime!
+  languages: [UserLanguage!]
+  followedBy: [Follower!]
+  following: [Follower!]
+  spaces: [Space!]
+  essays: [Essay!]
 }
 
 """User roles in the system"""
@@ -41,10 +177,14 @@ enum AuthProvider {
   facebook
 }
 
-"""
-A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
-"""
-scalar DateTime
+type PaginationOutputDto {
+  totalItems: Int!
+  currentPage: Int!
+  totalPages: Int!
+  itemsPerPage: Int!
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+}
 
 type UsersResponse {
   data: [User!]!
@@ -53,19 +193,19 @@ type UsersResponse {
 
 type Query {
   users(findAllUsersDto: FindAllUsersDto!): UsersResponse!
-  user(id: Int!): User!
+  user(id: String!): User!
 }
 
 input FindAllUsersDto {
-  page: Int = 1
-  perPage: Int = 10
+  page: Int! = 1
+  perPage: Int! = 10
   search: String
 }
 
 type Mutation {
   createUser(createUserInput: CreateUserDto!): User!
-  updateUser(id: Int!, updateUserInput: UpdateUserDto!): User!
-  removeUser(id: Int!): User!
+  updateUser(id: String!, updateUserInput: UpdateUserDto!): User!
+  removeUser(id: String!): User!
 }
 
 input CreateUserDto {

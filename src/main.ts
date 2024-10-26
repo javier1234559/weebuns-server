@@ -1,14 +1,12 @@
+import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
-import cookieParser from 'cookie-parser';
+import { useContainer } from 'class-validator';
+import * as cookieParser from 'cookie-parser';
 
 import config from 'src/config';
-import { CreateSpaceDto } from 'src/models/space/dto/create-space.dto';
-import { UpdateSpaceDto } from 'src/models/space/dto/update-space.dto';
-import { CreateUserDto } from 'src/models/user/dtos/create-user.dto';
-import { UpdateUserDto } from 'src/models/user/dtos/update-user.dto';
 
 import { AppModule } from './app.module';
 
@@ -16,12 +14,13 @@ async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
   app.use(cookieParser());
-
   app.setGlobalPrefix('api');
+
   // app.enableCors({
   //   origin: '*',
   //   credentials: true,
   // });
+
   app.enableCors({
     origin: true,
     credentials: true,
@@ -37,6 +36,26 @@ async function bootstrap() {
     optionsSuccessStatus: 204,
   });
 
+  // Enabling service container for custom validator constraint classes (class-validator)
+  useContainer(app.select(AppModule), { fallbackOnErrors: true });
+
+  app.useGlobalPipes(
+    new ValidationPipe({
+      // Enable transformation of incoming data to DTO instance
+      // This allows default values in DTOs to be applied
+      // Example: class UserDto { @IsOptional() age: number = 0; }
+      // Request without age will have age set to 0
+      transform: true,
+      transformOptions: {
+        // Automatically convert primitive types
+        // Example: "1" (string) becomes 1 (number) if the DTO property is number
+        // Works with: numbers, booleans, and simple arrays
+        // Query: ?age=25 (string) -> { age: 25 } (number)
+        enableImplicitConversion: true,
+      },
+    }),
+  );
+
   const swaggerConfig = new DocumentBuilder()
     .setTitle('Weebuns lms api')
     .setDescription(
@@ -46,7 +65,13 @@ async function bootstrap() {
     .build();
 
   const document = SwaggerModule.createDocument(app, swaggerConfig, {
-    extraModels: [CreateUserDto, UpdateUserDto, CreateSpaceDto, UpdateSpaceDto],
+    // extraModels: [
+    //   CreateUserDto,
+    //   UpdateUserDto,
+    //   CreateSpaceDto,
+    //   UpdateSpaceDto,
+    //   UserLoginResponse,
+    // ],
   });
   SwaggerModule.setup('api', app, document);
 
