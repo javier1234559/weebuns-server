@@ -21,6 +21,28 @@ async function bootstrap() {
   //   credentials: true,
   // });
 
+  if (process.env.NODE_ENV !== 'production') {
+    setInterval(() => {
+      const memoryData = process.memoryUsage();
+
+      console.log('Application Memory Usage:');
+      console.log('------------------------');
+      console.log(
+        `Total App Memory (RSS): ${(memoryData.rss / 1024 / 1024).toFixed(2)} MB`,
+      );
+      console.log(
+        `Heap Used: ${(memoryData.heapUsed / 1024 / 1024).toFixed(2)} MB`,
+      );
+      console.log(
+        `Heap Total: ${(memoryData.heapTotal / 1024 / 1024).toFixed(2)} MB`,
+      );
+      console.log(
+        `External: ${(memoryData.external / 1024 / 1024).toFixed(2)} MB`,
+      );
+      console.log('------------------------');
+    }, 10000);
+  }
+
   app.enableCors({
     origin: true,
     credentials: true,
