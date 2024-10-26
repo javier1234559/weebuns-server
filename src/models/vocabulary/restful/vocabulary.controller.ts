@@ -92,6 +92,10 @@ export class VocabularyController {
     status: HttpStatus.BAD_REQUEST,
     description: 'Invalid query parameters',
   })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Invalid query parameters',
+  })
   async findAll(
     @Query() findAllVocabulariesDto: FindAllVocabularyDto,
   ): Promise<VocabularyResponse> {

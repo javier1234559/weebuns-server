@@ -27,6 +27,7 @@ generator client {
   provider = "prisma-client-js"
 }
 
+// Enums remain the same
 enum UserRole {
   user
   admin

@@ -67,6 +67,7 @@ export class EssayController {
   async findAll(
     @Query() findAllEssaysDto: FindAllEssaysDto,
   ): Promise<EssaysResponse> {
+    console.log('findAllEssaysDto', findAllEssaysDto);
     return this.essayService.findAll(findAllEssaysDto);
   }
 

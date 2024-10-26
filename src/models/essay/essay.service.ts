@@ -96,8 +96,10 @@ export class EssayService {
       this.prisma.essay.count({ where }),
     ]);
 
+    console.log(findAllEssaysDto);
     const pagination = calculatePagination(totalItems, findAllEssaysDto);
 
+    console.log(pagination);
     return {
       data: essays,
       pagination,
