@@ -1,7 +1,7 @@
 import { Field, ObjectType } from '@nestjs/graphql';
 import { ApiProperty } from '@nestjs/swagger';
 
-import { Vocabulary } from 'src/models/Vocabulary/entities/Vocabulary.entity';
+import { Vocabulary } from 'src/models/vocabulary/entities/vocabulary.entity';
 
 @ObjectType()
 export class FindOneVocabularyResponseDto {
