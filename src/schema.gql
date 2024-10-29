@@ -2,13 +2,29 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+type PaginationOutputDto {
+  totalItems: Int!
+  currentPage: Int!
+  totalPages: Int!
+  itemsPerPage: Int!
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+}
+
+type SpaceCount {
+  essays: Int!
+  quizzes: Int!
+  vocabularies: Int!
+}
+
 type Space {
   id: ID!
   name: String!
   description: String
-  created_by: String!
+  created_by: User!
   created_at: DateTime!
   updated_at: DateTime!
+  _count: SpaceCount
 }
 
 """
@@ -39,11 +55,12 @@ type CorrectionReply {
 type CorrectionSentence {
   id: ID!
   id_correction: String!
+  index: Float!
   original_text: String!
-  corrected_text: String
-  explanation: String
+  corrected_text: String!
+  explanation: String!
   is_correct: Boolean!
-  rating: Float
+  rating: Float!
   created_at: DateTime!
   updated_at: DateTime!
   correction: Correction
@@ -63,13 +80,19 @@ type Correction {
   replies: [CorrectionReply!]
 }
 
+type Hashtag {
+  id: ID!
+  name: String!
+  usage_count: Int!
+  created_at: DateTime!
+  updated_at: DateTime!
+  essays: [EssayHashtag!]
+}
+
 """Association between essays and hashtags"""
 type EssayHashtag {
   """Unique identifier for the essay-hashtag association"""
   id: ID!
-
-  """Name of the hashtag"""
-  name: String!
 
   """ID of the associated essay"""
   essay_id: ID!
@@ -77,14 +100,8 @@ type EssayHashtag {
   """ID of the associated hashtag"""
   hashtag_id: ID!
 
-  """Number of times this hashtag has been used in essays"""
-  usage_count: Int!
-
   """Timestamp when the association was created"""
   created_at: DateTime!
-
-  """Timestamp when the association was last updated"""
-  updated_at: DateTime!
 
   """
   The associated essay details. Only populated when explicitly requested.
@@ -95,15 +112,6 @@ type EssayHashtag {
   The associated hashtag details. Only populated when explicitly requested.
   """
   hashtag: Hashtag
-}
-
-type Hashtag {
-  id: ID!
-  name: String!
-  usage_count: Int!
-  created_at: DateTime!
-  updated_at: DateTime!
-  essays: [EssayHashtag!]
 }
 
 type Essay {
@@ -122,7 +130,7 @@ type Essay {
   space: Space
   author: User
   corrections: [Correction!]
-  hashtags: [Hashtag!]
+  hashtags: [EssayHashtag!]
 }
 
 """The status of an essay"""
@@ -177,13 +185,26 @@ enum AuthProvider {
   facebook
 }
 
-type PaginationOutputDto {
-  totalItems: Int!
-  currentPage: Int!
-  totalPages: Int!
-  itemsPerPage: Int!
-  hasNextPage: Boolean!
-  hasPreviousPage: Boolean!
+type CorrectionResponseOneDto {
+  id: ID!
+  essay_id: String!
+  created_by: String!
+  overall_comment: String
+  rating: Float
+  created_at: DateTime!
+  updated_at: DateTime!
+  creator: User!
+  sentences: [CorrectionSentence!]
+}
+
+type CorrectionResponseAllDto {
+  data: [CorrectionResponseOneDto!]!
+  pagination: PaginationOutputDto!
+}
+
+type SpacesResponse {
+  data: [Space!]!
+  pagination: PaginationOutputDto!
 }
 
 type UsersResponse {
@@ -194,6 +215,8 @@ type UsersResponse {
 type Query {
   users(findAllUsersDto: FindAllUsersDto!): UsersResponse!
   user(id: String!): User!
+  getUserSpaces(input: GetUserSpacesDto!): SpacesResponse!
+  getCorrectionsByEssay(input: GetCorrectionsByEssay!): CorrectionResponseAllDto!
 }
 
 input FindAllUsersDto {
@@ -202,10 +225,26 @@ input FindAllUsersDto {
   search: String
 }
 
+input GetUserSpacesDto {
+  userId: String!
+  page: Float
+  perPage: Float
+  search: String
+}
+
+input GetCorrectionsByEssay {
+  page: Int! = 1
+  perPage: Int! = 10
+  essayId: String!
+  search: String
+}
+
 type Mutation {
   createUser(createUserInput: CreateUserDto!): User!
   updateUser(id: String!, updateUserInput: UpdateUserDto!): User!
   removeUser(id: String!): User!
+  createCorrectionEssay(input: CreateCorrectionDto!): CorrectionResponseOneDto!
+  updateCorrectionEssay(input: UpdateCorrectionDto!): CorrectionResponseOneDto!
 }
 
 input CreateUserDto {
@@ -221,4 +260,38 @@ input CreateUserDto {
 
 input UpdateUserDto {
   id: UserRole
+}
+
+input CreateCorrectionDto {
+  essay_id: String!
+  created_by: String!
+  overall_comment: String
+  rating: Float
+  sentences: [CreateCorrectionSentenceDto!]!
+}
+
+input CreateCorrectionSentenceDto {
+  original_text: String!
+  index: Float!
+  corrected_text: String!
+  explanation: String!
+  is_correct: Boolean!
+  rating: Float!
+}
+
+input UpdateCorrectionDto {
+  id: String!
+  userId: String!
+  overall_comment: String
+  rating: Float
+  sentences: [UpdateCorrectionSentenceDto!]!
+}
+
+input UpdateCorrectionSentenceDto {
+  index: Float!
+  original_text: String!
+  corrected_text: String!
+  explanation: String!
+  is_correct: Boolean!
+  rating: Float!
 }

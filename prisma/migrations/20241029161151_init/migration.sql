@@ -221,52 +221,52 @@ CREATE UNIQUE INDEX "Hashtag_name_key" ON "Hashtag"("name");
 CREATE UNIQUE INDEX "EssayHashtag_essay_id_hashtag_id_key" ON "EssayHashtag"("essay_id", "hashtag_id");
 
 -- AddForeignKey
-ALTER TABLE "UserLanguage" ADD CONSTRAINT "UserLanguage_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "UserLanguage" ADD CONSTRAINT "UserLanguage_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Follower" ADD CONSTRAINT "Follower_id_follower_fkey" FOREIGN KEY ("id_follower") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Follower" ADD CONSTRAINT "Follower_id_follower_fkey" FOREIGN KEY ("id_follower") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Follower" ADD CONSTRAINT "Follower_id_following_fkey" FOREIGN KEY ("id_following") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Follower" ADD CONSTRAINT "Follower_id_following_fkey" FOREIGN KEY ("id_following") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Space" ADD CONSTRAINT "Space_created_by_fkey" FOREIGN KEY ("created_by") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Essay" ADD CONSTRAINT "Essay_id_space_fkey" FOREIGN KEY ("id_space") REFERENCES "Space"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
 ALTER TABLE "Essay" ADD CONSTRAINT "Essay_created_by_fkey" FOREIGN KEY ("created_by") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "EssayHashtag" ADD CONSTRAINT "EssayHashtag_essay_id_fkey" FOREIGN KEY ("essay_id") REFERENCES "Essay"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Essay" ADD CONSTRAINT "Essay_id_space_fkey" FOREIGN KEY ("id_space") REFERENCES "Space"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "EssayHashtag" ADD CONSTRAINT "EssayHashtag_essay_id_fkey" FOREIGN KEY ("essay_id") REFERENCES "Essay"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "EssayHashtag" ADD CONSTRAINT "EssayHashtag_hashtag_id_fkey" FOREIGN KEY ("hashtag_id") REFERENCES "Hashtag"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Correction" ADD CONSTRAINT "Correction_essay_id_fkey" FOREIGN KEY ("essay_id") REFERENCES "Essay"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
 ALTER TABLE "Correction" ADD CONSTRAINT "Correction_created_by_fkey" FOREIGN KEY ("created_by") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "CorrectionSentence" ADD CONSTRAINT "CorrectionSentence_id_correction_fkey" FOREIGN KEY ("id_correction") REFERENCES "Correction"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Correction" ADD CONSTRAINT "Correction_essay_id_fkey" FOREIGN KEY ("essay_id") REFERENCES "Essay"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "CorrectionReply" ADD CONSTRAINT "CorrectionReply_correction_id_fkey" FOREIGN KEY ("correction_id") REFERENCES "Correction"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "CorrectionSentence" ADD CONSTRAINT "CorrectionSentence_id_correction_fkey" FOREIGN KEY ("id_correction") REFERENCES "Correction"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "CorrectionReply" ADD CONSTRAINT "CorrectionReply_correction_id_fkey" FOREIGN KEY ("correction_id") REFERENCES "Correction"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "CorrectionReply" ADD CONSTRAINT "CorrectionReply_created_by_fkey" FOREIGN KEY ("created_by") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Quiz" ADD CONSTRAINT "Quiz_id_space_fkey" FOREIGN KEY ("id_space") REFERENCES "Space"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
 ALTER TABLE "Quiz" ADD CONSTRAINT "Quiz_created_by_fkey" FOREIGN KEY ("created_by") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "QuizQuestion" ADD CONSTRAINT "QuizQuestion_quiz_id_fkey" FOREIGN KEY ("quiz_id") REFERENCES "Quiz"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Quiz" ADD CONSTRAINT "Quiz_id_space_fkey" FOREIGN KEY ("id_space") REFERENCES "Space"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "QuizQuestion" ADD CONSTRAINT "QuizQuestion_quiz_id_fkey" FOREIGN KEY ("quiz_id") REFERENCES "Quiz"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Vocabulary" ADD CONSTRAINT "Vocabulary_created_by_fkey" FOREIGN KEY ("created_by") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -275,7 +275,7 @@ ALTER TABLE "Vocabulary" ADD CONSTRAINT "Vocabulary_created_by_fkey" FOREIGN KEY
 ALTER TABLE "Vocabulary" ADD CONSTRAINT "Vocabulary_id_space_fkey" FOREIGN KEY ("id_space") REFERENCES "Space"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "FlashCard" ADD CONSTRAINT "FlashCard_id_vocabulary_fkey" FOREIGN KEY ("id_vocabulary") REFERENCES "Vocabulary"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "FlashCard" ADD CONSTRAINT "FlashCard_created_by_fkey" FOREIGN KEY ("created_by") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "FlashCard" ADD CONSTRAINT "FlashCard_created_by_fkey" FOREIGN KEY ("created_by") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "FlashCard" ADD CONSTRAINT "FlashCard_id_vocabulary_fkey" FOREIGN KEY ("id_vocabulary") REFERENCES "Vocabulary"("id") ON DELETE CASCADE ON UPDATE CASCADE;

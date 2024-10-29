@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-import { IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsOptional, IsString } from 'class-validator';
 
 export class CreateSpaceDto {
   @ApiProperty()
@@ -11,21 +11,6 @@ export class CreateSpaceDto {
   @IsOptional()
   @IsString()
   description?: string;
-
-  @ApiProperty()
-  @IsNumber()
-  @IsOptional()
-  essay_number?: number;
-
-  @ApiProperty()
-  @IsNumber()
-  @IsOptional()
-  quiz_number?: number;
-
-  @ApiProperty()
-  @IsNumber()
-  @IsOptional()
-  vocab_number?: number;
 
   @ApiProperty()
   @IsString()

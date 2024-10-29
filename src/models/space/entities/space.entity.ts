@@ -1,7 +1,23 @@
-import { Field, ID, ObjectType } from '@nestjs/graphql';
+import { Field, ID, Int, ObjectType } from '@nestjs/graphql';
 import { ApiProperty } from '@nestjs/swagger';
 
 import { ISpace } from 'src/models/space/space.interface';
+import { User } from 'src/models/user/entities/user.entity';
+
+@ObjectType()
+class SpaceCount {
+  @Field(() => Int)
+  @ApiProperty({ example: 0 })
+  essays: number;
+
+  @Field(() => Int)
+  @ApiProperty({ example: 0 })
+  quizzes: number;
+
+  @Field(() => Int)
+  @ApiProperty({ example: 0 })
+  vocabularies: number;
+}
 
 @ObjectType()
 export class Space implements ISpace {
@@ -17,7 +33,7 @@ export class Space implements ISpace {
   @ApiProperty({ example: 'A space for learning English', nullable: true })
   description: string | null;
 
-  @Field()
+  @Field(() => User)
   @ApiProperty({ example: 1 })
   created_by: string;
 
@@ -29,18 +45,19 @@ export class Space implements ISpace {
   @ApiProperty()
   updated_at: Date;
 
-  // @Field()
-  // @ApiProperty()
-  // @ApiProperty({
-  //   example: {
-  //     essays: 0,
-  //     quizzes: 0,
-  //     vocabularies: 0,
-  //   },
-  // })
-  // _count?: {
-  //   essays: number;
-  //   quizzes: number;
-  //   vocabularies: number;
-  // };
+  @Field(() => SpaceCount, { nullable: true })
+  @ApiProperty({
+    type: 'object',
+    properties: {
+      essays: { type: 'number', example: 0 },
+      quizzes: { type: 'number', example: 0 },
+      vocabularies: { type: 'number', example: 0 },
+    },
+    example: {
+      essays: 0,
+      quizzes: 0,
+      vocabularies: 0,
+    },
+  })
+  _count?: SpaceCount;
 }

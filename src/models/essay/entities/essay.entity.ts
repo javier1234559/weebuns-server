@@ -4,8 +4,8 @@ import { ApiProperty } from '@nestjs/swagger';
 import { EssayStatus } from '@prisma/client';
 
 import { Correction } from 'src/models/correction/entities/correction.entity';
+import { EssayHashtag } from 'src/models/essay-hashtag/entities/essay-hashtag.entity';
 import { IEssay } from 'src/models/essay/essay.interface';
-import { Hashtag } from 'src/models/hashtag/entities/hashtag.entity';
 
 import { Space } from '../../space/entities/space.entity';
 import { User } from '../../user/entities/user.entity';
@@ -77,13 +77,11 @@ export class Essay implements IEssay {
   @ApiProperty({ type: () => [Correction], nullable: true })
   corrections?: Correction[];
 
-  @Field(() => [Hashtag], { nullable: true })
+  @Field(() => [EssayHashtag], { nullable: true })
   @ApiProperty({
-    type: () => [Hashtag],
+    type: () => [EssayHashtag],
     nullable: true,
     description: 'Associated hashtags for this essay',
   })
-  hashtags?: {
-    hashtag: Hashtag;
-  }[];
+  hashtags?: EssayHashtag[];
 }

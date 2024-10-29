@@ -60,9 +60,7 @@ export class UpdateEssayDto {
   language?: string;
 
   @IsOptional()
-  @ExistEntities('hashtag', {
-    message: 'One or more hashtags not found',
-  })
+  @ExistEntities('hashtag')
   @ApiPropertyOptional({
     description: 'Array of hashtag IDs to associate with the essay',
     type: [String],

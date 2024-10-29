@@ -1,77 +1,37 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
-// generator nestjsDto {
-//   provider                        = "prisma-generator-nestjs-dto"
-//   output                          = "../src/migration"
-//   outputToNestJsResourceStructure = "true"
-//   exportRelationModifierClasses   = "true"
-//   reExport                        = "false"
-//   createDtoPrefix                 = "Create"
-//   updateDtoPrefix                 = "Update"
-//   dtoSuffix                       = "Dto"
-//   entityPrefix                    = ""
-//   entitySuffix                    = ""
-//   fileNamingStyle                 = "kebab"
-// }
+generator client {
+  provider = "prisma-client-js"
+}
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
-generator client {
-  provider = "prisma-client-js"
-}
-
-// Enums remain the same
-enum UserRole {
-  user
-  admin
-}
-
-enum EssayStatus {
-  draft
-  public
-  private
-  deleted
-}
-
-enum AuthProvider {
-  local
-  google
-  facebook
-}
-
 model User {
-  id                String       @id @default(uuid()) @db.Uuid
-  username          String?      @unique
-  email             String       @unique
-  password_hash     String?
-  role              UserRole     @default(user)
-  auth_provider     AuthProvider @default(local)
-  auth_provider_id  String?
-  first_name        String?
-  last_name         String?
-  profile_picture   String?
-  is_email_verified Boolean      @default(false)
-  last_login        DateTime?
-  created_at        DateTime     @default(now())
-  updated_at        DateTime     @updatedAt
-
-  languages          UserLanguage[]
-  followedBy         Follower[]        @relation("Following")
-  following          Follower[]        @relation("Follower")
-  spaces             Space[]
-  essays             Essay[]
-  quizzes            Quiz[]
-  vocabularies       Vocabulary[]
-  flash_cards        FlashCard[]
+  id                 String            @id @default(uuid()) @db.Uuid
+  username           String?           @unique
+  email              String            @unique
+  password_hash      String?
+  role               UserRole          @default(user)
+  auth_provider      AuthProvider      @default(local)
+  auth_provider_id   String?
+  first_name         String?
+  last_name          String?
+  profile_picture    String?
+  is_email_verified  Boolean           @default(false)
+  last_login         DateTime?
+  created_at         DateTime          @default(now())
+  updated_at         DateTime          @updatedAt
   corrections        Correction[]      @relation("CorrectionCreator")
   correction_replies CorrectionReply[] @relation("ReplyCreator")
+  essays             Essay[]
+  flash_cards        FlashCard[]
+  following          Follower[]        @relation("Follower")
+  followedBy         Follower[]        @relation("Following")
+  quizzes            Quiz[]
+  spaces             Space[]
+  languages          UserLanguage[]
+  vocabularies       Vocabulary[]
 }
 
 model UserLanguage {
@@ -92,43 +52,40 @@ model Follower {
   id_follower  String   @db.Uuid
   id_following String   @db.Uuid
   followed_at  DateTime @default(now())
-
-  follower  User @relation("Follower", fields: [id_follower], references: [id], onDelete: Cascade)
-  following User @relation("Following", fields: [id_following], references: [id], onDelete: Cascade)
+  follower     User     @relation("Follower", fields: [id_follower], references: [id], onDelete: Cascade)
+  following    User     @relation("Following", fields: [id_following], references: [id], onDelete: Cascade)
 }
 
 model Space {
-  id          String   @id @default(uuid()) @db.Uuid
-  name        String
-  description String?
-  created_by  String   @db.Uuid
-  created_at  DateTime @default(now())
-  updated_at  DateTime @updatedAt
-
-  creator      User         @relation(fields: [created_by], references: [id])
+  id           String       @id @default(uuid()) @db.Uuid
+  name         String
+  description  String?
+  created_by   String       @db.Uuid
+  created_at   DateTime     @default(now())
+  updated_at   DateTime     @updatedAt
   essays       Essay[]
   quizzes      Quiz[]
+  creator      User         @relation(fields: [created_by], references: [id])
   vocabularies Vocabulary[]
 }
 
 model Essay {
-  id           String      @id @default(uuid()) @db.Uuid
-  id_space     String      @db.Uuid
+  id           String         @id @default(uuid()) @db.Uuid
+  id_space     String         @db.Uuid
   title        String
   summary      String?
   content      String
-  upvote_count Int         @default(0)
+  upvote_count Int            @default(0)
   cover_url    String?
-  status       EssayStatus @default(draft)
+  status       EssayStatus    @default(draft)
   language     String
-  created_by   String      @db.Uuid
-  created_at   DateTime    @default(now())
-  updated_at   DateTime    @updatedAt
-
-  space       Space          @relation(fields: [id_space], references: [id], onDelete: Cascade)
-  author      User           @relation(fields: [created_by], references: [id])
-  hashtags    EssayHashtag[]
-  corrections Correction[]
+  created_by   String         @db.Uuid
+  created_at   DateTime       @default(now())
+  updated_at   DateTime       @updatedAt
+  corrections  Correction[]
+  author       User           @relation(fields: [created_by], references: [id])
+  space        Space          @relation(fields: [id_space], references: [id], onDelete: Cascade)
+  hashtags     EssayHashtag[]
 }
 
 model Hashtag {
@@ -145,31 +102,30 @@ model EssayHashtag {
   essay_id   String   @db.Uuid
   hashtag_id String   @db.Uuid
   created_at DateTime @default(now())
-
-  essay   Essay   @relation(fields: [essay_id], references: [id], onDelete: Cascade)
-  hashtag Hashtag @relation(fields: [hashtag_id], references: [id])
+  essay      Essay    @relation(fields: [essay_id], references: [id], onDelete: Cascade)
+  hashtag    Hashtag  @relation(fields: [hashtag_id], references: [id])
 
   @@unique([essay_id, hashtag_id])
 }
 
 model Correction {
-  id              String   @id @default(uuid()) @db.Uuid
-  essay_id        String   @db.Uuid
+  id              String               @id @default(uuid()) @db.Uuid
+  essay_id        String               @db.Uuid
   overall_comment String?
   rating          Int?
-  created_by      String   @db.Uuid
-  created_at      DateTime @default(now())
-  updated_at      DateTime @updatedAt
-
-  essay     Essay                @relation(fields: [essay_id], references: [id], onDelete: Cascade)
-  creator   User                 @relation("CorrectionCreator", fields: [created_by], references: [id])
-  sentences CorrectionSentence[]
-  replies   CorrectionReply[]
+  created_by      String               @db.Uuid
+  created_at      DateTime             @default(now())
+  updated_at      DateTime             @updatedAt
+  creator         User                 @relation("CorrectionCreator", fields: [created_by], references: [id])
+  essay           Essay                @relation(fields: [essay_id], references: [id], onDelete: Cascade)
+  replies         CorrectionReply[]
+  sentences       CorrectionSentence[]
 }
 
 model CorrectionSentence {
   id             String   @id @default(uuid()) @db.Uuid
   id_correction  String   @db.Uuid
+  index          Int
   original_text  String
   corrected_text String?
   explanation    String?
@@ -179,31 +135,31 @@ model CorrectionSentence {
   updated_at     DateTime @updatedAt
 
   correction Correction @relation(fields: [id_correction], references: [id], onDelete: Cascade)
+
+  @@unique([id_correction, index])
 }
 
 model CorrectionReply {
-  id            String   @id @default(uuid()) @db.Uuid
-  correction_id String   @db.Uuid
+  id            String     @id @default(uuid()) @db.Uuid
+  correction_id String     @db.Uuid
   comment       String
-  created_by    String   @db.Uuid
-  created_at    DateTime @default(now())
-  updated_at    DateTime @updatedAt
-
-  correction Correction @relation(fields: [correction_id], references: [id], onDelete: Cascade)
-  creator    User       @relation("ReplyCreator", fields: [created_by], references: [id])
+  created_by    String     @db.Uuid
+  created_at    DateTime   @default(now())
+  updated_at    DateTime   @updatedAt
+  correction    Correction @relation(fields: [correction_id], references: [id], onDelete: Cascade)
+  creator       User       @relation("ReplyCreator", fields: [created_by], references: [id])
 }
 
 model Quiz {
-  id         String   @id @default(uuid()) @db.Uuid
-  id_space   String   @db.Uuid
+  id         String         @id @default(uuid()) @db.Uuid
+  id_space   String         @db.Uuid
   title      String
-  created_by String   @db.Uuid
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
-
-  space     Space          @relation(fields: [id_space], references: [id], onDelete: Cascade)
-  creator   User           @relation(fields: [created_by], references: [id])
-  questions QuizQuestion[]
+  created_by String         @db.Uuid
+  created_at DateTime       @default(now())
+  updated_at DateTime       @updatedAt
+  creator    User           @relation(fields: [created_by], references: [id])
+  space      Space          @relation(fields: [id_space], references: [id], onDelete: Cascade)
+  questions  QuizQuestion[]
 }
 
 model QuizQuestion {
@@ -216,12 +172,11 @@ model QuizQuestion {
   id_vocabulary  String?  @db.Uuid
   created_at     DateTime @default(now())
   updated_at     DateTime @updatedAt
-
-  quiz Quiz @relation(fields: [quiz_id], references: [id], onDelete: Cascade)
+  quiz           Quiz     @relation(fields: [quiz_id], references: [id], onDelete: Cascade)
 }
 
 model Vocabulary {
-  id               String   @id @default(uuid()) @db.Uuid
+  id               String      @id @default(uuid()) @db.Uuid
   image_url        String?
   word             String
   part_of_speech   String?
@@ -229,31 +184,47 @@ model Vocabulary {
   pronunciation    String?
   example          String?
   reference_link   String?
-  id_essay_link    String?  @db.Uuid
-  id_space         String?  @db.Uuid
+  id_essay_link    String?     @db.Uuid
+  id_space         String?     @db.Uuid
   mastery_level    String?
   is_need_review   Boolean?
   next_review_date String?
   ease_factor      Int?
   interval         Int?
-  created_by       String   @db.Uuid
-  created_at       DateTime @default(now())
-  updated_at       DateTime @updatedAt
-
-  creator     User        @relation(fields: [created_by], references: [id])
-  space       Space?      @relation(fields: [id_space], references: [id], onDelete: SetNull)
-  flash_cards FlashCard[]
+  created_by       String      @db.Uuid
+  created_at       DateTime    @default(now())
+  updated_at       DateTime    @updatedAt
+  flash_cards      FlashCard[]
+  creator          User        @relation(fields: [created_by], references: [id])
+  space            Space?      @relation(fields: [id_space], references: [id])
 }
 
 model FlashCard {
-  id                String   @id @default(uuid()) @db.Uuid
-  id_vocabulary     String   @db.Uuid
+  id                String     @id @default(uuid()) @db.Uuid
+  id_vocabulary     String     @db.Uuid
   familiarity_level Int
   review_date       DateTime
-  created_by        String   @db.Uuid
-  created_at        DateTime @default(now())
-  updated_at        DateTime @updatedAt
+  created_by        String     @db.Uuid
+  created_at        DateTime   @default(now())
+  updated_at        DateTime   @updatedAt
+  creator           User       @relation(fields: [created_by], references: [id])
+  vocabulary        Vocabulary @relation(fields: [id_vocabulary], references: [id], onDelete: Cascade)
+}
 
-  vocabulary Vocabulary @relation(fields: [id_vocabulary], references: [id], onDelete: Cascade)
-  creator    User       @relation(fields: [created_by], references: [id])
+enum UserRole {
+  user
+  admin
+}
+
+enum EssayStatus {
+  draft
+  public
+  private
+  deleted
+}
+
+enum AuthProvider {
+  local
+  google
+  facebook
 }

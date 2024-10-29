@@ -281,10 +281,12 @@ export const createCorrections = (userIds: string[], essayIds: string[]) =>
       sentences: {
         create: [
           {
+            index: 0,
             original_text: 'I learning English.',
             corrected_text: 'I am learning English.',
             explanation: 'Present continuous tense requires "am/is/are"',
             is_correct: false,
+            rating: 5,
           },
         ],
       },

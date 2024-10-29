@@ -10,13 +10,7 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import {
-  ApiOperation,
-  ApiParam,
-  ApiQuery,
-  ApiResponse,
-  ApiTags,
-} from '@nestjs/swagger';
+import { ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 import { AuthGuard } from 'src/common/auth/auth.guard';
 import { Roles, RolesGuard, UserRole } from 'src/common/auth/role.guard';
@@ -33,130 +27,49 @@ import { SpaceService } from 'src/models/space/space.service';
 @Controller('spaces')
 @ApiTags('spaces')
 @UseGuards(AuthGuard, RolesGuard)
-@ApiResponse({
-  status: HttpStatus.UNAUTHORIZED,
-  description: 'Unauthorized - Invalid or missing authentication token',
-})
-@ApiResponse({
-  status: HttpStatus.FORBIDDEN,
-  description: 'Forbidden - User does not have required roles',
-})
 export class SpaceController {
   constructor(private readonly spaceService: SpaceService) {}
 
   @Get()
   @Roles(UserRole.USER, UserRole.ADMIN)
-  @ApiOperation({ summary: 'Get all spaces with pagination and filters' })
-  @ApiQuery({
-    type: FindAllSpacesDto,
-    description: 'Query parameters for filtering and pagination',
-  })
-  @ApiResponse({
-    status: HttpStatus.OK,
-    description: 'Spaces retrieved successfully',
-    type: SpacesResponse,
-  })
-  @ApiResponse({
-    status: HttpStatus.BAD_REQUEST,
-    description: 'Invalid query parameters',
-  })
-  async findAll(
-    @Query() findAllSpacesDto: FindAllSpacesDto,
-  ): Promise<SpacesResponse> {
-    return this.spaceService.findAll(findAllSpacesDto);
+  @ApiResponse({ status: HttpStatus.OK, type: SpacesResponse })
+  async findAll(@Query() query: FindAllSpacesDto): Promise<SpacesResponse> {
+    return this.spaceService.findAll(query);
   }
 
   @Get(':id')
-  @Roles(UserRole.USER, UserRole.ADMIN)
-  @ApiOperation({ summary: 'Get space by ID' })
-  @ApiParam({
-    name: 'id',
-    description: 'Space ID',
-    type: String,
-    required: true,
-  })
-  @ApiResponse({
-    status: HttpStatus.OK,
-    description: 'Space found successfully',
-    type: FindOneSpaceResponseDto,
-  })
-  @ApiResponse({
-    status: HttpStatus.NOT_FOUND,
-    description: 'Space not found',
-  })
+  @Roles(UserRole.USER)
+  @ApiParam({ name: 'id', type: String })
+  @ApiResponse({ status: HttpStatus.OK, type: FindOneSpaceResponseDto })
   async findOne(@Param('id') id: string): Promise<FindOneSpaceResponseDto> {
     return this.spaceService.findOne(id);
   }
 
   @Post()
-  @Roles(UserRole.USER, UserRole.ADMIN)
-  @ApiOperation({ summary: 'Create new space' })
+  @Roles(UserRole.USER)
   @ApiResponse({
     status: HttpStatus.CREATED,
-    description: 'Space created successfully',
     type: CreateSpaceResponseDto,
   })
-  @ApiResponse({
-    status: HttpStatus.BAD_REQUEST,
-    description: 'Invalid space data',
-  })
-  @ApiResponse({
-    status: HttpStatus.CONFLICT,
-    description: 'Space with the same name already exists',
-  })
-  async create(
-    @Body() createSpaceDto: CreateSpaceDto,
-  ): Promise<CreateSpaceResponseDto> {
-    return this.spaceService.create(createSpaceDto);
+  async create(@Body() dto: CreateSpaceDto): Promise<CreateSpaceResponseDto> {
+    return this.spaceService.create(dto);
   }
 
   @Patch(':id')
-  @Roles(UserRole.USER, UserRole.ADMIN)
-  @ApiOperation({ summary: 'Update space by ID' })
-  @ApiParam({
-    name: 'id',
-    description: 'Space ID',
-    type: String,
-    required: true,
-  })
-  @ApiResponse({
-    status: HttpStatus.OK,
-    description: 'Space updated successfully',
-    type: UpdateSpaceResponseDto,
-  })
-  @ApiResponse({
-    status: HttpStatus.BAD_REQUEST,
-    description: 'Invalid update data',
-  })
-  @ApiResponse({
-    status: HttpStatus.NOT_FOUND,
-    description: 'Space not found',
-  })
+  @Roles(UserRole.USER)
+  @ApiParam({ name: 'id', type: String })
+  @ApiResponse({ status: HttpStatus.OK, type: UpdateSpaceResponseDto })
   async update(
     @Param('id') id: string,
-    @Body() updateSpaceDto: UpdateSpaceDto,
+    @Body() dto: UpdateSpaceDto,
   ): Promise<UpdateSpaceResponseDto> {
-    return this.spaceService.update(id, updateSpaceDto);
+    return this.spaceService.update(id, dto);
   }
 
   @Delete(':id')
-  @Roles(UserRole.USER, UserRole.ADMIN)
-  @ApiOperation({ summary: 'Delete space by ID' })
-  @ApiParam({
-    name: 'id',
-    description: 'Space ID',
-    type: String,
-    required: true,
-  })
-  @ApiResponse({
-    status: HttpStatus.OK,
-    description: 'Space deleted successfully',
-    type: DeleteSpaceResponseDto,
-  })
-  @ApiResponse({
-    status: HttpStatus.NOT_FOUND,
-    description: 'Space not found',
-  })
+  @Roles(UserRole.USER)
+  @ApiParam({ name: 'id', type: String })
+  @ApiResponse({ status: HttpStatus.OK, type: DeleteSpaceResponseDto })
   async delete(@Param('id') id: string): Promise<DeleteSpaceResponseDto> {
     return this.spaceService.delete(id);
   }

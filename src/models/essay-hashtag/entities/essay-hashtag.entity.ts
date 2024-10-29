@@ -1,4 +1,4 @@
-import { Field, ID, Int, ObjectType } from '@nestjs/graphql';
+import { Field, ID, ObjectType } from '@nestjs/graphql';
 import { ApiProperty } from '@nestjs/swagger';
 
 import { IEssayHashtag } from 'src/models/essay-hashtag/essay-hashtag.interface';
@@ -18,16 +18,16 @@ export class EssayHashtag implements IEssayHashtag {
   })
   id: string;
 
-  @Field(() => String, {
-    description: 'Name of the hashtag',
-  })
-  @ApiProperty({
-    example: 'technology',
-    description: 'Name of the hashtag',
-    minLength: 1,
-    maxLength: 50,
-  })
-  name: string;
+  // @Field(() => String, {
+  //   description: 'Name of the hashtag',
+  // })
+  // @ApiProperty({
+  //   example: 'technology',
+  //   description: 'Name of the hashtag',
+  //   minLength: 1,
+  //   maxLength: 50,
+  // })
+  // name: string;
 
   @Field(() => ID, {
     description: 'ID of the associated essay',
@@ -49,15 +49,15 @@ export class EssayHashtag implements IEssayHashtag {
   })
   hashtag_id: string;
 
-  @Field(() => Int, {
-    description: 'Number of times this hashtag has been used in essays',
-  })
-  @ApiProperty({
-    example: 42,
-    description: 'Number of times this hashtag has been used in essays',
-    minimum: 0,
-  })
-  usage_count: number;
+  // @Field(() => Int, {
+  //   description: 'Number of times this hashtag has been used in essays',
+  // })
+  // @ApiProperty({
+  //   example: 42,
+  //   description: 'Number of times this hashtag has been used in essays',
+  //   minimum: 0,
+  // })
+  // usage_count: number;
 
   @Field(() => Date, {
     description: 'Timestamp when the association was created',
@@ -69,15 +69,15 @@ export class EssayHashtag implements IEssayHashtag {
   })
   created_at: Date;
 
-  @Field(() => Date, {
-    description: 'Timestamp when the association was last updated',
-  })
-  @ApiProperty({
-    example: '2024-01-01T00:00:00.000Z',
-    description: 'Timestamp when the association was last updated',
-    format: 'date-time',
-  })
-  updated_at: Date;
+  // @Field(() => Date, {
+  //   description: 'Timestamp when the association was last updated',
+  // })
+  // @ApiProperty({
+  //   example: '2024-01-01T00:00:00.000Z',
+  //   description: 'Timestamp when the association was last updated',
+  //   format: 'date-time',
+  // })
+  // updated_at: Date;
 
   @Field(() => Essay, {
     nullable: true,

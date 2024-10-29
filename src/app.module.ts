@@ -9,7 +9,9 @@ import { join } from 'path';
 import { CommonModule } from 'src/common/common.module';
 import { ValidationModule } from 'src/common/decorators/validation.module';
 import { HealthModule } from 'src/common/health/health.module';
-import { RemoveFieldInterceptor } from 'src/common/interceptors/remove-field';
+import { RemoveFieldInterceptor } from 'src/common/interceptors/remove-field.interceptor';
+import { TransactionInterceptor } from 'src/common/interceptors/transaction.interceptor';
+import { CorrectionModule } from 'src/models/correction/corrrection.module';
 import { EssayModule } from 'src/models/essay/essay.module';
 import { QuizQuestionModule } from 'src/models/quiz-question/quiz-question.module';
 import { QuizModule } from 'src/models/quiz/quiz.module';
@@ -31,6 +33,7 @@ import { VocabularyModule } from 'src/models/vocabulary/vocabulary.module';
     UserModule,
     SpaceModule,
     EssayModule,
+    CorrectionModule,
     VocabularyModule,
     QuizModule,
     QuizQuestionModule,
@@ -40,6 +43,10 @@ import { VocabularyModule } from 'src/models/vocabulary/vocabulary.module';
     {
       provide: APP_INTERCEPTOR,
       useClass: RemoveFieldInterceptor,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: TransactionInterceptor,
     },
   ],
 })

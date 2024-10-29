@@ -9,6 +9,7 @@ import { CreateSpaceDto } from 'src/models/space/dto/create-space.dto';
 import { DeleteSpaceResponseDto } from 'src/models/space/dto/delete-space-response.dto';
 import { FindAllSpacesDto } from 'src/models/space/dto/find-all-spaces.dto';
 import { FindOneSpaceResponseDto } from 'src/models/space/dto/find-one-space-response.dto';
+import { GetUserSpacesDto } from 'src/models/space/dto/get-user-space.dto';
 import { SpacesResponse } from 'src/models/space/dto/spaces-response.dto';
 import { UpdateSpaceResponseDto } from 'src/models/space/dto/update-space-response.dto';
 import { UpdateSpaceDto } from 'src/models/space/dto/update-space.dto';
@@ -159,5 +160,61 @@ export class SpaceService {
     return {
       space,
     };
+  }
+
+  //for graphql
+  async findUserSpaces(input: GetUserSpacesDto): Promise<SpacesResponse> {
+    const { userId, page, perPage, search } = input;
+    const isPaginated = page !== undefined && perPage !== undefined;
+
+    let where: Prisma.SpaceWhereInput = {
+      created_by: userId,
+    };
+
+    if (search) {
+      where = {
+        ...where,
+        OR: [{ name: { contains: search, mode: 'insensitive' } }],
+      };
+    }
+
+    const queryOptions: Prisma.SpaceFindManyArgs = {
+      where,
+      orderBy: { created_at: 'desc' },
+      include: {
+        _count: {
+          select: {
+            essays: true,
+            vocabularies: true,
+            quizzes: true,
+          },
+        },
+      },
+    };
+
+    // Add pagination options if both page and perPage are provided
+    if (isPaginated) {
+      queryOptions.skip = (page! - 1) * perPage!;
+      queryOptions.take = perPage;
+    }
+
+    const [spaces, totalItems] = await Promise.all([
+      this.prisma.space.findMany(queryOptions),
+      this.prisma.space.count({ where }),
+    ]);
+
+    const response: SpacesResponse = {
+      data: spaces,
+    };
+
+    // Only include pagination info if pagination parameters were provided
+    if (isPaginated) {
+      response.pagination = calculatePagination(totalItems, {
+        page: page!,
+        perPage: perPage!,
+      });
+    }
+
+    return response;
   }
 }

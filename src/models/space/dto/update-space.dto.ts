@@ -1,29 +1,15 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiPropertyOptional } from '@nestjs/swagger';
 
-import { IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsOptional, IsString } from 'class-validator';
 
 export class UpdateSpaceDto {
-  @ApiProperty()
+  @ApiPropertyOptional()
   @IsString()
-  name: string;
+  @IsOptional()
+  name?: string;
 
-  @ApiProperty()
+  @ApiPropertyOptional()
   @IsOptional()
   @IsString()
   description?: string;
-
-  @ApiProperty()
-  @IsNumber()
-  @IsOptional()
-  essay_number?: number;
-
-  @ApiProperty()
-  @IsNumber()
-  @IsOptional()
-  quiz_number?: number;
-
-  @ApiProperty()
-  @IsNumber()
-  @IsOptional()
-  vocab_number?: number;
 }

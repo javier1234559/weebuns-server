@@ -7,52 +7,43 @@ import { Correction } from 'src/models/correction/entities/correction.entity';
 @ObjectType()
 export class CorrectionSentence implements ICorrectionSentence {
   @Field(() => ID)
-  @ApiProperty({ example: '123e4567-e89b-12d3-a456-426614174000' })
+  @ApiProperty({ example: 'uuid' })
   id: string;
 
   @Field()
-  @ApiProperty({ example: '123e4567-e89b-12d3-a456-426614174001' })
+  @ApiProperty({ example: 'uuid' })
   id_correction: string;
 
   @Field()
-  @ApiProperty({ example: 'The original text with potential errors.' })
-  original_text: string;
-
-  @Field(() => String, { nullable: true })
-  @ApiProperty({
-    example: 'The corrected text with fixes.',
-    nullable: true,
-  })
-  corrected_text: string | null;
-
-  @Field(() => String, { nullable: true })
-  @ApiProperty({
-    example: 'Explanation of the corrections made.',
-    nullable: true,
-  })
-  explanation: string | null;
+  @ApiProperty({ example: 0 })
+  index: number;
 
   @Field()
-  @ApiProperty({
-    example: true,
-    description: 'Indicates if the original text is correct',
-  })
+  @ApiProperty({ example: 'Original text' })
+  original_text: string;
+
+  @Field(() => String)
+  @ApiProperty({ example: 'Corrected text' })
+  corrected_text: string;
+
+  @Field(() => String)
+  @ApiProperty({ example: 'Explanation of corrections' })
+  explanation: string;
+
+  @Field()
+  @ApiProperty({ example: false })
   is_correct: boolean;
 
-  @Field(() => Number, { nullable: true })
-  @ApiProperty({
-    example: 4.5,
-    nullable: true,
-    description: 'Rating score for the correction',
-  })
-  rating: number | null;
+  @Field(() => Number)
+  @ApiProperty({ example: 4 })
+  rating: number;
 
   @Field(() => Date)
-  @ApiProperty()
+  @ApiProperty({ example: '2024-01-01T00:00:00Z' })
   created_at: Date;
 
   @Field(() => Date)
-  @ApiProperty()
+  @ApiProperty({ example: '2024-01-01T00:00:00Z' })
   updated_at: Date;
 
   @Field(() => Correction, { nullable: true })

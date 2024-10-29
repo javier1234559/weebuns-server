@@ -1,11 +1,9 @@
 import { Essay as PrismaEssay } from '@prisma/client';
 
-import { Hashtag } from 'src/models/hashtag/entities/hashtag.entity';
+import { EssayHashtag } from 'src/models/essay-hashtag/entities/essay-hashtag.entity';
 
 export interface IEssay extends PrismaEssay {
-  hashtags?: {
-    hashtag: Hashtag;
-  }[];
+  hashtags?: EssayHashtag[];
 
   _count?: {
     hashtags: number;
