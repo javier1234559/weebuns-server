@@ -23,11 +23,6 @@ export class CreateCorrectionDto {
   @IsUUID()
   essay_id: string;
 
-  @Field()
-  @ApiProperty({ example: 'uuid' })
-  @IsUUID()
-  created_by: string;
-
   @Field({ nullable: true })
   @ApiProperty({ example: 'Overall comment', nullable: true })
   @IsString()

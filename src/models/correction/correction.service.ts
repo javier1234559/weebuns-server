@@ -11,15 +11,28 @@ import { calculatePagination } from 'src/common/utils/pagination';
 import { CorrectionResponseAllDto } from 'src/models/correction/dto/correction-all-response.dto copy';
 import { CorrectionResponseOneDto } from 'src/models/correction/dto/correction-one-response.dto';
 import { CreateCorrectionDto } from 'src/models/correction/dto/create-correction.dto';
-import { GetCorrectionsByEssay } from 'src/models/correction/dto/get-correction-by-essay.dto';
+import { GetCorrectionsByEssayDto } from 'src/models/correction/dto/get-correction-by-essay.dto';
 import { UpdateCorrectionDto } from 'src/models/correction/dto/update-correction.dto';
 
 @Injectable()
 export class CorrectionService {
   constructor(private readonly prisma: PrismaService) {}
 
+  async getByUserId(
+    userId: string,
+    essayId: string,
+  ): Promise<CorrectionResponseOneDto> {
+    const correction = await this.prisma.correction.findFirst({
+      where: {
+        essay_id: essayId,
+        created_by: userId,
+      },
+    });
+    return correction;
+  }
+
   async getAllByEssay(
-    input: GetCorrectionsByEssay,
+    input: GetCorrectionsByEssayDto,
   ): Promise<CorrectionResponseAllDto> {
     const { essayId, page, perPage, search } = input;
     const isPaginated = page !== undefined && perPage !== undefined;
@@ -83,41 +96,40 @@ export class CorrectionService {
   }
 
   async create(
+    tx: Prisma.TransactionClient,
+    userId: string,
     createCorrectionDto: CreateCorrectionDto,
   ): Promise<CorrectionResponseOneDto> {
-    // Use transaction to ensure atomic operation
-    const correction = await this.prisma.$transaction(async (tx) => {
-      // First create the correction
-      const newCorrection = await tx.correction.create({
-        data: {
-          essay_id: createCorrectionDto.essay_id,
-          created_by: createCorrectionDto.created_by,
-          overall_comment: createCorrectionDto.overall_comment,
-          rating: createCorrectionDto.rating,
-        },
-      });
+    // First create the correction
+    const newCorrection = await tx.correction.create({
+      data: {
+        essay_id: createCorrectionDto.essay_id,
+        created_by: userId,
+        overall_comment: createCorrectionDto.overall_comment,
+        rating: createCorrectionDto.rating,
+      },
+    });
 
-      // Then create all correction sentences
-      await tx.correctionSentence.createMany({
-        data: createCorrectionDto.sentences.map((sentence) => ({
-          id_correction: newCorrection.id,
-          index: sentence.index,
-          original_text: sentence.original_text,
-          corrected_text: sentence.corrected_text,
-          explanation: sentence.explanation,
-          is_correct: sentence.is_correct,
-          rating: sentence.rating,
-        })),
-      });
+    // Then create all correction sentences
+    await tx.correctionSentence.createMany({
+      data: createCorrectionDto.sentences.map((sentence) => ({
+        id_correction: newCorrection.id,
+        index: sentence.index,
+        original_text: sentence.original_text,
+        corrected_text: sentence.corrected_text,
+        explanation: sentence.explanation,
+        is_correct: sentence.is_correct,
+        rating: sentence.rating,
+      })),
+    });
 
-      // Return the complete correction with its sentences
-      return tx.correction.findUnique({
-        where: { id: newCorrection.id },
-        include: {
-          creator: true,
-          sentences: true,
-        },
-      });
+    // Return the complete correction with its sentences
+    const correction = tx.correction.findUnique({
+      where: { id: newCorrection.id },
+      include: {
+        creator: true,
+        sentences: true,
+      },
     });
 
     return correction;
@@ -125,13 +137,11 @@ export class CorrectionService {
 
   async update(
     tx: Prisma.TransactionClient,
+    userId: string,
     updateCorrectionDto: UpdateCorrectionDto,
   ): Promise<CorrectionResponseOneDto> {
     // Step 1: Validate ownership
-    await this.validateCorrectionOwnership(
-      updateCorrectionDto.id,
-      updateCorrectionDto.userId,
-    );
+    await this.validateCorrectionOwnership(updateCorrectionDto.id, userId);
 
     // Step 2: Update main correction record
     await tx.correction.update({

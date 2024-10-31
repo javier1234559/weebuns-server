@@ -4,4 +4,7 @@
     "source.fixAll.eslint": "always"
   },
   "files.eol": "\n",
+  "conventionalCommits.scopes": [
+    "deploy"
+  ],
 }

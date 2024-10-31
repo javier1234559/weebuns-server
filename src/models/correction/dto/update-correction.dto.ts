@@ -20,11 +20,6 @@ export class UpdateCorrectionDto {
   @IsUUID()
   id: string;
 
-  @Field()
-  @ApiProperty({ example: 'uuid' })
-  @IsUUID()
-  userId: string;
-
   @Field({ nullable: true })
   @ApiProperty({ example: 'Overall comment', nullable: true })
   @IsString()

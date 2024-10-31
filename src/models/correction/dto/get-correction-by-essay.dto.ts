@@ -6,7 +6,7 @@ import { IsOptional, IsString, IsUUID } from 'class-validator';
 import { PaginationInputDto } from 'src/common/dto/pagination.dto';
 
 @InputType()
-export class GetCorrectionsByEssay extends PaginationInputDto {
+export class GetCorrectionsByEssayDto extends PaginationInputDto {
   @ApiProperty()
   @Field()
   @IsString()

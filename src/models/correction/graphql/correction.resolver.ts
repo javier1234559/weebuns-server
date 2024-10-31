@@ -5,13 +5,15 @@ import { Prisma } from '@prisma/client';
 
 import { AuthGuard } from 'src/common/auth/auth.guard';
 import { Roles, RolesGuard, UserRole } from 'src/common/auth/role.guard';
+import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { TransactionClient } from 'src/common/decorators/transaction-client.decorator';
 import { UseTransaction } from 'src/common/interceptors/transaction.interceptor';
+import { IAuthPayload } from 'src/common/interface/auth-payload.interface';
 import { CorrectionService } from 'src/models/correction/correction.service';
 import { CorrectionResponseAllDto } from 'src/models/correction/dto/correction-all-response.dto copy';
 import { CorrectionResponseOneDto } from 'src/models/correction/dto/correction-one-response.dto';
 import { CreateCorrectionDto } from 'src/models/correction/dto/create-correction.dto';
-import { GetCorrectionsByEssay } from 'src/models/correction/dto/get-correction-by-essay.dto';
+import { GetCorrectionsByEssayDto } from 'src/models/correction/dto/get-correction-by-essay.dto';
 import { UpdateCorrectionDto } from 'src/models/correction/dto/update-correction.dto';
 import { Correction } from 'src/models/correction/entities/correction.entity';
 
@@ -23,15 +25,32 @@ export class CorrectionResolver {
   @Roles(UserRole.USER)
   @Query(() => CorrectionResponseAllDto)
   async getCorrectionsByEssay(
-    @Args('input') input: GetCorrectionsByEssay,
+    @Args('input') input: GetCorrectionsByEssayDto,
   ): Promise<CorrectionResponseAllDto> {
     return this.correctService.getAllByEssay(input);
   }
 
   @Roles(UserRole.USER)
+  @Query(() => CorrectionResponseOneDto, { nullable: true })
+  async getCorrectionIfExist(
+    @CurrentUser() currentUser: IAuthPayload,
+    @Args('essayId') essayId: string,
+  ): Promise<CorrectionResponseOneDto> {
+    return this.correctService.getByUserId(String(currentUser.sub), essayId);
+  }
+
+  @Roles(UserRole.USER)
   @Mutation(() => CorrectionResponseOneDto)
-  async createCorrectionEssay(@Args('input') input: CreateCorrectionDto) {
-    return this.correctService.create(input);
+  async createCorrectionEssay(
+    @TransactionClient() transaction: Prisma.TransactionClient,
+    @CurrentUser() currentUser: IAuthPayload,
+    @Args('input') input: CreateCorrectionDto,
+  ) {
+    return this.correctService.create(
+      transaction,
+      String(currentUser.sub),
+      input,
+    );
   }
 
   @Roles(UserRole.USER)
@@ -39,8 +58,13 @@ export class CorrectionResolver {
   @Mutation(() => CorrectionResponseOneDto)
   async updateCorrectionEssay(
     @TransactionClient() transaction: Prisma.TransactionClient,
+    @CurrentUser() currentUser: IAuthPayload,
     @Args('input') input: UpdateCorrectionDto,
   ) {
-    return this.correctService.update(transaction, input);
+    return this.correctService.update(
+      transaction,
+      String(currentUser.sub),
+      input,
+    );
   }
 }

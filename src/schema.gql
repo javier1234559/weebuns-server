@@ -216,7 +216,8 @@ type Query {
   users(findAllUsersDto: FindAllUsersDto!): UsersResponse!
   user(id: String!): User!
   getUserSpaces(input: GetUserSpacesDto!): SpacesResponse!
-  getCorrectionsByEssay(input: GetCorrectionsByEssay!): CorrectionResponseAllDto!
+  getCorrectionsByEssay(input: GetCorrectionsByEssayDto!): CorrectionResponseAllDto!
+  getCorrectionIfExist(essayId: String!): CorrectionResponseOneDto
 }
 
 input FindAllUsersDto {
@@ -232,7 +233,7 @@ input GetUserSpacesDto {
   search: String
 }
 
-input GetCorrectionsByEssay {
+input GetCorrectionsByEssayDto {
   page: Int! = 1
   perPage: Int! = 10
   essayId: String!
@@ -264,7 +265,6 @@ input UpdateUserDto {
 
 input CreateCorrectionDto {
   essay_id: String!
-  created_by: String!
   overall_comment: String
   rating: Float
   sentences: [CreateCorrectionSentenceDto!]!
@@ -281,7 +281,6 @@ input CreateCorrectionSentenceDto {
 
 input UpdateCorrectionDto {
   id: String!
-  userId: String!
   overall_comment: String
   rating: Float
   sentences: [UpdateCorrectionSentenceDto!]!
