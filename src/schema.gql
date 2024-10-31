@@ -193,7 +193,7 @@ type CorrectionResponseOneDto {
   rating: Float
   created_at: DateTime!
   updated_at: DateTime!
-  creator: User!
+  creator: User
   sentences: [CorrectionSentence!]
 }
 

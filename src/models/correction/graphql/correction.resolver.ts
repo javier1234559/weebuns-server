@@ -40,6 +40,7 @@ export class CorrectionResolver {
   }
 
   @Roles(UserRole.USER)
+  @UseTransaction()
   @Mutation(() => CorrectionResponseOneDto)
   async createCorrectionEssay(
     @TransactionClient() transaction: Prisma.TransactionClient,

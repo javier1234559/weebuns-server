@@ -5,6 +5,7 @@
   },
   "files.eol": "\n",
   "conventionalCommits.scopes": [
-    "deploy"
+    "deploy",
+    "logic"
   ],
 }

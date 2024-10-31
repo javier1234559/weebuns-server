@@ -27,6 +27,9 @@ export class CorrectionService {
         essay_id: essayId,
         created_by: userId,
       },
+      include: {
+        sentences: true,
+      },
     });
     return correction;
   }

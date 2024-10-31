@@ -40,8 +40,8 @@ export class CorrectionResponseOneDto {
   @ApiProperty({ example: '2024-01-01T00:00:00Z' })
   updated_at: Date;
 
-  @Field(() => User)
-  @ApiProperty({ type: User })
+  @Field(() => User, { nullable: true })
+  @ApiProperty({ type: User, nullable: true })
   creator?: User;
 
   @Field(() => [CorrectionSentence], { nullable: true })
