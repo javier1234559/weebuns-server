@@ -89,28 +89,12 @@ type Hashtag {
   essays: [EssayHashtag!]
 }
 
-"""Association between essays and hashtags"""
 type EssayHashtag {
-  """Unique identifier for the essay-hashtag association"""
   id: ID!
-
-  """ID of the associated essay"""
   essay_id: ID!
-
-  """ID of the associated hashtag"""
   hashtag_id: ID!
-
-  """Timestamp when the association was created"""
   created_at: DateTime!
-
-  """
-  The associated essay details. Only populated when explicitly requested.
-  """
   essay: Essay
-
-  """
-  The associated hashtag details. Only populated when explicitly requested.
-  """
   hashtag: Hashtag
 }
 

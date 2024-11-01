@@ -14,7 +14,10 @@ import { Response } from 'express';
 
 import { IAuthPayload } from 'src/common/interface/auth-payload.interface';
 import { PrismaService } from 'src/common/prisma/prisma.service';
-import config from 'src/config';
+import config, {
+  MAX_ACCESS_TOKEN_AGE,
+  MAX_REFRESH_TOKEN_AGE,
+} from 'src/config';
 import {
   LogoutResponse,
   UserLoginResponse,
@@ -41,11 +44,11 @@ export class AuthService {
     };
     const accessToken = this.jwtService.sign(payload, {
       secret: config.jwt.jwtAccessSecret,
-      expiresIn: '1d', // 15 minutes
+      expiresIn: MAX_ACCESS_TOKEN_AGE,
     });
     const refreshToken = this.jwtService.sign(payload, {
       secret: config.jwt.jwtRefreshSecret,
-      expiresIn: '7d', // 7 days
+      expiresIn: MAX_REFRESH_TOKEN_AGE,
     });
     return { accessToken, refreshToken };
   }

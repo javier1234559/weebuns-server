@@ -6,6 +6,7 @@ import { ValidationModule } from 'src/common/decorators/validation.module';
 // import { ValidationModule } from 'src/common/decorators/validation.module';
 import { LoggerMiddleware } from 'src/common/logger/logger.middleware';
 import { PrismaModule } from 'src/common/prisma/prisma.module';
+import { UploadModule } from 'src/common/upload/upload.module';
 import config, { MAX_AGE } from 'src/config';
 
 @Global()
@@ -22,6 +23,7 @@ import config, { MAX_AGE } from 'src/config';
       signOptions: { expiresIn: MAX_AGE },
     }),
     ValidationModule,
+    UploadModule,
   ],
   exports: [ConfigModule, ValidationModule],
 })

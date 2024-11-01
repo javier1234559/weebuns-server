@@ -13,14 +13,12 @@ export class Hashtag implements IHashtag {
   @Field()
   @ApiProperty({
     example: 'grammar',
-    description: 'Name of the hashtag without # symbol',
   })
   name: string;
 
   @Field(() => Int)
   @ApiProperty({
     example: 42,
-    description: 'Number of times this hashtag has been used',
     minimum: 0,
   })
   usage_count: number;
@@ -28,14 +26,12 @@ export class Hashtag implements IHashtag {
   @Field(() => Date)
   @ApiProperty({
     example: '2024-01-01T00:00:00Z',
-    description: 'When the hashtag was created',
   })
   created_at: Date;
 
   @Field(() => Date)
   @ApiProperty({
     example: '2024-01-01T00:00:00Z',
-    description: 'When the hashtag was last updated',
   })
   updated_at: Date;
 
@@ -43,7 +39,6 @@ export class Hashtag implements IHashtag {
   @ApiProperty({
     type: () => [EssayHashtag],
     nullable: true,
-    description: 'Essays associated with this hashtag',
   })
   essays?: EssayHashtag[];
 }

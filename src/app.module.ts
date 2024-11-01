@@ -23,7 +23,6 @@ import { VocabularyModule } from 'src/models/vocabulary/vocabulary.module';
   imports: [
     CommonModule,
     ValidationModule,
-
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
       autoSchemaFile: join(process.cwd(), 'src/schema.gql'),

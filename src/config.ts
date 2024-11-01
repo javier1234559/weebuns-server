@@ -5,6 +5,8 @@ import { logger } from 'src/common/utils/logger';
 dotenvConfig();
 
 export const MAX_AGE = '3d';
+export const MAX_ACCESS_TOKEN_AGE = '3d';
+export const MAX_REFRESH_TOKEN_AGE = '7d';
 
 const config = {
   mode: process.env.NODE_ENV,
@@ -29,6 +31,7 @@ const config = {
   // Google OAuth configuration
   googleClientID: process.env.GOOGLE_AUTH_CLIENT_ID,
   googleClientSecret: process.env.GOOGLE_AUTH_CLIENT_SECRET,
+  upload_token: process.env.UPLOAD_TOKEN,
 };
 
 logger.info('Configuration loaded:', config);

@@ -9,8 +9,6 @@ import { ExistEntity } from 'src/common/decorators/exist-entity.decorator';
 export class CreateEssayDto {
   @ApiProperty({
     example: 'My Journey Learning English',
-    minLength: 1,
-    maxLength: 255,
   })
   title: string;
 
@@ -22,7 +20,6 @@ export class CreateEssayDto {
   @ApiProperty({
     example:
       'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua...',
-    minLength: 1,
   })
   content: string;
 
@@ -54,14 +51,12 @@ export class CreateEssayDto {
   // })
   @ApiProperty({
     example: '123e4567-e89b-12d3-a456-426614174000',
-    format: 'uuid',
   })
   spaceId: string;
 
   @ExistEntity('user')
   @ApiProperty({
     example: '123e4567-e89b-12d3-a456-426614174000',
-    format: 'uuid',
   })
   created_by: string;
 
