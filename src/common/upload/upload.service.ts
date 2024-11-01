@@ -32,6 +32,34 @@ export class UploadService {
     }
   }
 
+  async uploadMany(files: Express.Multer.File[]): Promise<UploadFileResult[]> {
+    try {
+      if (!files?.length) {
+        throw new BadRequestException('No files provided');
+      }
+
+      // Process files one by one to ensure proper upload
+      const uploadPromises = files.map(async (file) => {
+        const fileObject = new File([file.buffer], file.originalname, {
+          type: file.mimetype,
+        });
+
+        return this.utapi.uploadFiles(fileObject) as Promise<UploadFileResult>;
+      });
+
+      const uploadResponses = await Promise.all(uploadPromises);
+
+      console.log(
+        'Upload responses:',
+        JSON.stringify(uploadResponses, null, 2),
+      );
+      return uploadResponses;
+    } catch (error) {
+      console.error('Upload error:', error);
+      throw new BadRequestException(error.message || 'Failed to upload files');
+    }
+  }
+
   async deleteFile(fileKey: string) {
     try {
       await this.utapi.deleteFiles(fileKey);
