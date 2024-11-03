@@ -29,14 +29,12 @@ import { SpaceService } from 'src/models/space/space.service';
 @UseGuards(AuthGuard, RolesGuard)
 export class SpaceController {
   constructor(private readonly spaceService: SpaceService) {}
-
   @Get()
   @Roles(UserRole.USER, UserRole.ADMIN)
   @ApiResponse({ status: HttpStatus.OK, type: SpacesResponse })
   async findAll(@Query() query: FindAllSpacesDto): Promise<SpacesResponse> {
     return this.spaceService.findAll(query);
   }
-
   @Get(':id')
   @Roles(UserRole.USER)
   @ApiParam({ name: 'id', type: String })
@@ -44,7 +42,6 @@ export class SpaceController {
   async findOne(@Param('id') id: string): Promise<FindOneSpaceResponseDto> {
     return this.spaceService.findOne(id);
   }
-
   @Post()
   @Roles(UserRole.USER)
   @ApiResponse({
@@ -54,7 +51,6 @@ export class SpaceController {
   async create(@Body() dto: CreateSpaceDto): Promise<CreateSpaceResponseDto> {
     return this.spaceService.create(dto);
   }
-
   @Patch(':id')
   @Roles(UserRole.USER)
   @ApiParam({ name: 'id', type: String })
@@ -65,7 +61,6 @@ export class SpaceController {
   ): Promise<UpdateSpaceResponseDto> {
     return this.spaceService.update(id, dto);
   }
-
   @Delete(':id')
   @Roles(UserRole.USER)
   @ApiParam({ name: 'id', type: String })

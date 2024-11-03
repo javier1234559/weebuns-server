@@ -2,7 +2,9 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 
 import { Prisma } from '@prisma/client';
 
+import { IAuthPayload } from 'src/common/interface/auth-payload.interface';
 import { PrismaService } from 'src/common/prisma/prisma.service';
+import { logger } from 'src/common/utils/logger';
 import { calculatePagination } from 'src/common/utils/pagination';
 import { CreateEssayResponseDto } from 'src/models/essay/dto/create-essay-response.dto';
 import { CreateEssayDto } from 'src/models/essay/dto/create-essay.dto';
@@ -12,10 +14,14 @@ import { FindAllEssaysDto } from 'src/models/essay/dto/find-all-essay.dto';
 import { FindOneEssayResponseDto } from 'src/models/essay/dto/find-one-essay-reponse.dto';
 import { UpdateEssayDto } from 'src/models/essay/dto/update-essay.dto';
 import { UpdateEssayResponseDto } from 'src/models/essay/dto/update-space-response.dto';
+import { HashtagService } from 'src/models/hashtag/hashtag.service';
 
 @Injectable()
 export class EssayService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly hashTagService: HashtagService,
+  ) {}
 
   private readonly defaultInclude = {
     author: true,
@@ -29,32 +35,81 @@ export class EssayService {
     },
   } as const;
 
-  async create(
-    createEssayDto: CreateEssayDto,
-  ): Promise<CreateEssayResponseDto> {
-    const { created_by, spaceId, hashtag_ids, ...data } = createEssayDto;
+  async findAllByUser(
+    query: FindAllEssaysDto,
+    user: IAuthPayload,
+  ): Promise<EssaysResponse> {
+    const { page, perPage, search, status } = query;
+    const skip = (page - 1) * perPage || 0;
 
-    const essay = await this.prisma.essay.create({
+    let where: Prisma.EssayWhereInput = {
+      created_by: String(user.sub), // Use user ID from auth token
+    };
+
+    if (search) {
+      where = {
+        ...where,
+        OR: [{ title: { contains: search, mode: 'insensitive' } }],
+      };
+    }
+
+    if (status) {
+      where = {
+        ...where,
+        status,
+      };
+    }
+
+    const [essays, totalItems] = await Promise.all([
+      this.prisma.essay.findMany({
+        where,
+        skip,
+        take: perPage,
+        orderBy: { created_at: 'desc' },
+        include: this.defaultInclude,
+      }),
+      this.prisma.essay.count({ where }),
+    ]);
+
+    const pagination = calculatePagination(totalItems, query);
+
+    return {
+      data: essays,
+      pagination,
+    };
+  }
+
+  async create(
+    tx: Prisma.TransactionClient,
+    createEssayDto: CreateEssayDto,
+    user: IAuthPayload,
+  ): Promise<CreateEssayResponseDto> {
+    const { spaceId, hashtag_names, ...data } = createEssayDto;
+    logger.info('hashtagIds', hashtag_names);
+
+    const hashtagIds = hashtag_names?.length
+      ? await this.hashTagService.findOrCreateHashtags(hashtag_names)
+      : [];
+
+    logger.info('hashtagIds', hashtagIds);
+
+    const essay = await tx.essay.create({
       data: {
         ...data,
         author: {
-          connect: { id: created_by },
+          connect: { id: String(user.sub) },
         },
         space: {
           connect: { id: spaceId },
         },
-        // Create hashtag connections if hashtag_ids exist
-        ...(hashtag_ids?.length && {
-          hashtags: {
-            create: hashtag_ids.map((hashtag_id) => ({
-              hashtag: {
-                connect: { id: hashtag_id },
-              },
-            })),
-          },
-        }),
+        hashtags: {
+          create: hashtagIds.map((hashtagId) => ({
+            hashtag: {
+              connect: { id: hashtagId },
+            },
+          })),
+        },
       },
-      // Include related data in response
       include: this.defaultInclude,
     });
 
@@ -74,7 +129,7 @@ export class EssayService {
   }
 
   async findAll(findAllEssaysDto: FindAllEssaysDto): Promise<EssaysResponse> {
-    const { page, perPage, search } = findAllEssaysDto;
+    const { page, perPage, search, status } = findAllEssaysDto;
     const skip = (page - 1) * perPage || 0;
 
     let where: Prisma.EssayWhereInput = {};
@@ -82,6 +137,13 @@ export class EssayService {
     if (search) {
       where = {
         OR: [{ title: { contains: search, mode: 'insensitive' } }],
+      };
+    }
+    console.log(status);
+    if (status) {
+      where = {
+        ...where,
+        status,
       };
     }
 
@@ -122,32 +184,48 @@ export class EssayService {
   }
 
   async update(
+    tx: Prisma.TransactionClient,
     id: string,
     updateEssayDto: UpdateEssayDto,
+    user: IAuthPayload,
   ): Promise<UpdateEssayResponseDto> {
-    const { hashtag_ids, ...updateData } = updateEssayDto;
+    // First check if the essay belongs to the user
+    const existingEssay = await tx.essay.findFirst({
+      where: {
+        id,
+        created_by: String(user.sub),
+      },
+    });
 
-    const essay = await this.prisma.essay.update({
+    if (!existingEssay) {
+      throw new NotFoundException(
+        `Essay with ID ${id} not found or you don't have permission to update it`,
+      );
+    }
+
+    const { hashtag_names, ...updateData } = updateEssayDto;
+
+    const hashtagIds = hashtag_names?.length
+      ? await this.hashTagService.findOrCreateHashtags(hashtag_names)
+      : null;
+
+    const essay = await tx.essay.update({
       where: { id },
-      // Create hashtag connections if hashtag_ids exist
       data: {
         ...updateData,
-        ...(hashtag_ids?.length && {
+        ...(hashtagIds && {
           hashtags: {
-            deleteMany: {}, // Remove existing connections
-            create: hashtag_ids?.map((hashtag_id) => ({
+            deleteMany: {},
+            create: hashtagIds.map((hashtagId) => ({
               hashtag: {
-                connect: { id: hashtag_id },
+                connect: { id: hashtagId },
               },
             })),
           },
         }),
       },
+      include: this.defaultInclude,
     });
-
-    if (!essay) {
-      throw new NotFoundException(`Essay with ID ${id} not found`);
-    }
 
     return {
       essay,

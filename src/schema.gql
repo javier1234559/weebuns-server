@@ -80,13 +80,17 @@ type Correction {
   replies: [CorrectionReply!]
 }
 
+type HashtagCount {
+  essays: Float!
+}
+
 type Hashtag {
   id: ID!
   name: String!
-  usage_count: Int!
   created_at: DateTime!
   updated_at: DateTime!
   essays: [EssayHashtag!]
+  _count: HashtagCount
 }
 
 type EssayHashtag {

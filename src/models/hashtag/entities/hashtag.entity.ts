@@ -1,8 +1,17 @@
-import { Field, ID, Int, ObjectType } from '@nestjs/graphql';
+import { Field, ID, ObjectType } from '@nestjs/graphql';
 import { ApiProperty } from '@nestjs/swagger';
 
 import { EssayHashtag } from '../../essay-hashtag/entities/essay-hashtag.entity';
 import { IHashtag } from '../hashtag.interface';
+
+@ObjectType()
+export class HashtagCount {
+  @Field(() => Number)
+  @ApiProperty({
+    example: 5,
+  })
+  essays: number;
+}
 
 @ObjectType()
 export class Hashtag implements IHashtag {
@@ -15,13 +24,6 @@ export class Hashtag implements IHashtag {
     example: 'grammar',
   })
   name: string;
-
-  @Field(() => Int)
-  @ApiProperty({
-    example: 42,
-    minimum: 0,
-  })
-  usage_count: number;
 
   @Field(() => Date)
   @ApiProperty({
@@ -41,4 +43,11 @@ export class Hashtag implements IHashtag {
     nullable: true,
   })
   essays?: EssayHashtag[];
+
+  @Field(() => HashtagCount, { nullable: true })
+  @ApiProperty({
+    type: HashtagCount,
+    nullable: true,
+  })
+  _count?: HashtagCount;
 }

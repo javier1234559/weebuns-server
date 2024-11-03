@@ -2,6 +2,7 @@ import { Global, MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 
+import { CacheModule } from 'src/common/cache/cache.module';
 import { ValidationModule } from 'src/common/decorators/validation.module';
 // import { ValidationModule } from 'src/common/decorators/validation.module';
 import { LoggerMiddleware } from 'src/common/logger/logger.middleware';
@@ -16,6 +17,7 @@ import config, { MAX_AGE } from 'src/config';
       isGlobal: true,
       load: [() => config],
     }),
+    CacheModule,
     PrismaModule,
     JwtModule.register({
       global: true,

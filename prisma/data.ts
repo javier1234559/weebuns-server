@@ -180,19 +180,15 @@ export const createUserLanguages = (userIds: string[]) =>
 export const hashtags: Prisma.HashtagCreateInput[] = [
   {
     name: 'english',
-    usage_count: 1,
   },
   {
     name: 'grammar',
-    usage_count: 1,
   },
   {
     name: 'japanese',
-    usage_count: 1,
   },
   {
     name: 'learning',
-    usage_count: 2,
   },
 ];
 

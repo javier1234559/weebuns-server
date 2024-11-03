@@ -3,7 +3,6 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { EssayStatus } from '@prisma/client';
 import { IsOptional } from 'class-validator';
 
-import { ExistEntities } from 'src/common/decorators/exist-entities.decorator';
 import { ExistEntity } from 'src/common/decorators/exist-entity.decorator';
 
 export class CreateEssayDto {
@@ -54,14 +53,7 @@ export class CreateEssayDto {
   })
   spaceId: string;
 
-  @ExistEntity('user')
-  @ApiProperty({
-    example: '123e4567-e89b-12d3-a456-426614174000',
-  })
-  created_by: string;
-
   @IsOptional()
-  @ExistEntities('hashtag')
   @ApiPropertyOptional({
     example: [
       '123e4567-e89b-12d3-a456-426614174000',
@@ -72,5 +64,5 @@ export class CreateEssayDto {
     isArray: true,
     required: false,
   })
-  hashtag_ids?: string[];
+  hashtag_names?: string[];
 }

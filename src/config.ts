@@ -31,7 +31,8 @@ const config = {
   // Google OAuth configuration
   googleClientID: process.env.GOOGLE_AUTH_CLIENT_ID,
   googleClientSecret: process.env.GOOGLE_AUTH_CLIENT_SECRET,
-  upload_token: process.env.UPLOAD_TOKEN,
+  upload_token: process.env.UPLOADTHING_TOKEN,
+  cache: process.env.UPSTASH_REDIS_REST_URL,
 };
 
 logger.info('Configuration loaded:', config);

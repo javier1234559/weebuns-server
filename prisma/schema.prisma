@@ -89,12 +89,11 @@ model Essay {
 }
 
 model Hashtag {
-  id          String         @id @default(uuid()) @db.Uuid
-  name        String         @unique
-  usage_count Int            @default(0)
-  created_at  DateTime       @default(now())
-  updated_at  DateTime       @updatedAt
-  essays      EssayHashtag[]
+  id         String         @id @default(uuid()) @db.Uuid
+  name       String         @unique
+  created_at DateTime       @default(now())
+  updated_at DateTime       @updatedAt
+  essays     EssayHashtag[]
 }
 
 model EssayHashtag {

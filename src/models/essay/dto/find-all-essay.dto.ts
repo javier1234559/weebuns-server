@@ -1,7 +1,8 @@
 import { Field, InputType } from '@nestjs/graphql';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 
-import { IsOptional, IsString } from 'class-validator';
+import { EssayStatus } from '@prisma/client';
+import { IsEnum, IsOptional, IsString } from 'class-validator';
 
 import { PaginationInputDto } from 'src/common/dto/pagination.dto';
 
@@ -12,4 +13,9 @@ export class FindAllEssaysDto extends PaginationInputDto {
   @IsOptional()
   @IsString()
   search?: string;
+
+  @ApiPropertyOptional({ enum: EssayStatus, example: EssayStatus.public })
+  @IsOptional()
+  @IsEnum(EssayStatus)
+  status?: EssayStatus;
 }
