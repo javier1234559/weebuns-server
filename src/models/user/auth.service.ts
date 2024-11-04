@@ -218,8 +218,8 @@ export class AuthService {
       if (error instanceof BadRequestException) {
         throw error; // Re-throw BadRequestException
       }
-      console.error('Error during Google login:', error);
-      throw new UnauthorizedException('Google authentication failed');
+      console.error('Error during Facebook login:', error);
+      throw new UnauthorizedException('Facebook authentication failed');
     }
   }
 

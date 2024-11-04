@@ -48,7 +48,7 @@ export class EssayController {
     return this.essayService.findAll(query);
   }
 
-  @Get()
+  @Get('/user')
   @Roles(UserRole.USER)
   @ApiResponse({ status: HttpStatus.OK, type: EssaysResponse })
   async findAllByUser(
@@ -94,8 +94,18 @@ export class EssayController {
     return this.essayService.update(transaction, params.id, dto, user);
   }
 
-  @Delete(':id')
+  @Delete(':id/user')
   @Roles(UserRole.USER)
+  @ApiParam({ name: 'id', type: String })
+  @ApiResponse({ status: HttpStatus.OK, type: DeleteEssayResponseDto })
+  async deleteByUser(
+    @Param() params: FindOneEssayDto,
+  ): Promise<DeleteEssayResponseDto> {
+    return this.essayService.deleteByUser(params.id);
+  }
+
+  @Delete(':id')
+  @Roles(UserRole.USER, UserRole.ADMIN)
   @ApiParam({ name: 'id', type: String })
   @ApiResponse({ status: HttpStatus.OK, type: DeleteEssayResponseDto })
   async delete(

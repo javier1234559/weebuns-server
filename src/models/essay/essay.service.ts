@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 
-import { Prisma } from '@prisma/client';
+import { EssayStatus, Prisma } from '@prisma/client';
 
 import { IAuthPayload } from 'src/common/interface/auth-payload.interface';
 import { PrismaService } from 'src/common/prisma/prisma.service';
@@ -234,10 +234,8 @@ export class EssayService {
 
   async delete(id: string): Promise<DeleteEssayResponseDto> {
     return await this.prisma.$transaction(async (tx) => {
-      // Get the essay with its relations
       const essay = await tx.essay.findUnique({
         where: { id },
-        include: this.defaultInclude,
       });
 
       if (!essay) {
@@ -247,6 +245,28 @@ export class EssayService {
       // Delete the essay
       await tx.essay.delete({
         where: { id },
+      });
+
+      return { essay };
+    });
+  }
+
+  async deleteByUser(id: string): Promise<DeleteEssayResponseDto> {
+    return await this.prisma.$transaction(async (tx) => {
+      const essay = await tx.essay.findUnique({
+        where: { id },
+      });
+
+      if (!essay) {
+        throw new NotFoundException(`Essay with ID ${id} not found`);
+      }
+
+      // Soft Delete the essay
+      await tx.essay.update({
+        where: { id },
+        data: {
+          status: EssayStatus.deleted,
+        },
       });
 
       return { essay };
