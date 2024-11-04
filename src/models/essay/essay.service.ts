@@ -171,6 +171,11 @@ export class EssayService {
       where: { id },
       include: {
         author: true,
+        hashtags: {
+          include: {
+            hashtag: true,
+          },
+        },
       },
     });
 
