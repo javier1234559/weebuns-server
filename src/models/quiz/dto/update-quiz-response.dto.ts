@@ -1,9 +1,11 @@
+import { ObjectType } from '@nestjs/graphql';
 import { ApiProperty } from '@nestjs/swagger';
 
 import { QuizQuestion } from 'src/models/quiz-question/entities/quiz-question.entity';
 import { Space } from 'src/models/space/entities/space.entity';
 import { User } from 'src/models/user/entities/user.entity';
 
+@ObjectType()
 export class UpdateQuizResponseDto {
   @ApiProperty({
     description: 'Quiz ID',
