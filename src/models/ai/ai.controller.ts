@@ -9,7 +9,7 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 import { AuthGuard } from 'src/common/auth/auth.guard';
 import { Roles, RolesGuard, UserRole } from 'src/common/auth/role.guard';
@@ -32,6 +32,7 @@ export class AiController {
 
   @Post('translate')
   @Roles(UserRole.USER)
+  @ApiBody({ type: TranslateDto })
   @CacheKeyDto('translate', 86400)
   @ApiResponse({
     status: HttpStatus.OK,
@@ -44,6 +45,7 @@ export class AiController {
 
   @Post('check-grammar')
   @Roles(UserRole.USER)
+  @ApiBody({ type: CheckGrammarDto })
   @CacheKeyDto('grammar', 86400)
   @ApiResponse({
     status: HttpStatus.OK,

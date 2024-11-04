@@ -6,6 +6,7 @@ import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default';
 import { join } from 'path';
 
+import { CacheKeyInterceptor } from 'src/common/cache/cache-key.interceptor';
 import { CommonModule } from 'src/common/common.module';
 import { ValidationModule } from 'src/common/decorators/validation.module';
 import { HealthModule } from 'src/common/health/health.module';
@@ -50,6 +51,10 @@ import { VocabularyModule } from 'src/models/vocabulary/vocabulary.module';
     {
       provide: APP_INTERCEPTOR,
       useClass: TransactionInterceptor,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: CacheKeyInterceptor,
     },
   ],
 })

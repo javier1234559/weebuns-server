@@ -1,16 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-class TopicDto {
-  @ApiProperty()
-  title: string;
-
-  @ApiProperty()
-  description: string;
-}
-
 export class RecommendTopicsResponseDto {
-  @ApiProperty({ type: [TopicDto] })
-  topics: TopicDto[];
+  @ApiProperty({ type: [String] })
+  topics: string[];
 
   @ApiProperty()
   category: string;

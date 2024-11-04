@@ -1,32 +1,58 @@
 import { ApiProperty } from '@nestjs/swagger';
 
+class PositionDto {
+  @ApiProperty({
+    example: 0,
+  })
+  start: number;
+
+  @ApiProperty({
+    example: 5,
+  })
+  end: number;
+}
+
 class CorrectionDto {
-  @ApiProperty()
+  @ApiProperty({
+    example: 'grammer',
+  })
   original: string;
 
-  @ApiProperty()
+  @ApiProperty({
+    example: 'grammar',
+  })
   corrected: string;
 
-  @ApiProperty()
+  @ApiProperty({})
   explanation: string;
 
-  @ApiProperty()
+  @ApiProperty({
+    enum: ['grammar', 'spelling', 'punctuation', 'style'],
+    example: 'spelling',
+  })
   type: 'grammar' | 'spelling' | 'punctuation' | 'style';
 
-  @ApiProperty()
-  position: {
-    start: number;
-    end: number;
-  };
+  @ApiProperty({
+    type: () => PositionDto,
+  })
+  position: PositionDto;
 }
 
 export class CheckGrammarResponseDto {
-  @ApiProperty({ type: [CorrectionDto] })
+  @ApiProperty({
+    type: [CorrectionDto],
+  })
   corrections: CorrectionDto[];
 
-  @ApiProperty()
+  @ApiProperty({
+    example: 'Found 2 spelling errors and 1 grammar mistake.',
+  })
   summary: string;
 
-  @ApiProperty()
+  @ApiProperty({
+    example: 85,
+    minimum: 0,
+    maximum: 100,
+  })
   overall_score: number;
 }

@@ -12,3 +12,12 @@ export const CACHE_KEYS = {
   AI_GRAMMAR: (text: string) => `grammar:${text.substring(0, 50)}`,
   AI_TOPICS: (category?: string) => `topics:${category || 'all'}`,
 };
+
+// src/common/decorators/cache/constants.ts
+export const CACHE_KEY_METADATA = 'cache_key_metadata';
+
+// src/common/decorators/cache/interfaces.ts
+export interface CacheKeyMetadata {
+  prefix: string;
+  ttl: number;
+}

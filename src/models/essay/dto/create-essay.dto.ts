@@ -1,7 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 import { EssayStatus } from '@prisma/client';
-import { IsOptional } from 'class-validator';
+import { IsArray, IsString } from 'class-validator';
 
 import { ExistEntity } from 'src/common/decorators/exist-entity.decorator';
 
@@ -53,16 +53,17 @@ export class CreateEssayDto {
   })
   spaceId: string;
 
-  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
   @ApiPropertyOptional({
-    example: [
-      '123e4567-e89b-12d3-a456-426614174000',
-      '123e4567-e89b-12d3-a456-426614174001',
-    ],
-    type: [String],
-    format: 'uuid',
-    isArray: true,
-    required: false,
+    type: 'array',
+    items: {
+      type: 'string',
+      example: 'english',
+      minLength: 2,
+      maxLength: 50,
+    },
+    example: ['english', 'travel'],
   })
   hashtag_names?: string[];
 }

@@ -10,7 +10,16 @@ import { User } from 'src/models/user/entities/user.entity';
 
 @ObjectType()
 export class CreateEssayResponseDto {
+  @ApiPropertyOptional({
+    type: 'string',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
   id: string;
+
+  @ApiPropertyOptional({
+    type: 'string',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
   id_space: string;
 
   @ApiPropertyOptional({
