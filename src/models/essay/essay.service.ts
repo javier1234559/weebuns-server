@@ -43,7 +43,7 @@ export class EssayService {
     const skip = (page - 1) * perPage || 0;
 
     let where: Prisma.EssayWhereInput = {
-      created_by: String(user.sub), // Use user ID from auth token
+      createdBy: String(user.sub), // Use user ID from auth token
     };
 
     if (search) {
@@ -65,7 +65,7 @@ export class EssayService {
         where,
         skip,
         take: perPage,
-        orderBy: { created_at: 'desc' },
+        orderBy: { createdAt: 'desc' },
         include: this.defaultInclude,
       }),
       this.prisma.essay.count({ where }),
@@ -115,12 +115,12 @@ export class EssayService {
 
     return {
       id: essay.id,
-      id_space: essay.id_space,
+      id_space: essay.spaceId,
       title: essay.title,
       summary: essay.summary,
-      upvote_count: essay.upvote_count,
+      upvote_count: essay.upvoteCount,
       content: essay.content,
-      cover_url: essay.cover_url,
+      cover_url: essay.coverUrl,
       status: essay.status,
       language: essay.language,
       hashtags: essay.hashtags,
@@ -152,7 +152,7 @@ export class EssayService {
         where,
         skip,
         take: perPage,
-        orderBy: { created_at: 'desc' },
+        orderBy: { createdAt: 'desc' },
         include: this.defaultInclude,
       }),
       this.prisma.essay.count({ where }),
@@ -198,7 +198,7 @@ export class EssayService {
     const existingEssay = await tx.essay.findFirst({
       where: {
         id,
-        created_by: String(user.sub),
+        createdBy: String(user.sub),
       },
     });
 

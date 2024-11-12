@@ -1,15 +1,17 @@
-// seed.ts
 import { PrismaClient } from '@prisma/client';
 
 import {
+  createCorrectionReplies,
   createCorrections,
+  createCourses,
   createEssayHashtags,
   createEssays,
-  createFlashCards,
-  createFollowers,
-  createQuizzes,
-  createSpaces,
-  createUserLanguages,
+  createNotes,
+  createSpaceCourses,
+  createSpaces, // Thêm mới
+  createUnitContents,
+  createUnits,
+  createUserCourses,
   createVocabularies,
   generatedIds,
   hashtags,
@@ -19,6 +21,7 @@ import {
 const prisma = new PrismaClient();
 
 async function cleanDatabase() {
+  console.log('Cleaning database...');
   const tablenames = await prisma.$queryRaw<Array<{ tablename: string }>>`
     SELECT tablename FROM pg_tables WHERE schemaname='public'
   `;
@@ -33,7 +36,7 @@ async function cleanDatabase() {
       `TRUNCATE TABLE ${tables.join(',')} CASCADE;`,
     );
   } catch (error) {
-    console.log({ error });
+    console.log('Error cleaning database:', error);
   }
 }
 
@@ -47,24 +50,62 @@ async function seedUsers() {
   }
 }
 
-async function seedUserLanguages() {
-  console.log('Seeding user languages...');
-  const userLanguages = createUserLanguages(generatedIds.users);
-  for (const language of userLanguages) {
-    await prisma.userLanguage.create({
-      data: language,
+async function seedCourses() {
+  console.log('Seeding courses...');
+  const courses = createCourses(generatedIds.users);
+  for (const course of courses) {
+    const createdCourse = await prisma.course.create({
+      data: course,
     });
+    generatedIds.courses.push(createdCourse.id);
+  }
+}
+
+async function seedUnits() {
+  console.log('Seeding units...');
+  const units = createUnits(generatedIds.courses);
+  for (const unit of units) {
+    const createdUnit = await prisma.unit.create({
+      data: unit,
+    });
+    generatedIds.units.push(createdUnit.id);
+  }
+}
+
+async function seedUnitContents() {
+  console.log('Seeding unit contents...');
+  const unitContents = createUnitContents(generatedIds.units);
+  for (const content of unitContents) {
+    const createdContent = await prisma.unitContent.create({
+      data: content,
+    });
+    generatedIds.unitContents.push(createdContent.id);
   }
 }
 
 async function seedSpaces() {
   console.log('Seeding spaces...');
-  const spaces = createSpaces(generatedIds.users);
+  const spaces = createSpaces(generatedIds.users); // Đã update params
   for (const space of spaces) {
     const createdSpace = await prisma.space.create({
       data: space,
     });
     generatedIds.spaces.push(createdSpace.id);
+  }
+}
+
+// Thêm mới: seed SpaceCourses
+async function seedSpaceCourses() {
+  console.log('Seeding space courses...');
+  const spaceCourses = createSpaceCourses(
+    generatedIds.spaces,
+    generatedIds.courses,
+  );
+  for (const spaceCourse of spaceCourses) {
+    const created = await prisma.spaceCourse.create({
+      data: spaceCourse,
+    });
+    generatedIds.spaceCourses.push(created.id);
   }
 }
 
@@ -89,123 +130,132 @@ async function seedEssays() {
   }
 }
 
-async function seedVocabularies() {
-  console.log('Seeding vocabularies...');
-  const vocabularies = createVocabularies(
-    generatedIds.users,
-    generatedIds.spaces,
-  );
-  for (const vocabulary of vocabularies) {
-    const createdVocabulary = await prisma.vocabulary.create({
-      data: vocabulary,
-    });
-    generatedIds.vocabularies.push(createdVocabulary.id);
-  }
-}
-
-async function seedFollowers() {
-  console.log('Seeding followers...');
-  const followers = createFollowers(generatedIds.users);
-  for (const follower of followers) {
-    await prisma.follower.create({
-      data: follower,
-    });
-  }
-}
-
-async function seedQuizzes() {
-  console.log('Seeding quizzes...');
-  const quizzes = createQuizzes(generatedIds.users, generatedIds.spaces);
-  for (const quiz of quizzes) {
-    const createdQuiz = await prisma.quiz.create({
-      data: quiz,
-    });
-    generatedIds.quizzes.push(createdQuiz.id);
-  }
-}
-
-async function seedCorrections() {
-  console.log('Seeding corrections...');
-  const corrections = createCorrections(
-    generatedIds.users,
-    generatedIds.essays,
-  );
-  for (const correction of corrections) {
-    const createdCorrection = await prisma.correction.create({
-      data: correction,
-    });
-    generatedIds.corrections.push(createdCorrection.id);
-  }
-}
-
 async function seedEssayHashtags() {
   console.log('Seeding essay hashtags...');
   const essayHashtags = createEssayHashtags(
     generatedIds.essays,
     generatedIds.hashtags,
   );
-  for (const essayHashtag of essayHashtags) {
-    const createdEssayHashtag = await prisma.essayHashtag.create({
-      data: essayHashtag,
+  for (const hashtagLink of essayHashtags) {
+    const created = await prisma.essayHashtag.create({
+      data: hashtagLink,
     });
-    generatedIds.essayHashtags.push(createdEssayHashtag.id);
+    generatedIds.essayHashtags.push(created.id);
   }
 }
 
-async function seedFlashCards() {
-  console.log('Seeding flash cards...');
-  const flashCards = createFlashCards(
+async function seedVocabularies() {
+  console.log('Seeding vocabularies...');
+  const vocabularies = createVocabularies(
+    generatedIds.spaces,
     generatedIds.users,
-    generatedIds.vocabularies,
   );
-  for (const flashCard of flashCards) {
-    await prisma.flashCard.create({
-      data: flashCard,
+  for (const vocabulary of vocabularies) {
+    const created = await prisma.vocabulary.create({
+      data: vocabulary,
     });
+    generatedIds.vocabularies.push(created.id);
+  }
+}
+
+async function seedNotes() {
+  console.log('Seeding notes...');
+  const notes = createNotes(
+    generatedIds.units,
+    generatedIds.spaces, // Thêm spaces ID
+    generatedIds.users,
+  );
+  for (const note of notes) {
+    const created = await prisma.note.create({
+      data: note,
+    });
+    generatedIds.notes.push(created.id);
+  }
+}
+
+async function seedCorrections() {
+  console.log('Seeding corrections...');
+  const corrections = createCorrections(
+    generatedIds.essays,
+    generatedIds.users,
+  );
+  for (const correction of corrections) {
+    const created = await prisma.correction.create({
+      data: correction,
+      include: {
+        sentences: true,
+      },
+    });
+    generatedIds.corrections.push(created.id);
+  }
+}
+
+async function seedCorrectionReplies() {
+  console.log('Seeding correction replies...');
+  const replies = createCorrectionReplies(
+    generatedIds.corrections,
+    generatedIds.users,
+  );
+  for (const reply of replies) {
+    const created = await prisma.correctionReply.create({
+      data: reply,
+    });
+    generatedIds.correctionReplies.push(created.id);
+  }
+}
+
+async function seedUserCourses() {
+  console.log('Seeding user courses...');
+  const userCourses = createUserCourses(
+    generatedIds.users,
+    generatedIds.courses,
+  );
+  for (const userCourse of userCourses) {
+    const created = await prisma.userCourse.create({
+      data: userCourse,
+    });
+    generatedIds.userCourses.push(created.id);
   }
 }
 
 async function seedAll() {
   try {
-    console.log('Cleaning database...');
+    // Clear the database first
     await cleanDatabase();
 
-    // Seed in order of dependencies
+    // Seed all data in the correct order
     await seedUsers();
-    await seedUserLanguages();
+    await seedCourses();
+    await seedUnits();
+    await seedUnitContents();
     await seedSpaces();
+    await seedSpaceCourses(); // Thêm vào đây
     await seedHashtags();
     await seedEssays();
     await seedEssayHashtags();
     await seedVocabularies();
-    await seedFollowers();
-    await seedQuizzes();
+    await seedNotes();
     await seedCorrections();
-    await seedFlashCards();
+    await seedCorrectionReplies();
+    await seedUserCourses();
 
-    console.log('Seed completed successfully!');
+    console.log('Database has been seeded successfully');
+    console.log('Generated IDs:', generatedIds);
   } catch (error) {
-    console.error('Error during seeding:', error);
-    throw error;
-  }
-}
-
-async function main() {
-  try {
-    await seedAll();
-  } catch (error) {
-    console.error('Failed to seed database:', error);
+    console.error('Error seeding database:', error);
     throw error;
   } finally {
     await prisma.$disconnect();
   }
 }
 
-main()
+// Run the seed function
+seedAll()
   .catch((error) => {
     console.error(error);
     process.exit(1);
   })
-  .finally(() => {
+  .finally(async () => {
+    await prisma.$disconnect();
     process.exit(0);
   });

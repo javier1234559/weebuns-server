@@ -11,7 +11,7 @@ import { map } from 'rxjs/operators';
 // this interceptor removes fields from the response before sending it to the client
 @Injectable()
 export class RemoveFieldInterceptor implements NestInterceptor {
-  private readonly FIELDS_TO_REMOVE = ['password', 'password_hash'];
+  private readonly FIELDS_TO_REMOVE = ['password', 'passwordHash'];
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     return next.handle().pipe(map((data) => this.removeFields(data)));

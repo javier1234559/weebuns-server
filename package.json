@@ -21,9 +21,12 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "seed": "npx ts-node prisma/seed.ts",
-    "migrate": "npx prisma generate && prisma migrate dev",
     "prisma:generate": "npx prisma generate",
-    "prisma:migrate": "npx prisma migrate dev"
+    "prisma:migrate": "npx prisma generate && prisma migrate dev --create-only",
+    "prisma:reset": "npx prisma migrate reset",
+    "prisma:dev": "prisma generate && prisma migrate dev && ts-node scripts/set-up-timescale.ts",
+    "prisma": "prisma generate && prisma migrate dev",
+    "prisma:deploy": "prisma generate && prisma migrate deploy && ts-node scripts/set-up-timescale.ts"
   },
   "dependencies": {
     "@apollo/server": "^4.10.5",
@@ -36,6 +39,7 @@
     "@nestjs/jwt": "^10.2.0",
     "@nestjs/mapped-types": "*",
     "@nestjs/platform-express": "^10.0.0",
+    "@nestjs/schedule": "^4.1.1",
     "@nestjs/terminus": "^10.2.3",
     "@prisma/client": "^5.18.0",
     "apollo-server-express": "^3.13.0",
@@ -58,6 +62,7 @@
   },
   "devDependencies": {
     "@babel/eslint-parser": "^7.25.0",
+    "@brakebein/prisma-generator-nestjs-dto": "^1.23.3",
     "@nestjs/cli": "^10.0.0",
     "@nestjs/config": "^3.2.3",
     "@nestjs/schematics": "^10.0.0",
@@ -75,7 +80,6 @@
     "@types/supertest": "^6.0.0",
     "@typescript-eslint/eslint-plugin": "^7.0.0",
     "@typescript-eslint/parser": "^7.0.0",
-    "@vegardit/prisma-generator-nestjs-dto": "^1.5.1",
     "eslint": "^8.42.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-prettier": "^5.2.1",

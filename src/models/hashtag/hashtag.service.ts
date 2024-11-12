@@ -36,7 +36,7 @@ export class HashtagService {
         where,
         skip,
         take: perPage,
-        orderBy: { created_at: 'desc' },
+        orderBy: { createdAt: 'desc' },
         include: {
           _count: {
             select: { essays: true },

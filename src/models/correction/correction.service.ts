@@ -24,8 +24,8 @@ export class CorrectionService {
   ): Promise<CorrectionResponseOneDto> {
     const correction = await this.prisma.correction.findFirst({
       where: {
-        essay_id: essayId,
-        created_by: userId,
+        essayId: essayId,
+        createdBy: userId,
       },
       include: {
         sentences: true,
@@ -41,20 +41,20 @@ export class CorrectionService {
     const isPaginated = page !== undefined && perPage !== undefined;
 
     let where: Prisma.CorrectionWhereInput = {
-      essay_id: essayId,
+      essayId: essayId,
     };
 
     if (search) {
       where = {
         ...where,
         OR: [
-          { overall_comment: { contains: search, mode: 'insensitive' } },
+          { overallComment: { contains: search, mode: 'insensitive' } },
           {
             sentences: {
               some: {
                 OR: [
-                  { original_text: { contains: search, mode: 'insensitive' } },
-                  { corrected_text: { contains: search, mode: 'insensitive' } },
+                  { originalText: { contains: search, mode: 'insensitive' } },
+                  { correctedText: { contains: search, mode: 'insensitive' } },
                   { explanation: { contains: search, mode: 'insensitive' } },
                 ],
               },
@@ -66,7 +66,7 @@ export class CorrectionService {
 
     const queryOptions: Prisma.CorrectionFindManyArgs = {
       where,
-      orderBy: { created_at: 'desc' },
+      orderBy: { createdAt: 'desc' },
       include: {
         creator: true,
         sentences: true,
@@ -106,9 +106,9 @@ export class CorrectionService {
     // First create the correction
     const newCorrection = await tx.correction.create({
       data: {
-        essay_id: createCorrectionDto.essay_id,
-        created_by: userId,
-        overall_comment: createCorrectionDto.overall_comment,
+        essayId: createCorrectionDto.essay_id,
+        createdBy: userId,
+        overallComment: createCorrectionDto.overall_comment,
         rating: createCorrectionDto.rating,
       },
     });
@@ -116,9 +116,9 @@ export class CorrectionService {
     // Then create all correction sentences
     await tx.correctionSentence.createMany({
       data: createCorrectionDto.sentences.map((sentence) => ({
-        id_correction: newCorrection.id,
+        correctionId: newCorrection.id,
         index: sentence.index,
-        original_text: sentence.original_text,
+        originalText: sentence.original_text,
         corrected_text: sentence.corrected_text,
         explanation: sentence.explanation,
         is_correct: sentence.is_correct,
@@ -150,7 +150,7 @@ export class CorrectionService {
     await tx.correction.update({
       where: { id: updateCorrectionDto.id },
       data: {
-        overall_comment: updateCorrectionDto.overall_comment,
+        overallComment: updateCorrectionDto.overall_comment,
         rating: updateCorrectionDto.rating,
       },
     });
@@ -187,7 +187,7 @@ export class CorrectionService {
       );
     }
 
-    if (existingCorrection.created_by !== userId) {
+    if (existingCorrection.createdBy !== userId) {
       throw new UnauthorizedException(
         'You are not authorized to update this correction',
       );
@@ -201,7 +201,7 @@ export class CorrectionService {
     // Get existing sentences
     const existingSentences = await tx.correctionSentence.findMany({
       where: {
-        id_correction: updateCorrectionDto.id,
+        correctionId: updateCorrectionDto.id,
       },
     });
 
@@ -219,21 +219,21 @@ export class CorrectionService {
         await tx.correctionSentence.update({
           where: { id: existingSentence.id },
           data: {
-            corrected_text: sentenceDto.corrected_text,
+            correctedText: sentenceDto.corrected_text,
             explanation: sentenceDto.explanation,
-            is_correct: sentenceDto.is_correct,
+            isCorrect: sentenceDto.is_correct,
             rating: sentenceDto.rating,
           },
         });
       } else {
         await tx.correctionSentence.create({
           data: {
-            id_correction: updateCorrectionDto.id,
+            correctionId: updateCorrectionDto.id,
             index: sentenceDto.index,
-            original_text: sentenceDto.original_text,
-            corrected_text: sentenceDto.corrected_text,
+            originalText: sentenceDto.original_text,
+            correctedText: sentenceDto.corrected_text,
             explanation: sentenceDto.explanation,
-            is_correct: sentenceDto.is_correct,
+            isCorrect: sentenceDto.is_correct,
             rating: sentenceDto.rating,
           },
         });

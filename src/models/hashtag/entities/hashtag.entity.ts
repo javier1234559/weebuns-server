@@ -25,17 +25,23 @@ export class Hashtag implements IHashtag {
   })
   name: string;
 
-  @Field(() => Date)
+  @Field(() => Number)
   @ApiProperty({
-    example: '2024-01-01T00:00:00Z',
+    example: 10,
   })
-  created_at: Date;
+  usageCount: number;
 
   @Field(() => Date)
   @ApiProperty({
     example: '2024-01-01T00:00:00Z',
   })
-  updated_at: Date;
+  createdAt: Date;
+
+  @Field(() => Date)
+  @ApiProperty({
+    example: '2024-01-01T00:00:00Z',
+  })
+  updatedAt: Date;
 
   @Field(() => [EssayHashtag], { nullable: true })
   @ApiProperty({

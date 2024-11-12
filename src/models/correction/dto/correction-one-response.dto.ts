@@ -17,12 +17,12 @@ export class CorrectionResponseOneDto {
   @Field()
   @IsUUID()
   @ApiProperty({ example: 'uuid' })
-  essay_id: string;
+  essayId: string;
 
   @Field()
   @IsUUID()
   @ApiProperty({ example: 'uuid' })
-  created_by: string;
+  createdBy: string;
 
   @Field({ nullable: true })
   @ApiProperty({ example: 'Overall comment', nullable: true })
@@ -34,11 +34,11 @@ export class CorrectionResponseOneDto {
 
   @Field(() => Date)
   @ApiProperty({ example: '2024-01-01T00:00:00Z' })
-  created_at: Date;
+  createdAt: Date;
 
   @Field(() => Date)
   @ApiProperty({ example: '2024-01-01T00:00:00Z' })
-  updated_at: Date;
+  updatedAt: Date;
 
   @Field(() => User, { nullable: true })
   @ApiProperty({ type: User, nullable: true })

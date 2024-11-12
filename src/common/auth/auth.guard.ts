@@ -46,7 +46,7 @@ export class AuthGuard implements CanActivate {
       //update last login time
       this.prisma.user.update({
         where: { id: String(payload.sub) },
-        data: { last_login: new Date() },
+        data: { lastLogin: new Date() },
       });
 
       return true;

@@ -1,18 +1,48 @@
-export class CreateVocabularyDto {
-  image_url?: string;
-  word: string;
-  part_of_speech?: string;
-  definition?: string;
-  pronunciation?: string;
-  example?: string;
-  reference_link?: string;
-  id_essay_link?: string;
-  mastery_level?: string;
-  is_need_review?: boolean;
-  next_review_date?: string;
-  ease_factor?: number;
-  interval?: number;
+import { ApiProperty } from '@nestjs/swagger';
 
-  created_id: string;
-  space_id: string;
+export class CreateVocabularyDto {
+  @ApiProperty({
+    type: 'string',
+  })
+  spaceId: string;
+
+  @ApiProperty({
+    type: 'string',
+  })
+  term: string;
+  @ApiProperty({
+    type: 'string',
+  })
+  meaning: string;
+  @ApiProperty({
+    type: 'string',
+    required: false,
+    nullable: true,
+  })
+  exampleSentence?: string | null;
+  @ApiProperty({
+    type: 'string',
+    required: false,
+    nullable: true,
+  })
+  imageUrl?: string | null;
+  @ApiProperty({
+    type: 'string',
+    required: false,
+    nullable: true,
+  })
+  referenceLink?: string | null;
+  @ApiProperty({
+    type: 'string',
+    required: false,
+    nullable: true,
+  })
+  referenceName?: string | null;
+  @ApiProperty({
+    type: 'string',
+    format: 'date-time',
+    required: false,
+    nullable: true,
+  })
+  nextReview?: Date | null;
 }

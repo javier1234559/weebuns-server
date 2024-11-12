@@ -58,7 +58,9 @@ export class AuthService {
       const user = await this.prisma.user.findUnique({
         where: { id: String(authPayload.sub) },
       });
-      return { user };
+      return {
+        user,
+      };
     } catch (error) {
       return null;
     }
@@ -72,11 +74,11 @@ export class AuthService {
       throw new UnauthorizedException('User not found');
     }
 
-    if (user.auth_provider !== AuthProvider.local) {
+    if (user.authProvider !== AuthProvider.local) {
       throw new UnauthorizedException('User is not registered with.local auth');
     }
 
-    const isPasswordValid = await bcrypt.compare(password, user.password_hash);
+    const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
     if (!isPasswordValid) {
       throw new UnauthorizedException('The password is incorrect');
     }
@@ -110,11 +112,11 @@ export class AuthService {
         data: {
           username,
           email,
-          password_hash: hashedPassword,
-          first_name: firstName,
-          last_name: lastName,
+          passwordHash: hashedPassword,
+          firstName: firstName,
+          lastName: lastName,
           role: UserRole.user,
-          auth_provider: AuthProvider.local,
+          authProvider: AuthProvider.local,
         },
       });
 
@@ -161,7 +163,7 @@ export class AuthService {
         provider: AuthProvider.google,
       });
 
-      if (user.auth_provider !== AuthProvider.google) {
+      if (user.authProvider !== AuthProvider.google) {
         throw new BadRequestException(
           'User is not registered with Google auth',
         );
@@ -207,7 +209,7 @@ export class AuthService {
         provider: AuthProvider.facebook,
       });
 
-      if (user.auth_provider !== AuthProvider.facebook) {
+      if (user.authProvider !== AuthProvider.facebook) {
         throw new BadRequestException(
           'User is not registered with facebook auth',
         );
@@ -240,11 +242,11 @@ export class AuthService {
         data: {
           email: userData.email,
           username: userData.name,
-          first_name: userData.firstName,
-          last_name: userData.lastName,
+          firstName: userData.firstName,
+          lastName: userData.lastName,
           role: UserRole.user,
-          auth_provider: userData.provider,
-          profile_picture: userData.picture,
+          authProvider: userData.provider,
+          profilePicture: userData.picture,
         },
       });
     }

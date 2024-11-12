@@ -2,7 +2,7 @@ import { Injectable, OnModuleInit } from '@nestjs/common';
 
 import { PrismaClient } from '@prisma/client';
 
-import { createSoftDeleteMiddleware } from 'src/common/prisma/soft-delete.middlware';
+import { createSoftDeleteMiddleware } from 'src/common/prisma/soft-delete.middleware';
 
 @Injectable()
 export class PrismaService extends PrismaClient implements OnModuleInit {

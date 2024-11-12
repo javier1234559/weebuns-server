@@ -5,12 +5,12 @@ import { User } from 'src/models/user/entities/user.entity';
 
 export class UserResponse {
   @ApiProperty()
-  user: Omit<User, 'password_hash'>;
+  user: Omit<User, 'passwordHash'>;
 }
 
 export class UsersResponse {
   @ApiProperty({ type: [User] })
-  users: Omit<User, 'password_hash'>[];
+  users: Omit<User, 'passwordHash'>[];
 
   @ApiProperty()
   @ApiProperty({ type: PaginationOutputDto })
@@ -20,17 +20,17 @@ export class UsersResponse {
 export class CreateUserResponse {
   @ApiProperty()
   @ApiProperty({ type: User })
-  user: Omit<User, 'password_hash'>;
+  user: Omit<User, 'passwordHash'>;
 }
 
 export class UpdateUserResponse {
   @ApiProperty()
   @ApiProperty({ type: User })
-  user: Omit<User, 'password_hash'>;
+  user: Omit<User, 'passwordHash'>;
 }
 
 export class DeleteUserResponse {
   @ApiProperty()
   @ApiProperty({ type: User })
-  user: Omit<User, 'password_hash'>;
+  user: Omit<User, 'passwordHash'>;
 }
