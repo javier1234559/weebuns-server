@@ -1,14 +1,24 @@
 import { Field, ID, ObjectType, registerEnumType } from '@nestjs/graphql';
 import { ApiProperty } from '@nestjs/swagger';
 
-import { AuthProvider, UserRole } from '@prisma/client';
+import {
+  $Enums,
+  AuthProvider,
+  Prisma,
+  ProficiencyLevel,
+  UserRole,
+} from '@prisma/client';
 
+import { CorrectionReply } from 'src/models/correction-reply/entities/correction-reply.entity';
+import { Correction } from 'src/models/correction/entities/correction.entity';
+import { Course } from 'src/models/course/entities/course.entity';
+import { Note } from 'src/models/note/entities/note.entity';
 import { Space } from 'src/models/space/entities/space.entity';
-import { UserLanguage } from 'src/models/user-language/entities/user-language.entity';
+import { UserCourse } from 'src/models/user-course/entities/user-course.entity';
 import { IUser } from 'src/models/user/user.interface';
+import { Vocabulary } from 'src/models/vocabulary/entities/vocabulary.entity';
 
 import { Essay } from '../../essay/entities/essay.entity';
-import { Follower } from '../../follower/entities/follower.entity';
 
 registerEnumType(UserRole, {
   name: 'UserRole',
@@ -20,15 +30,21 @@ registerEnumType(AuthProvider, {
   description: 'Authentication providers',
 });
 
+registerEnumType(ProficiencyLevel, {
+  name: 'ProficiencyLevel',
+  description: 'User proficiency levels',
+});
+
 @ObjectType()
 export class User implements IUser {
+  // GraphQL fields (snake_case)
   @Field(() => ID)
   @ApiProperty({ example: '00321d6f-2bcf-4985-9659-92a571275da6' })
   id: string;
 
-  @Field(() => String, { nullable: true })
-  @ApiProperty({ example: 'johndoe', nullable: true })
-  username: string | null;
+  @Field()
+  @ApiProperty({ example: 'johndoe' })
+  username: string;
 
   @Field()
   @ApiProperty({ example: 'john@example.com' })
@@ -36,7 +52,7 @@ export class User implements IUser {
 
   @Field(() => String, { nullable: true })
   @ApiProperty({ nullable: true })
-  password_hash: string | null;
+  passwordHash: string | null;
 
   @Field(() => UserRole)
   @ApiProperty({ enum: UserRole, example: UserRole.user })
@@ -44,77 +60,71 @@ export class User implements IUser {
 
   @Field(() => AuthProvider)
   @ApiProperty({ enum: AuthProvider, example: AuthProvider.local })
-  auth_provider: AuthProvider;
+  authProvider: $Enums.AuthProvider;
 
   @Field(() => String, { nullable: true })
   @ApiProperty({ nullable: true })
-  auth_provider_id: string | null;
+  authProviderId: string | null;
 
   @Field(() => String, { nullable: true })
   @ApiProperty({ example: 'John', nullable: true })
-  first_name: string | null;
+  firstName: string | null;
 
   @Field(() => String, { nullable: true })
   @ApiProperty({ example: 'Doe', nullable: true })
-  last_name: string | null;
+  lastName: string | null;
 
   @Field(() => String, { nullable: true })
   @ApiProperty({ example: 'https://example.com/avatar.jpg', nullable: true })
-  profile_picture: string | null;
+  profilePicture: string | null;
 
   @Field()
   @ApiProperty({ example: false })
-  is_email_verified: boolean;
+  isEmailVerified: boolean;
+
+  @Field(() => ProficiencyLevel)
+  @ApiProperty({ enum: ProficiencyLevel })
+  currentLevel: $Enums.ProficiencyLevel;
+
+  // @Field(() => Object)
+  @ApiProperty({
+    type: () => Object,
+  })
+  languages: Prisma.JsonValue;
 
   @Field(() => Date, { nullable: true })
   @ApiProperty({ nullable: true })
-  last_login: Date | null;
+  lastLogin: Date | null;
 
   @Field(() => Date)
   @ApiProperty()
-  created_at: Date;
+  createdAt: Date;
 
   @Field(() => Date)
   @ApiProperty()
-  updated_at: Date;
+  updatedAt: Date;
 
-  @Field(() => [UserLanguage], { nullable: true })
-  @ApiProperty({ type: () => [UserLanguage], nullable: true })
-  languages?: UserLanguage[];
+  @ApiProperty({ type: () => [Course], nullable: true })
+  courses?: Course[];
 
-  @Field(() => [Follower], { nullable: true })
-  @ApiProperty({ type: () => [Follower], nullable: true })
-  followedBy?: Follower[];
+  @ApiProperty({ type: () => [UserCourse], nullable: true })
+  user_courses?: UserCourse[];
 
-  @Field(() => [Follower], { nullable: true })
-  @ApiProperty({ type: () => [Follower], nullable: true })
-  following?: Follower[];
+  @ApiProperty({ type: () => [Note], nullable: true })
+  notes?: Note[];
 
-  @Field(() => [Space], { nullable: true })
+  @ApiProperty({ type: () => [Vocabulary], nullable: true })
+  vocabularies?: Vocabulary[];
+
   @ApiProperty({ type: () => [Space], nullable: true })
   spaces?: Space[];
 
-  @Field(() => [Essay], { nullable: true })
   @ApiProperty({ type: () => [Essay], nullable: true })
   essays?: Essay[];
 
-  // @Field(() => [Quiz], { nullable: true })
-  // @ApiProperty({ type: () => [Quiz], nullable: true })
-  // quizzes?: Quiz[];
+  @ApiProperty({ type: () => [Correction], nullable: true })
+  corrections?: Correction[];
 
-  // @Field(() => [Vocabulary], { nullable: true })
-  // @ApiProperty({ type: () => [Vocabulary], nullable: true })
-  // vocabularies?: Vocabulary[];
-
-  // @Field(() => [FlashCard], { nullable: true })
-  // @ApiProperty({ type: () => [FlashCard], nullable: true })
-  // flash_cards?: FlashCard[];
-
-  // @Field(() => [Correction], { nullable: true })
-  // @ApiProperty({ type: () => [Correction], nullable: true })
-  // corrections?: Correction[];
-
-  // @Field(() => [CorrectionReply], { nullable: true })
-  // @ApiProperty({ type: () => [CorrectionReply], nullable: true })
-  // correction_replies?: CorrectionReply[];
+  @ApiProperty({ type: () => [CorrectionReply], nullable: true })
+  correction_replies?: CorrectionReply[];
 }

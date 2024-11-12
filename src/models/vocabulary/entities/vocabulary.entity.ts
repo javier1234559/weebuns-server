@@ -1,118 +1,87 @@
-import { Field, ID } from '@nestjs/graphql';
 import { ApiProperty } from '@nestjs/swagger';
 
+import { Prisma } from '@prisma/client';
+
+import { Space } from 'src/models/space/entities/space.entity';
+import { User } from 'src/models/user/entities/user.entity';
 import { IVocabulary } from 'src/models/vocabulary/vocabulary.interface';
 
 // @ObjectType()
 export class Vocabulary implements IVocabulary {
-  @Field(() => ID)
   @ApiProperty({
-    example: '123e4567-e89b-12d3-a456-426614174000',
+    type: 'string',
   })
   id: string;
-
-  @Field(() => String, { nullable: true })
   @ApiProperty({
-    example: 'https://example.com/images/word.jpg',
+    type: 'string',
+  })
+  spaceId: string;
+  @ApiProperty({
+    type: 'string',
+  })
+  term: string;
+  @ApiProperty({
+    type: 'string',
+  })
+  meaning: string;
+  @ApiProperty({
+    type: 'string',
     nullable: true,
   })
-  image_url: string;
-
-  @Field()
+  exampleSentence: string | null;
   @ApiProperty({
-    example: 'ephemeral',
-  })
-  word: string;
-
-  @Field()
-  @ApiProperty({
-    example: 'adjective',
-  })
-  part_of_speech: string;
-
-  @Field()
-  @ApiProperty({
-    example: 'Lasting for a very short time',
-  })
-  definition: string;
-
-  @Field()
-  @ApiProperty({
-    example: 'ih-fem-er-uhl',
-  })
-  pronunciation: string;
-
-  @Field()
-  @ApiProperty({
-    example:
-      'The ephemeral nature of fashion trends makes it hard to stay current.',
-  })
-  example: string;
-
-  @Field(() => String, { nullable: true })
-  @ApiProperty({
-    example: 'https://dictionary.com/ephemeral',
+    type: 'string',
     nullable: true,
   })
-  reference_link: string;
-
-  @Field()
+  imageUrl: string | null;
   @ApiProperty({
-    example: '123',
+    type: 'string',
+    nullable: true,
   })
-  id_essay_link: string;
-
-  @Field()
+  referenceLink: string | null;
   @ApiProperty({
-    example: '456',
+    type: 'string',
+    nullable: true,
   })
-  id_space: string;
-
-  @Field()
+  referenceName: string | null;
   @ApiProperty({
-    example: 'intermediate',
+    example: ['business', 'common', 'idiom', 'phrasal-verb'],
+    type: () => Object,
   })
-  mastery_level: string;
-
-  @Field()
+  tags: Prisma.JsonValue;
   @ApiProperty({
-    example: true,
+    type: 'integer',
+    format: 'int32',
   })
-  is_need_review: boolean;
-
-  @Field()
+  repetitionLevel: number;
   @ApiProperty({
-    example: '2024-10-25',
+    type: 'string',
+    format: 'date-time',
+    nullable: true,
   })
-  next_review_date: string;
-
-  @Field()
+  nextReview: Date | null;
   @ApiProperty({
-    example: 2.5,
+    type: 'string',
   })
-  ease_factor: number;
-
-  @Field()
+  createdBy: string;
   @ApiProperty({
-    example: 7,
+    type: 'string',
+    format: 'date-time',
   })
-  interval: number;
-
-  @Field()
+  createdAt: Date;
   @ApiProperty({
-    example: '789',
+    type: 'string',
+    format: 'date-time',
   })
-  created_by: string;
-
-  @Field(() => Date)
+  updatedAt: Date;
   @ApiProperty({
-    example: '2024-10-24T12:00:00Z',
+    type: () => Space,
+    required: false,
   })
-  created_at: Date;
-
-  @Field(() => Date)
+  space?: Space;
   @ApiProperty({
-    example: '2024-10-24T12:00:00Z',
+    type: () => User,
+    required: false,
   })
-  updated_at: Date;
+  creator?: User;
 }

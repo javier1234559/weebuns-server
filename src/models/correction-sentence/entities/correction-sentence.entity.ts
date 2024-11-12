@@ -2,7 +2,6 @@ import { Field, ID, ObjectType } from '@nestjs/graphql';
 import { ApiProperty } from '@nestjs/swagger';
 
 import { ICorrectionSentence } from 'src/models/correction-sentence/correction-sentence.interfacte';
-import { Correction } from 'src/models/correction/entities/correction.entity';
 
 @ObjectType()
 export class CorrectionSentence implements ICorrectionSentence {
@@ -10,43 +9,39 @@ export class CorrectionSentence implements ICorrectionSentence {
   @ApiProperty({ example: 'uuid' })
   id: string;
 
-  @Field()
+  @Field(() => ID)
   @ApiProperty({ example: 'uuid' })
-  id_correction: string;
+  correctionId: string;
 
   @Field()
   @ApiProperty({ example: 0 })
   index: number;
 
   @Field()
-  @ApiProperty({ example: 'Original text' })
-  original_text: string;
+  @ApiProperty({ example: 'original text' })
+  originalText: string;
 
-  @Field(() => String)
-  @ApiProperty({ example: 'Corrected text' })
-  corrected_text: string;
+  @Field()
+  @ApiProperty({ example: 'corrected text' })
+  correctedText: string;
 
-  @Field(() => String)
-  @ApiProperty({ example: 'Explanation of corrections' })
+  @Field()
+  @ApiProperty({ example: 'explanation' })
   explanation: string;
 
   @Field()
-  @ApiProperty({ example: false })
-  is_correct: boolean;
+  @ApiProperty({ example: true })
+  isCorrect: boolean;
 
-  @Field(() => Number)
-  @ApiProperty({ example: 4 })
+  @Field()
+  @ApiProperty({ example: 4.5 })
   rating: number;
 
-  @Field(() => Date)
-  @ApiProperty({ example: '2024-01-01T00:00:00Z' })
-  created_at: Date;
+  @Field()
+  @ApiProperty({ example: new Date().toISOString() })
+  createdAt: Date;
 
-  @Field(() => Date)
-  @ApiProperty({ example: '2024-01-01T00:00:00Z' })
-  updated_at: Date;
-
-  @Field(() => Correction, { nullable: true })
-  @ApiProperty({ type: () => Correction, nullable: true })
-  correction?: Correction;
+  @Field()
+  @ApiProperty({ example: new Date().toISOString() })
+  updatedAt: Date;
 }

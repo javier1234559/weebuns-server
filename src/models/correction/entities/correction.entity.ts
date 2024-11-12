@@ -1,4 +1,4 @@
-import { Field, ID, Int, ObjectType } from '@nestjs/graphql';
+import { Field, ID, ObjectType } from '@nestjs/graphql';
 import { ApiProperty } from '@nestjs/swagger';
 
 import { CorrectionReply } from 'src/models/correction-reply/entities/correction-reply.entity';
@@ -16,7 +16,7 @@ export class Correction implements ICorrection {
 
   @Field()
   @ApiProperty({ example: 1, description: 'ID of the essay being corrected' })
-  essay_id: string;
+  essayId: string;
 
   @Field(() => String, { nullable: true })
   @ApiProperty({
@@ -24,11 +24,11 @@ export class Correction implements ICorrection {
     nullable: true,
     description: 'Overall feedback for the essay',
   })
-  overall_comment: string | null;
+  overallComment: string | null;
 
-  @Field(() => Int, { nullable: true })
+  @Field(() => String, { nullable: true })
   @ApiProperty({
-    example: 8,
+    example: '8.0',
     nullable: true,
     description: 'Rating score for the essay',
     minimum: 0,
@@ -41,15 +41,15 @@ export class Correction implements ICorrection {
     example: 1,
     description: 'User ID who created the correction',
   })
-  created_by: string;
+  createdBy: string;
 
   @Field(() => Date)
   @ApiProperty()
-  created_at: Date;
+  createdAt: Date;
 
   @Field(() => Date)
   @ApiProperty()
-  updated_at: Date;
+  updatedAt: Date;
 
   @Field(() => Essay, { nullable: true })
   @ApiProperty({ type: () => Essay, nullable: true })

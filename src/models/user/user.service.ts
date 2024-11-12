@@ -5,7 +5,6 @@ import * as bcrypt from 'bcrypt';
 
 import { PrismaService } from 'src/common/prisma/prisma.service';
 import { calculatePagination } from 'src/common/utils/pagination';
-import { generateRandomNumber } from 'src/common/utils/random';
 import { CreateUserDto } from 'src/models/user/dtos/create-user.dto';
 import { FindAllUsersDto } from 'src/models/user/dtos/find-all-user.dto';
 import { UpdateUserDto } from 'src/models/user/dtos/update-user.dto';
@@ -27,16 +26,15 @@ export class UserService {
 
     const newUser = await this.prisma.user.create({
       data: {
-        id: generateRandomNumber(1, 100),
         ...userData,
-        password_hash: hashedPassword,
+        passwordHash: hashedPassword,
         role: UserRole.user,
-        auth_provider: AuthProvider.local,
+        authProvider: AuthProvider.local,
       },
     });
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { password_hash, ...userWithoutPassword } = newUser;
+    const { passwordHash, ...userWithoutPassword } = newUser;
     return { user: userWithoutPassword };
   }
 
@@ -51,8 +49,8 @@ export class UserService {
         OR: [
           { username: { contains: search, mode: 'insensitive' } },
           { email: { contains: search, mode: 'insensitive' } },
-          { first_name: { contains: search, mode: 'insensitive' } },
-          { last_name: { contains: search, mode: 'insensitive' } },
+          { firstName: { contains: search, mode: 'insensitive' } },
+          { lastName: { contains: search, mode: 'insensitive' } },
         ],
       };
     }
@@ -62,7 +60,7 @@ export class UserService {
         where,
         skip,
         take: perPage,
-        orderBy: { created_at: 'desc' },
+        orderBy: { createdAt: 'desc' },
       }),
       this.prisma.user.count({ where }),
     ]);
@@ -71,7 +69,7 @@ export class UserService {
 
     return {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      users: users.map(({ password_hash, ...user }) => user),
+      users: users.map(({ passwordHash, ...user }) => user),
       pagination,
     };
   }
@@ -86,7 +84,7 @@ export class UserService {
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { password_hash, ...userWithoutPassword } = user;
+    const { passwordHash, ...userWithoutPassword } = user;
     return { user: userWithoutPassword };
   }
 
@@ -100,7 +98,7 @@ export class UserService {
     });
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { password_hash, ...userWithoutPassword } = updatedUser;
+    const { passwordHash, ...userWithoutPassword } = updatedUser;
     return { user: userWithoutPassword };
   }
 
@@ -110,7 +108,7 @@ export class UserService {
     });
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { password_hash, ...userWithoutPassword } = deletedUser;
+    const { passwordHash, ...userWithoutPassword } = deletedUser;
     return { user: userWithoutPassword };
   }
 }

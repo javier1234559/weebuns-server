@@ -12,7 +12,7 @@ export class CorrectionReply implements ICorrectionReply {
 
   @Field()
   @ApiProperty({ example: 1, description: 'ID of the related correction' })
-  correction_id: string;
+  correctionId: string;
 
   @Field()
   @ApiProperty({
@@ -23,15 +23,15 @@ export class CorrectionReply implements ICorrectionReply {
 
   @Field()
   @ApiProperty({ example: 1, description: 'User ID who created the reply' })
-  created_by: string;
+  createdBy: string;
 
   @Field(() => Date)
   @ApiProperty()
-  created_at: Date;
+  createdAt: Date;
 
   @Field(() => Date)
   @ApiProperty()
-  updated_at: Date;
+  updatedAt: Date;
 
   @Field(() => User, { nullable: true })
   @ApiProperty({ type: () => User, nullable: true })

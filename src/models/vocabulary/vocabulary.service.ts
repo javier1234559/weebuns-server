@@ -2,6 +2,8 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 
 import { Prisma } from '@prisma/client';
 
+import { CurrentUser } from 'src/common/decorators/current-user.decorator';
+import { IAuthPayload } from 'src/common/interface/auth-payload.interface';
 import { PrismaService } from 'src/common/prisma/prisma.service';
 import { calculatePagination } from 'src/common/utils/pagination';
 import { CreateVocabularyResponseDto } from 'src/models/vocabulary/dto/create-vocabulary-response.dto';
@@ -19,15 +21,17 @@ export class VocabularyService {
 
   async create(
     createVocabularyDto: CreateVocabularyDto,
+    @CurrentUser() _currentUser: IAuthPayload,
   ): Promise<CreateVocabularyResponseDto> {
-    const { created_id, space_id, ...data } = createVocabularyDto;
+    const created_id = String(_currentUser.sub);
+    const { spaceId, ...data } = createVocabularyDto;
 
     const space = await this.prisma.space.findUnique({
-      where: { id: space_id },
+      where: { id: spaceId },
     });
 
     if (!space) {
-      throw new NotFoundException(`Space with ID ${space_id} not found`);
+      throw new NotFoundException(`Space with ID ${spaceId} not found`);
     }
 
     // Kiểm tra sự tồn tại của created_by
@@ -42,8 +46,8 @@ export class VocabularyService {
     const vocabulary = await this.prisma.vocabulary.create({
       data: {
         ...data,
-        created_by: created_id,
-        id_space: space_id,
+        createdBy: created_id,
+        spaceId: spaceId,
       },
       include: {
         creator: true,
@@ -52,26 +56,7 @@ export class VocabularyService {
     });
 
     return {
-      id: vocabulary.id,
-      image_url: vocabulary.image_url,
-      word: vocabulary.word,
-      part_of_speech: vocabulary.part_of_speech,
-      definition: vocabulary.definition,
-      pronunciation: vocabulary.pronunciation,
-      example: vocabulary.example,
-      reference_link: vocabulary.reference_link,
-      id_essay_link: vocabulary.id_essay_link,
-      id_space: vocabulary.id_space,
-      mastery_level: vocabulary.mastery_level,
-      is_need_review: vocabulary.is_need_review,
-      next_review_date: vocabulary.next_review_date,
-      ease_factor: vocabulary.ease_factor,
-      interval: vocabulary.interval,
-      created_by: vocabulary.created_by,
-      created_at: vocabulary.created_at,
-      updated_at: vocabulary.updated_at,
-      creator: vocabulary.creator,
-      space: vocabulary.space,
+      vocabulary,
     };
   }
 
@@ -85,7 +70,7 @@ export class VocabularyService {
 
     if (search) {
       where = {
-        OR: [{ word: { contains: search, mode: 'insensitive' } }],
+        OR: [{ term: { contains: search, mode: 'insensitive' } }],
       };
     }
 
@@ -94,7 +79,7 @@ export class VocabularyService {
         where,
         skip,
         take: perPage,
-        orderBy: { created_at: 'desc' },
+        orderBy: { createdAt: 'desc' },
       }),
       this.prisma.vocabulary.count({ where }),
     ]);
@@ -137,24 +122,7 @@ export class VocabularyService {
     }
 
     return {
-      id: vocabulary.id,
-      image_url: vocabulary.image_url,
-      word: vocabulary.word,
-      part_of_speech: vocabulary.part_of_speech,
-      definition: vocabulary.definition,
-      pronunciation: vocabulary.pronunciation,
-      example: vocabulary.example,
-      reference_link: vocabulary.reference_link,
-      id_essay_link: vocabulary.id_essay_link,
-      id_space: vocabulary.id_space,
-      mastery_level: vocabulary.mastery_level,
-      is_need_review: vocabulary.is_need_review,
-      next_review_date: vocabulary.next_review_date,
-      ease_factor: vocabulary.ease_factor,
-      interval: vocabulary.interval,
-      created_by: vocabulary.created_by,
-      created_at: vocabulary.created_at,
-      updated_at: vocabulary.updated_at,
+      vocabulary,
     };
   }
 

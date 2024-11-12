@@ -23,7 +23,7 @@ export class Essay implements IEssay {
 
   @Field()
   @ApiProperty({ example: 1 })
-  id_space: string;
+  spaceId: string;
 
   @Field()
   @ApiProperty({ example: 'My First Essay' })
@@ -39,11 +39,11 @@ export class Essay implements IEssay {
 
   @Field()
   @ApiProperty({ example: 0 })
-  upvote_count: number;
+  upvoteCount: number;
 
   @Field(() => String, { nullable: true })
   @ApiProperty({ example: 'https://example.com/cover.jpg', nullable: true })
-  cover_url: string | null;
+  coverUrl: string | null;
 
   @Field(() => EssayStatus)
   @ApiProperty({ enum: EssayStatus, example: EssayStatus.draft })
@@ -55,15 +55,19 @@ export class Essay implements IEssay {
 
   @Field()
   @ApiProperty({ example: 1 })
-  created_by: string;
+  createdBy: string;
 
   @Field(() => Date)
   @ApiProperty()
-  created_at: Date;
+  createdAt: Date;
 
   @Field(() => Date)
   @ApiProperty()
-  updated_at: Date;
+  updatedAt: Date;
+
+  @Field(() => Date)
+  @ApiProperty()
+  deletedAt: Date;
 
   @Field(() => Space, { nullable: true })
   @ApiProperty({ type: () => Space, nullable: true })

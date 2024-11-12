@@ -11,20 +11,14 @@ type PaginationOutputDto {
   hasPreviousPage: Boolean!
 }
 
-type SpaceCount {
-  essays: Int!
-  quizzes: Int!
-  vocabularies: Int!
-}
-
-type Space {
+type CorrectionReply {
   id: ID!
-  name: String!
-  description: String
-  created_by: User!
-  created_at: DateTime!
-  updated_at: DateTime!
-  _count: SpaceCount
+  correctionId: String!
+  comment: String!
+  createdBy: String!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  creator: User
 }
 
 """
@@ -32,52 +26,17 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 """
 scalar DateTime
 
-type UserLanguage {
-  id: ID!
-  user_id: String!
-  language: String!
-  proficiency_level: String!
-  is_native: Boolean!
-  created_at: DateTime!
-  updated_at: DateTime!
-}
-
-type CorrectionReply {
-  id: ID!
-  correction_id: String!
-  comment: String!
-  created_by: String!
-  created_at: DateTime!
-  updated_at: DateTime!
-  creator: User
-}
-
 type CorrectionSentence {
   id: ID!
-  id_correction: String!
+  correctionId: ID!
   index: Float!
-  original_text: String!
-  corrected_text: String!
+  originalText: String!
+  correctedText: String!
   explanation: String!
-  is_correct: Boolean!
+  isCorrect: Boolean!
   rating: Float!
-  created_at: DateTime!
-  updated_at: DateTime!
-  correction: Correction
-}
-
-type Correction {
-  id: ID!
-  essay_id: String!
-  overall_comment: String
-  rating: Int
-  created_by: String!
-  created_at: DateTime!
-  updated_at: DateTime!
-  essay: Essay
-  creator: User
-  sentences: [CorrectionSentence!]
-  replies: [CorrectionReply!]
+  createdAt: DateTime!
+  updatedAt: DateTime!
 }
 
 type HashtagCount {
@@ -87,34 +46,76 @@ type HashtagCount {
 type Hashtag {
   id: ID!
   name: String!
-  created_at: DateTime!
-  updated_at: DateTime!
+  usageCount: Float!
+  createdAt: DateTime!
+  updatedAt: DateTime!
   essays: [EssayHashtag!]
   _count: HashtagCount
 }
 
 type EssayHashtag {
   id: ID!
-  essay_id: ID!
-  hashtag_id: ID!
-  created_at: DateTime!
+  essayId: ID!
+  hashtagId: ID!
+  createdAt: DateTime!
   essay: Essay
   hashtag: Hashtag
 }
 
+type SpaceCount {
+  essays: Int!
+  notes: Int!
+  vocabularies: Int!
+}
+
+type Space {
+  id: ID!
+  name: String!
+  description: String
+  createdBy: User!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  target: SpaceTarget!
+  language: Language!
+  _count: SpaceCount
+}
+
+enum SpaceTarget {
+  GENERAL_LEARNING
+  TEST_PREPARATION
+  BUSINESS
+  ACADEMIC
+  CONVERSATION
+  TRAVEL
+  PROFESSIONAL
+  ORTHER
+}
+
+enum Language {
+  ENGLISH
+  JAPANESE
+  KOREAN
+  CHINESE
+  VIETNAMESE
+  FRENCH
+  GERMAN
+  SPANISH
+}
+
 type Essay {
   id: ID!
-  id_space: String!
+  spaceId: String!
   title: String!
   summary: String
   content: String!
-  upvote_count: Float!
-  cover_url: String
+  upvoteCount: Float!
+  coverUrl: String
   status: EssayStatus!
   language: String!
-  created_by: String!
-  created_at: DateTime!
-  updated_at: DateTime!
+  createdBy: String!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  deletedAt: DateTime!
   space: Space
   author: User
   corrections: [Correction!]
@@ -129,41 +130,43 @@ enum EssayStatus {
   deleted
 }
 
-type Follower {
+type Correction {
   id: ID!
-  id_follower: String!
-  id_following: String!
-  followed_at: DateTime!
-  follower: User
-  following: User
+  essayId: String!
+  overallComment: String
+  rating: String
+  createdBy: String!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  essay: Essay
+  creator: User
+  sentences: [CorrectionSentence!]
+  replies: [CorrectionReply!]
 }
 
 type User {
   id: ID!
-  username: String
+  username: String!
   email: String!
-  password_hash: String
+  passwordHash: String
   role: UserRole!
-  auth_provider: AuthProvider!
-  auth_provider_id: String
-  first_name: String
-  last_name: String
-  profile_picture: String
-  is_email_verified: Boolean!
-  last_login: DateTime
-  created_at: DateTime!
-  updated_at: DateTime!
-  languages: [UserLanguage!]
-  followedBy: [Follower!]
-  following: [Follower!]
-  spaces: [Space!]
-  essays: [Essay!]
+  authProvider: AuthProvider!
+  authProviderId: String
+  firstName: String
+  lastName: String
+  profilePicture: String
+  isEmailVerified: Boolean!
+  currentLevel: ProficiencyLevel!
+  lastLogin: DateTime
+  createdAt: DateTime!
+  updatedAt: DateTime!
 }
 
 """User roles in the system"""
 enum UserRole {
   user
   admin
+  teacher
 }
 
 """Authentication providers"""
@@ -173,14 +176,24 @@ enum AuthProvider {
   facebook
 }
 
+"""User proficiency levels"""
+enum ProficiencyLevel {
+  BEGINNER
+  ELEMENTARY
+  INTERMEDIATE
+  UPPER_INTERMEDIATE
+  ADVANCED
+  MASTER
+}
+
 type CorrectionResponseOneDto {
   id: ID!
-  essay_id: String!
-  created_by: String!
+  essayId: String!
+  createdBy: String!
   overall_comment: String
   rating: Float
-  created_at: DateTime!
-  updated_at: DateTime!
+  createdAt: DateTime!
+  updatedAt: DateTime!
   creator: User
   sentences: [CorrectionSentence!]
 }
@@ -195,23 +208,10 @@ type SpacesResponse {
   pagination: PaginationOutputDto!
 }
 
-type UsersResponse {
-  data: [User!]!
-  pagination: PaginationOutputDto!
-}
-
 type Query {
-  users(findAllUsersDto: FindAllUsersDto!): UsersResponse!
-  user(id: String!): User!
   getUserSpaces(input: GetUserSpacesDto!): SpacesResponse!
   getCorrectionsByEssay(input: GetCorrectionsByEssayDto!): CorrectionResponseAllDto!
   getCorrectionIfExist(essayId: String!): CorrectionResponseOneDto
-}
-
-input FindAllUsersDto {
-  page: Int! = 1
-  perPage: Int! = 10
-  search: String
 }
 
 input GetUserSpacesDto {
@@ -229,26 +229,8 @@ input GetCorrectionsByEssayDto {
 }
 
 type Mutation {
-  createUser(createUserInput: CreateUserDto!): User!
-  updateUser(id: String!, updateUserInput: UpdateUserDto!): User!
-  removeUser(id: String!): User!
   createCorrectionEssay(input: CreateCorrectionDto!): CorrectionResponseOneDto!
   updateCorrectionEssay(input: UpdateCorrectionDto!): CorrectionResponseOneDto!
-}
-
-input CreateUserDto {
-  last_name: String
-  first_name: String
-  username: String!
-  email: String!
-  password: String!
-  profile_picture: String
-  role: UserRole
-  auth_provider: AuthProvider
-}
-
-input UpdateUserDto {
-  id: UserRole
 }
 
 input CreateCorrectionDto {

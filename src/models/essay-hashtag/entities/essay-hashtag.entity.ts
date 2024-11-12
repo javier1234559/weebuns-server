@@ -20,21 +20,21 @@ export class EssayHashtag implements IEssayHashtag {
     example: '123e4567-e89b-12d3-a456-426614174000',
     format: 'uuid',
   })
-  essay_id: string;
+  essayId: string;
 
   @Field(() => ID)
   @ApiProperty({
     example: '123e4567-e89b-12d3-a456-426614174000',
     format: 'uuid',
   })
-  hashtag_id: string;
+  hashtagId: string;
 
   @Field(() => Date)
   @ApiProperty({
     example: '2024-01-01T00:00:00.000Z',
     format: 'date-time',
   })
-  created_at: Date;
+  createdAt: Date;
 
   @Field(() => Essay, {
     nullable: true,

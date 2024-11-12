@@ -14,6 +14,8 @@ import { ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 import { AuthGuard } from 'src/common/auth/auth.guard';
 import { Roles, RolesGuard, UserRole } from 'src/common/auth/role.guard';
+import { CurrentUser } from 'src/common/decorators/current-user.decorator';
+import { IAuthPayload } from 'src/common/interface/auth-payload.interface';
 import { CreateSpaceResponseDto } from 'src/models/space/dto/create-space-response.dto';
 import { CreateSpaceDto } from 'src/models/space/dto/create-space.dto';
 import { DeleteSpaceResponseDto } from 'src/models/space/dto/delete-space-response.dto';
@@ -29,6 +31,7 @@ import { SpaceService } from 'src/models/space/space.service';
 @UseGuards(AuthGuard, RolesGuard)
 export class SpaceController {
   constructor(private readonly spaceService: SpaceService) {}
+
   @Get()
   @Roles(UserRole.USER, UserRole.ADMIN)
   @ApiResponse({ status: HttpStatus.OK, type: SpacesResponse })
@@ -48,8 +51,11 @@ export class SpaceController {
     status: HttpStatus.CREATED,
     type: CreateSpaceResponseDto,
   })
-  async create(@Body() dto: CreateSpaceDto): Promise<CreateSpaceResponseDto> {
-    return this.spaceService.create(dto);
+  async create(
+    @CurrentUser() user: IAuthPayload,
+    @Body() dto: CreateSpaceDto,
+  ): Promise<CreateSpaceResponseDto> {
+    return this.spaceService.create(dto, user);
   }
   @Patch(':id')
   @Roles(UserRole.USER)

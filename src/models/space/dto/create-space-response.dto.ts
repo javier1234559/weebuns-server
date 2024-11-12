@@ -21,7 +21,7 @@ export class CreateSpaceResponseDto {
 
   @Field({ nullable: true })
   @ApiProperty()
-  quiz_number?: number;
+  notes_number?: number;
 
   @Field({ nullable: true })
   @ApiProperty()

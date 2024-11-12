@@ -1,8 +1,18 @@
-import { Field, ID, Int, ObjectType } from '@nestjs/graphql';
+import { Field, ID, Int, ObjectType, registerEnumType } from '@nestjs/graphql';
 import { ApiProperty } from '@nestjs/swagger';
+
+import { $Enums, Language, SpaceTarget } from '@prisma/client';
 
 import { ISpace } from 'src/models/space/space.interface';
 import { User } from 'src/models/user/entities/user.entity';
+
+registerEnumType(SpaceTarget, {
+  name: 'SpaceTarget',
+});
+
+registerEnumType(Language, {
+  name: 'Language',
+});
 
 @ObjectType()
 class SpaceCount {
@@ -12,7 +22,7 @@ class SpaceCount {
 
   @Field(() => Int)
   @ApiProperty({ example: 0 })
-  quizzes: number;
+  notes: number;
 
   @Field(() => Int)
   @ApiProperty({ example: 0 })
@@ -35,27 +45,35 @@ export class Space implements ISpace {
 
   @Field(() => User)
   @ApiProperty({ example: 1 })
-  created_by: string;
+  createdBy: string;
 
   @Field(() => Date)
   @ApiProperty()
-  created_at: Date;
+  createdAt: Date;
 
   @Field(() => Date)
   @ApiProperty()
-  updated_at: Date;
+  updatedAt: Date;
+
+  @Field(() => $Enums.SpaceTarget)
+  @ApiProperty()
+  target: $Enums.SpaceTarget;
+
+  @Field(() => $Enums.Language)
+  @ApiProperty()
+  language: $Enums.Language;
 
   @Field(() => SpaceCount, { nullable: true })
   @ApiProperty({
     type: 'object',
     properties: {
       essays: { type: 'number', example: 0 },
-      quizzes: { type: 'number', example: 0 },
+      notes: { type: 'number', example: 0 },
       vocabularies: { type: 'number', example: 0 },
     },
     example: {
       essays: 0,
-      quizzes: 0,
+      notes: 0,
       vocabularies: 0,
     },
   })

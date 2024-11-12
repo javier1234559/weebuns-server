@@ -1,273 +1,284 @@
-// data.ts
-import { AuthProvider, EssayStatus, Prisma, UserRole } from '@prisma/client';
+import {
+  AuthProvider,
+  EssayStatus,
+  Language,
+  Prisma,
+  ProficiencyLevel,
+  SpaceTarget,
+  UserRole,
+} from '@prisma/client';
 
 // Interface for storing generated IDs
 interface GeneratedIds {
   users: string[];
+  courses: string[];
+  userCourses: string[];
+  units: string[];
+  unitContents: string[];
+  notes: string[];
+  vocabularies: string[];
   spaces: string[];
+  spaceCourses: string[]; // Thêm vào
   essays: string[];
   hashtags: string[];
-  vocabularies: string[];
-  corrections: string[];
-  quizzes: string[];
   essayHashtags: string[];
+  corrections: string[];
+  correctionSentences: string[];
+  correctionReplies: string[];
 }
 
 // Store generated IDs
 export const generatedIds: GeneratedIds = {
   users: [],
+  courses: [],
+  userCourses: [],
+  units: [],
+  unitContents: [],
+  notes: [],
+  vocabularies: [],
   spaces: [],
+  spaceCourses: [], // Thêm vào
   essays: [],
   hashtags: [],
-  vocabularies: [],
-  corrections: [],
-  quizzes: [],
   essayHashtags: [],
+  corrections: [],
+  correctionSentences: [],
+  correctionReplies: [],
 };
 
-export const createEssayHashtags = (essayIds: string[], hashtagIds: string[]) =>
-  [
-    // Connect first essay with 'english' and 'learning' hashtags
-    {
-      essay: {
-        connect: { id: essayIds[0] },
-      },
-      hashtag: {
-        connect: { id: hashtagIds[0] }, // english
-      },
-    },
-    {
-      essay: {
-        connect: { id: essayIds[0] },
-      },
-      hashtag: {
-        connect: { id: hashtagIds[3] }, // learning
-      },
-    },
-    // Connect second essay with 'japanese' and 'learning' hashtags
-    {
-      essay: {
-        connect: { id: essayIds[1] },
-      },
-      hashtag: {
-        connect: { id: hashtagIds[2] }, // japanese
-      },
-    },
-    {
-      essay: {
-        connect: { id: essayIds[1] },
-      },
-      hashtag: {
-        connect: { id: hashtagIds[3] }, // learning
-      },
-    },
-  ] as Prisma.EssayHashtagCreateInput[];
-
-// Base entities
+// Base users data
 export const users: Prisma.UserCreateInput[] = [
   {
-    username: 'Alice',
+    username: 'test user',
     email: 'test@gmail.com',
-    role: UserRole.user,
-    auth_provider: AuthProvider.local,
-    password_hash:
+    passwordHash:
       '$2b$10$11zWAeJIiwBV7rI.TYlF4.nW/kLj67MvHs5j8BFcMeG9XgHXx8pci',
-    auth_provider_id: null,
-    first_name: 'Alice',
-    last_name: 'Smith',
-    profile_picture: 'http://example.com/alice.jpg',
-    is_email_verified: false,
-    last_login: new Date('2024-01-01T00:00:00Z'),
+    role: UserRole.user,
+    authProvider: AuthProvider.local,
+    firstName: 'Student',
+    lastName: 'One',
+    profilePicture: 'https://example.com/student1.jpg',
+    isEmailVerified: true,
+    currentLevel: ProficiencyLevel.INTERMEDIATE,
+    languages: JSON.stringify([
+      {
+        language: 'en',
+        proficiency_level: 'INTERMEDIATE',
+        is_native: false,
+      },
+    ]),
+    lastLogin: new Date(),
   },
   {
-    username: 'Bob',
-    email: 'bob@prisma.io',
-    role: UserRole.user,
-    auth_provider: AuthProvider.local,
-    password_hash:
+    username: 'teacher1',
+    email: 'teacher@gmail.com',
+    passwordHash:
       '$2b$10$11zWAeJIiwBV7rI.TYlF4.nW/kLj67MvHs5j8BFcMeG9XgHXx8pci',
-    auth_provider_id: null,
-    first_name: 'Bob',
-    last_name: 'Johnson',
-    profile_picture: 'http://example.com/bob.jpg',
-    is_email_verified: false,
-    last_login: new Date('2024-01-01T00:00:00Z'),
+    role: UserRole.teacher,
+    authProvider: AuthProvider.local,
+    firstName: 'Teacher',
+    lastName: 'One',
+    profilePicture: 'https://example.com/teacher1.jpg',
+    isEmailVerified: true,
+    currentLevel: ProficiencyLevel.MASTER,
+    languages: JSON.stringify([
+      {
+        language: 'en',
+        proficiency_level: 'NATIVE',
+        is_native: true,
+      },
+    ]),
+    lastLogin: new Date(),
+  },
+  {
+    username: 'admin',
+    email: 'admin@gmail.com',
+    passwordHash:
+      '$2b$10$11zWAeJIiwBV7rI.TYlF4.nW/kLj67MvHs5j8BFcMeG9XgHXx8pci',
+    role: UserRole.teacher,
+    authProvider: AuthProvider.local,
+    firstName: 'Teacher',
+    lastName: 'One',
+    profilePicture: 'https://example.com/teacher1.jpg',
+    isEmailVerified: true,
+    currentLevel: ProficiencyLevel.MASTER,
+    languages: JSON.stringify([
+      {
+        language: 'en',
+        proficiency_level: 'NATIVE',
+        is_native: true,
+      },
+    ]),
+    lastLogin: new Date(),
   },
 ];
 
-// Functions to create relational data
+export const createCourses = (userIds: string[]) =>
+  [
+    {
+      title: 'English Grammar Fundamentals',
+      description: 'Master the basics of English grammar',
+      thumbnailUrl: 'https://example.com/course1.jpg',
+      level: ProficiencyLevel.INTERMEDIATE,
+      price: new Prisma.Decimal(29.99),
+      totalWeight: 10,
+      isPublished: true,
+      reviews: JSON.stringify([]),
+      creator: {
+        connect: { id: userIds[1] },
+      },
+    },
+  ] as Prisma.CourseCreateInput[];
+
+export const createUnits = (courseIds: string[]) =>
+  [
+    {
+      title: 'Present Tenses',
+      description: 'Learn all about present tenses in English',
+      orderIndex: 1,
+      comments: JSON.stringify([]),
+      course: {
+        connect: { id: courseIds[0] },
+      },
+    },
+  ] as Prisma.UnitCreateInput[];
+
+export const createUnitContents = (unitIds: string[]) =>
+  [
+    {
+      title: 'Present Simple vs Present Continuous',
+      contentType: 'theory',
+      content: JSON.stringify({
+        blocks: [
+          {
+            type: 'paragraph',
+            content:
+              'Learn the differences between present simple and present continuous tenses.',
+          },
+        ],
+      }),
+      orderIndex: 1,
+      isPremium: false,
+      isRequired: true,
+      completeWeight: 1,
+      isDone: false,
+      unit: {
+        connect: { id: unitIds[0] },
+      },
+    },
+  ] as Prisma.UnitContentCreateInput[];
+
 export const createSpaces = (userIds: string[]) =>
   [
     {
-      name: 'English Learning',
-      description: 'Space for learning English',
+      name: 'English Writing Practice',
+      description: 'Space for practicing English writing',
+      target: SpaceTarget.GENERAL_LEARNING,
+      language: Language.ENGLISH,
       creator: {
         connect: { id: userIds[0] },
-      },
-    },
-    {
-      name: 'Japanese Study',
-      description: 'Space for learning Japanese',
-      creator: {
-        connect: { id: userIds[1] },
       },
     },
   ] as Prisma.SpaceCreateInput[];
 
+export const createSpaceCourses = (spaceIds: string[], courseIds: string[]) =>
+  [
+    {
+      space: {
+        connect: { id: spaceIds[0] },
+      },
+      course: {
+        connect: { id: courseIds[0] },
+      },
+    },
+  ] as Prisma.SpaceCourseCreateInput[];
+
 export const createEssays = (spaceIds: string[], userIds: string[]) =>
   [
     {
-      title: 'My First English Essay And How I Learned It',
-      summary: 'A simple essay about learning English',
-      content: `This is the content of my first essay about learning English...
-orem ipsum dolor sit amet consectetur, adipisicing elit. Illum necessitatibus odit atque inventore deleniti enim corrupti molestiae, porro, fugit ea reiciendis velit ipsam officiis facere ipsum mollitia doloremque natus maiores.
- Lorem ipsum dolor sit amet consectetur, adipisicing elit. Illum necessitatibus odit atque inventore deleniti enim corrupti molestiae, porro, fugit ea reiciendis velit ipsam officiis facere ipsum mollitia doloremque natus maiores.
-  Lorem ipsum dolor sit amet consectetur, adipisicing elit. Illum necessitatibus odit atque inventore deleniti enim corrupti molestiae, porro, fugit ea reiciendis velit ipsam officiis facere ipsum mollitia doloremque natus maiores.
-Lorem ipsum dolor sit amet consectetur, adipisicing elit. Illum necessitatibus odit atque inventore deleniti enim corrupti molestiae, porro, fugit ea reiciendis velit ipsam officiis facere ipsum mollitia doloremque natus maiores.
-  Lorem ipsum dolor sit amet consectetur, adipisicing elit. Illum necessitatibus odit atque inventore deleniti enim corrupti molestiae, porro, fugit ea reiciendis velit ipsam officiis facere ipsum mollitia doloremque natus maiores.
-        `,
+      title: 'My Journey Learning English',
+      summary: 'A personal reflection on learning English',
+      content:
+        'I have been learning English for three years. It has been an amazing journey with many challenges and rewards.',
       status: EssayStatus.public,
-      language: 'en',
+      language: 'ENGLISH',
+      upvoteCount: 0,
       space: {
         connect: { id: spaceIds[0] },
       },
       author: {
         connect: { id: userIds[0] },
-      },
-    },
-    {
-      title: 'Japanese Learning Journey',
-      summary: 'My experience learning Japanese',
-      content: `Here is my journey learning Japanese...
-      This is the content of my first essay about learning English...
-orem ipsum dolor sit amet consectetur, adipisicing elit. Illum necessitatibus odit atque inventore deleniti enim corrupti molestiae, porro, fugit ea reiciendis velit ipsam officiis facere ipsum mollitia doloremque natus maiores.
- Lorem ipsum dolor sit amet consectetur, adipisicing elit. Illum necessitatibus odit atque inventore deleniti enim corrupti molestiae, porro, fugit ea reiciendis velit ipsam officiis facere ipsum mollitia doloremque natus maiores.
-  Lorem ipsum dolor sit amet consectetur, adipisicing elit. Illum necessitatibus odit atque inventore deleniti enim corrupti molestiae, porro, fugit ea reiciendis velit ipsam officiis facere ipsum mollitia doloremque natus maiores.
-Lorem ipsum dolor sit amet consectetur, adipisicing elit. Illum necessitatibus odit atque inventore deleniti enim corrupti molestiae, porro, fugit ea reiciendis velit ipsam officiis facere ipsum mollitia doloremque natus maiores.
-  Lorem ipsum dolor sit amet consectetur, adipisicing elit. Illum necessitatibus odit atque inventore deleniti enim corrupti molestiae, porro, fugit ea reiciendis velit ipsam officiis facere ipsum mollitia doloremque natus maiores.
-       `,
-      status: EssayStatus.draft,
-      language: 'ja',
-      space: {
-        connect: { id: spaceIds[1] },
-      },
-      author: {
-        connect: { id: userIds[1] },
       },
     },
   ] as Prisma.EssayCreateInput[];
 
-export const createUserLanguages = (userIds: string[]) =>
-  [
-    {
-      language: 'English',
-      proficiency_level: 'Advanced',
-      is_native: false,
-      user: {
-        connect: { id: userIds[0] },
-      },
-    },
-    {
-      language: 'Japanese',
-      proficiency_level: 'Beginner',
-      is_native: false,
-      user: {
-        connect: { id: userIds[1] },
-      },
-    },
-  ] as Prisma.UserLanguageCreateInput[];
-
 export const hashtags: Prisma.HashtagCreateInput[] = [
-  {
-    name: 'english',
-  },
-  {
-    name: 'grammar',
-  },
-  {
-    name: 'japanese',
-  },
-  {
-    name: 'learning',
-  },
+  { name: 'learning', usageCount: 0 },
+  { name: 'english', usageCount: 0 },
+  { name: 'grammar', usageCount: 0 },
 ];
 
-export const createVocabularies = (userIds: string[], spaceIds: string[]) =>
+export const createEssayHashtags = (essayIds: string[], hashtagIds: string[]) =>
   [
     {
-      word: 'ephemeral',
-      part_of_speech: 'adjective',
-      definition: 'lasting for a very short time',
-      pronunciation: 'ih-fem-er-uhl',
-      example: 'The beauty of cherry blossoms is ephemeral.',
-      mastery_level: 'beginner',
-      creator: {
-        connect: { id: userIds[0] },
+      essay: {
+        connect: { id: essayIds[0] },
       },
+      hashtag: {
+        connect: { id: hashtagIds[0] },
+      },
+    },
+  ] as Prisma.EssayHashtagCreateInput[];
+
+export const createVocabularies = (spaceIds: string[], userIds: string[]) =>
+  [
+    {
+      term: 'perseverance',
+      meaning: 'Persistence in doing something despite difficulty',
+      exampleSentence: 'Her perseverance in studying English paid off.',
+      imageUrl: 'https://example.com/vocab1.jpg',
+      tags: JSON.stringify(['important', 'academic']),
+      repetitionLevel: 0,
+      nextReview: new Date(),
       space: {
         connect: { id: spaceIds[0] },
       },
-    },
-    {
-      word: '桜',
-      part_of_speech: 'noun',
-      definition: 'cherry blossom',
-      pronunciation: 'さくら (sakura)',
-      example: '桜が咲いている。(The cherry blossoms are blooming.)',
-      mastery_level: 'beginner',
       creator: {
-        connect: { id: userIds[1] },
-      },
-      space: {
-        connect: { id: spaceIds[1] },
+        connect: { id: userIds[0] },
       },
     },
   ] as Prisma.VocabularyCreateInput[];
 
-export const createFollowers = (userIds: string[]) =>
+export const createNotes = (
+  unitIds: string[],
+  spaceIds: string[],
+  userIds: string[],
+) =>
   [
     {
-      follower: {
-        connect: { id: userIds[1] }, // Bob follows Alice
+      title: 'Present Tense Rules',
+      content: 'Important rules about present tense usage...',
+      tags: JSON.stringify(['grammar', 'important']),
+      isBookmarked: true,
+      unit: {
+        connect: { id: unitIds[0] },
       },
-      following: {
-        connect: { id: userIds[0] },
-      },
-    },
-  ] as Prisma.FollowerCreateInput[];
-
-export const createQuizzes = (userIds: string[], spaceIds: string[]) =>
-  [
-    {
-      title: 'English Grammar Basics',
-      space: {
-        connect: { id: spaceIds[0] },
-      },
+      space: spaceIds[0]
+        ? {
+            connect: { id: spaceIds[0] },
+          }
+        : undefined,
       creator: {
         connect: { id: userIds[0] },
       },
-      questions: {
-        create: [
-          {
-            question_text: 'What is the past tense of "go"?',
-            correct_answer: 'went',
-            is_correct: false,
-          },
-          {
-            question_text: 'What is the plural of "child"?',
-            correct_answer: 'children',
-            is_correct: false,
-          },
-        ],
-      },
     },
-  ] as Prisma.QuizCreateInput[];
+  ] as Prisma.NoteCreateInput[];
 
-export const createCorrections = (userIds: string[], essayIds: string[]) =>
+export const createCorrections = (essayIds: string[], userIds: string[]) =>
   [
     {
-      overall_comment: 'Good essay, but needs some grammar improvements',
-      rating: 8,
+      overallComment: 'Good effort! Here are some suggestions for improvement.',
+      rating: 4,
       essay: {
         connect: { id: essayIds[0] },
       },
@@ -277,28 +288,55 @@ export const createCorrections = (userIds: string[], essayIds: string[]) =>
       sentences: {
         create: [
           {
+            originalText: 'I have learn English for three years.',
+            correctedText: 'I have been learning English for three years.',
+            explanation:
+              'Use present perfect continuous for ongoing actions that started in the past.',
+            isCorrect: false,
+            rating: 4,
             index: 0,
-            original_text: 'I learning English.',
-            corrected_text: 'I am learning English.',
-            explanation: 'Present continuous tense requires "am/is/are"',
-            is_correct: false,
+          },
+          {
+            originalText:
+              'It has been an amazing journey with many challenges and rewards.',
+            correctedText: null,
+            explanation: 'This sentence is perfect!',
+            isCorrect: true,
             rating: 5,
+            index: 1,
           },
         ],
       },
     },
   ] as Prisma.CorrectionCreateInput[];
 
-export const createFlashCards = (userIds: string[], vocabularyIds: string[]) =>
+export const createCorrectionReplies = (
+  correctionIds: string[],
+  userIds: string[],
+) =>
   [
     {
-      familiarity_level: 1,
-      review_date: new Date(Date.now() + 24 * 60 * 60 * 1000),
-      vocabulary: {
-        connect: { id: vocabularyIds[0] },
+      comment: 'Thank you for the helpful feedback!',
+      correction: {
+        connect: { id: correctionIds[0] },
       },
       creator: {
         connect: { id: userIds[0] },
       },
     },
-  ] as Prisma.FlashCardCreateInput[];
+  ] as Prisma.CorrectionReplyCreateInput[];
+
+export const createUserCourses = (userIds: string[], courseIds: string[]) =>
+  [
+    {
+      paymentId: 'payment_123',
+      paymentStatus: 'pending',
+      purchasePrice: new Prisma.Decimal(29.99),
+      user: {
+        connect: { id: userIds[0] },
+      },
+      course: {
+        connect: { id: courseIds[0] },
+      },
+    },
+  ] as Prisma.UserCourseCreateInput[];

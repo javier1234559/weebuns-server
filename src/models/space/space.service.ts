@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 
 import { Prisma } from '@prisma/client';
 
+import { IAuthPayload } from 'src/common/interface/auth-payload.interface';
 import { PrismaService } from 'src/common/prisma/prisma.service';
 import { calculatePagination } from 'src/common/utils/pagination';
 import { CreateSpaceResponseDto } from 'src/models/space/dto/create-space-response.dto';
@@ -20,11 +21,11 @@ export class SpaceService {
 
   async create(
     createSpaceDto: CreateSpaceDto,
+    created_by: IAuthPayload,
   ): Promise<CreateSpaceResponseDto> {
-    const { created_by, ...data } = createSpaceDto;
-
+    const creatorId = String(created_by.sub);
     const user = await this.prisma.user.findUnique({
-      where: { id: created_by },
+      where: { id: creatorId },
     });
 
     if (!user) {
@@ -33,9 +34,9 @@ export class SpaceService {
 
     const space = await this.prisma.space.create({
       data: {
-        ...data,
+        ...createSpaceDto,
         creator: {
-          connect: { id: created_by },
+          connect: { id: creatorId },
         },
       },
     });
@@ -45,7 +46,7 @@ export class SpaceService {
       name: space.name,
       description: space.description,
       essay_number: 0,
-      quiz_number: 0,
+      notes_number: 0,
       vocab_number: 0,
     };
   }
@@ -67,13 +68,13 @@ export class SpaceService {
         where,
         skip,
         take: perPage,
-        orderBy: { created_at: 'desc' },
+        orderBy: { createdAt: 'desc' },
         include: {
           _count: {
             select: {
               essays: true,
               vocabularies: true,
-              quizzes: true,
+              notes: true,
             },
           },
         },
@@ -97,7 +98,7 @@ export class SpaceService {
           select: {
             essays: true,
             vocabularies: true,
-            quizzes: true,
+            notes: true,
           },
         },
       },
@@ -123,7 +124,7 @@ export class SpaceService {
           select: {
             essays: true,
             vocabularies: true,
-            quizzes: true,
+            notes: true,
           },
         },
       },
@@ -139,7 +140,7 @@ export class SpaceService {
       name: space.name,
       description: space.description,
       essay_number: space._count.essays,
-      quiz_number: space._count.quizzes,
+      notes_number: space._count.notes,
       vocab_number: space._count.vocabularies,
     };
   }
@@ -168,7 +169,7 @@ export class SpaceService {
     const isPaginated = page !== undefined && perPage !== undefined;
 
     let where: Prisma.SpaceWhereInput = {
-      created_by: userId,
+      createdBy: userId,
     };
 
     if (search) {
@@ -180,13 +181,13 @@ export class SpaceService {
 
     const queryOptions: Prisma.SpaceFindManyArgs = {
       where,
-      orderBy: { created_at: 'desc' },
+      orderBy: { createdAt: 'desc' },
       include: {
         _count: {
           select: {
             essays: true,
             vocabularies: true,
-            quizzes: true,
+            notes: true,
           },
         },
       },
