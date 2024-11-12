@@ -123,7 +123,6 @@ export const createCourses = (userIds: string[]) =>
       price: new Prisma.Decimal(29.99),
       totalWeight: 10,
       isPublished: true,
-      reviews: JSON.stringify([]),
       creator: {
         connect: { id: userIds[1] },
       },
@@ -136,7 +135,6 @@ export const createUnits = (courseIds: string[]) =>
       title: 'Present Tenses',
       description: 'Learn all about present tenses in English',
       orderIndex: 1,
-      comments: JSON.stringify([]),
       course: {
         connect: { id: courseIds[0] },
       },
