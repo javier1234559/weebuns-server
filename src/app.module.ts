@@ -10,6 +10,7 @@ import { join } from 'path';
 import { CacheKeyInterceptor } from 'src/common/cache/cache-key.interceptor';
 import { CommonModule } from 'src/common/common.module';
 import { HealthModule } from 'src/common/health/health.module';
+import { ActivityInterceptor } from 'src/common/interceptors/activity.interceptor';
 import { RemoveFieldInterceptor } from 'src/common/interceptors/remove-field.interceptor';
 import { TransactionInterceptor } from 'src/common/interceptors/transaction.interceptor';
 import { AiModule } from 'src/models/ai/ai.module';
@@ -17,6 +18,7 @@ import { CorrectionModule } from 'src/models/correction/corrrection.module';
 import { EssayModule } from 'src/models/essay/essay.module';
 import { HashTagModule } from 'src/models/hashtag/hashtag.module';
 import { SpaceModule } from 'src/models/space/space.module';
+import { StatsModule } from 'src/models/stats/stats.module';
 import { UserModule } from 'src/models/user/user.module';
 import { VocabularyModule } from 'src/models/vocabulary/vocabulary.module';
 
@@ -37,6 +39,7 @@ import { VocabularyModule } from 'src/models/vocabulary/vocabulary.module';
     VocabularyModule,
     HealthModule,
     HashTagModule,
+    StatsModule,
     AiModule,
   ],
   providers: [
@@ -51,6 +54,10 @@ import { VocabularyModule } from 'src/models/vocabulary/vocabulary.module';
     {
       provide: APP_INTERCEPTOR,
       useClass: CacheKeyInterceptor,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: ActivityInterceptor,
     },
   ],
 })

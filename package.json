@@ -21,12 +21,11 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "seed": "npx ts-node prisma/seed.ts",
+    "prisma:dev": "yarn prisma:generate && yarn prisma:migrate && yarn setup:timescale",
     "prisma:generate": "npx prisma generate",
-    "prisma:migrate": "npx prisma generate && prisma migrate dev --create-only",
-    "prisma:reset": "npx prisma migrate reset",
-    "prisma:dev": "prisma generate && prisma migrate dev && ts-node scripts/set-up-timescale.ts",
-    "prisma": "prisma generate && prisma migrate dev",
-    "prisma:deploy": "prisma generate && prisma migrate deploy && ts-node scripts/set-up-timescale.ts"
+    "prisma:migrate": "npx prisma migrate dev",
+    "setup:timescale": "ts-node scripts/setup-timescale.ts",
+    "prisma:reset": "npx prisma migrate reset && yarn setup:timescale"
   },
   "dependencies": {
     "@apollo/server": "^4.10.5",

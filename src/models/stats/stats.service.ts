@@ -15,39 +15,66 @@ export class StatsService {
     startDate: string,
     endDate: string,
   ): Promise<ActivityStreakResponseDto> {
+    // Get activities with streak count
     const activities = await this.prisma.$queryRaw<DailyActivityDto[]>`
-      WITH daily_counts AS (
+      WITH daily_activities AS (
         SELECT 
-          DATE_TRUNC('day', time)::date as date,
-          COUNT(*) as count
+          time::date as date,
+          COUNT(*) as activity_count,
+          MAX(streak_count) as streak_count  -- Get streak count
         FROM user_activities
         WHERE 
-          user_id = ${userId}
+          user_id = ${userId}::uuid
           AND time >= ${startDate}::timestamp
           AND time <= ${endDate}::timestamp
-        GROUP BY DATE_TRUNC('day', time)::date
+        GROUP BY time::date
       )
       SELECT
         to_char(d.date, 'YYYY-MM-DD') as date,
         CASE 
-          WHEN count IS NULL THEN 0
-          WHEN count <= 2 THEN 1
-          WHEN count <= 4 THEN 2
-          WHEN count <= 6 THEN 3
+          WHEN da.activity_count IS NULL THEN 0
+          WHEN da.activity_count = 1 THEN 1
+          WHEN da.activity_count = 2 THEN 2
+          WHEN da.activity_count = 3 THEN 3
           ELSE 4
-        END as level
+        END as level,
+        COALESCE(da.streak_count, 0) as streak
       FROM generate_series(
         ${startDate}::date,
         ${endDate}::date,
         '1 day'
       ) d(date)
-      LEFT JOIN daily_counts dc ON d.date = dc.date
-      ORDER BY date;
+      LEFT JOIN daily_activities da ON d.date = da.date
+      ORDER BY date DESC;
     `;
 
-    return { activities };
-  }
+    // Get current day's activity
+    const [currentStreak] = await this.prisma.$queryRaw<DailyActivityDto[]>`
+      SELECT 
+        to_char(time::date, 'YYYY-MM-DD') as date,
+        CASE 
+          WHEN COUNT(*) = 1 THEN 1
+          WHEN COUNT(*) = 2 THEN 2
+          WHEN COUNT(*) = 3 THEN 3
+          ELSE 4
+        END as level,
+        MAX(streak_count) as streak
+      FROM user_activities
+      WHERE 
+        user_id = ${userId}::uuid
+        AND DATE_TRUNC('day', time) = DATE_TRUNC('day', NOW())
+      GROUP BY time::date;
+    `;
 
+    return {
+      activities,
+      currentStreak: currentStreak || {
+        date: new Date().toISOString().split('T')[0],
+        level: 0,
+        streak: 0,
+      },
+    };
+  }
   // async getSpaceStats(spaceId: string) {
   //   const [essays, notes, vocabularies, courses] = await Promise.all([
   //     this.prisma.essay.count({ where: { spaceId } }),

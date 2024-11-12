@@ -4,7 +4,6 @@ import { JwtModule } from '@nestjs/jwt';
 
 import { CacheModule } from 'src/common/cache/cache.module';
 import { ValidationModule } from 'src/common/decorators/validation.module';
-import { ActivityTrackingMiddleware } from 'src/common/middleware/activity.middleware';
 import { LoggerMiddleware } from 'src/common/middleware/logger.middleware';
 import { PrismaModule } from 'src/common/prisma/prisma.module';
 import { UploadModule } from 'src/common/upload/upload.module';
@@ -32,6 +31,6 @@ import config, { MAX_AGE } from 'src/config';
 })
 export class CommonModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(LoggerMiddleware, ActivityTrackingMiddleware).forRoutes('*');
+    consumer.apply(LoggerMiddleware).forRoutes('*');
   }
 }

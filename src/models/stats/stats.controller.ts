@@ -1,6 +1,10 @@
-import { Controller, Get, Query, Req } from '@nestjs/common';
+import { Controller, Get, Query, UseGuards } from '@nestjs/common';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
 
+import { AuthGuard } from 'src/common/auth/auth.guard';
+import { Roles, RolesGuard, UserRole } from 'src/common/auth/role.guard';
+import { CurrentUser } from 'src/common/decorators/current-user.decorator';
+import { IAuthPayload } from 'src/common/interface/auth-payload.interface';
 import {
   ActivityStreakResponseDto,
   GetActivityStreakDto,
@@ -9,22 +13,24 @@ import { StatsService } from 'src/models/stats/stats.service';
 
 @ApiTags('Stats')
 @Controller('stats')
+@UseGuards(AuthGuard, RolesGuard)
 export class StatsController {
   constructor(private statsService: StatsService) {}
 
   @Get('user/activity-streak')
+  @Roles(UserRole.USER)
   @ApiResponse({
     status: 200,
     type: ActivityStreakResponseDto,
   })
   async getUserActivityStreak(
-    @Req() req,
+    @CurrentUser() currentUser: IAuthPayload,
     @Query() query: GetActivityStreakDto,
   ): Promise<ActivityStreakResponseDto> {
-    return this.statsService.getUserActivityStreak(
-      req.user.id,
-      query.startDate,
-      query.endDate,
-    );
+    const userId = String(currentUser.sub);
+    const currentYear = new Date().getFullYear();
+    const startDate = query.startDate || `${currentYear}-01-01`;
+    const endDate = query.endDate || `${currentYear}-12-31`;
+    return this.statsService.getUserActivityStreak(userId, startDate, endDate);
   }
 }
