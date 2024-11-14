@@ -16,13 +16,11 @@ import { AuthGuard } from 'src/common/auth/auth.guard';
 import { Roles, RolesGuard, UserRole } from 'src/common/auth/role.guard';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { IAuthPayload } from 'src/common/interface/auth-payload.interface';
-import { CreateSpaceResponseDto } from 'src/models/space/dto/create-space-response.dto';
 import { CreateSpaceDto } from 'src/models/space/dto/create-space.dto';
 import { DeleteSpaceResponseDto } from 'src/models/space/dto/delete-space-response.dto';
 import { FindAllSpacesDto } from 'src/models/space/dto/find-all-spaces.dto';
 import { FindOneSpaceResponseDto } from 'src/models/space/dto/find-one-space-response.dto';
 import { SpacesResponse } from 'src/models/space/dto/spaces-response.dto';
-import { UpdateSpaceResponseDto } from 'src/models/space/dto/update-space-response.dto';
 import { UpdateSpaceDto } from 'src/models/space/dto/update-space.dto';
 import { SpaceService } from 'src/models/space/space.service';
 
@@ -39,7 +37,7 @@ export class SpaceController {
     return this.spaceService.findAll(query);
   }
   @Get(':id')
-  @Roles(UserRole.USER)
+  @Roles(UserRole.USER, UserRole.ADMIN)
   @ApiParam({ name: 'id', type: String })
   @ApiResponse({ status: HttpStatus.OK, type: FindOneSpaceResponseDto })
   async findOne(@Param('id') id: string): Promise<FindOneSpaceResponseDto> {
@@ -49,24 +47,25 @@ export class SpaceController {
   @Roles(UserRole.USER)
   @ApiResponse({
     status: HttpStatus.CREATED,
-    type: CreateSpaceResponseDto,
+    type: FindOneSpaceResponseDto,
   })
   async create(
     @CurrentUser() user: IAuthPayload,
     @Body() dto: CreateSpaceDto,
-  ): Promise<CreateSpaceResponseDto> {
+  ): Promise<FindOneSpaceResponseDto> {
     return this.spaceService.create(dto, user);
   }
   @Patch(':id')
   @Roles(UserRole.USER)
   @ApiParam({ name: 'id', type: String })
-  @ApiResponse({ status: HttpStatus.OK, type: UpdateSpaceResponseDto })
+  @ApiResponse({ status: HttpStatus.OK, type: FindOneSpaceResponseDto })
   async update(
     @Param('id') id: string,
     @Body() dto: UpdateSpaceDto,
-  ): Promise<UpdateSpaceResponseDto> {
+  ): Promise<FindOneSpaceResponseDto> {
     return this.spaceService.update(id, dto);
   }
+
   @Delete(':id')
   @Roles(UserRole.USER)
   @ApiParam({ name: 'id', type: String })

@@ -1,7 +1,13 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-import { Language, SpaceTarget } from '@prisma/client';
 import { IsEnum, IsOptional, IsString } from 'class-validator';
+
+import {
+  LanguageCode,
+  LevelCode,
+  TargetCode,
+  TopicCode,
+} from 'src/common/enum/common';
 
 export class CreateSpaceDto {
   @ApiProperty()
@@ -14,20 +20,40 @@ export class CreateSpaceDto {
   description?: string;
 
   @ApiProperty({
-    enum: SpaceTarget,
-    example: SpaceTarget.GENERAL_LEARNING,
+    enum: LanguageCode,
+    example: LanguageCode.ENGLISH,
   })
-  @IsEnum(SpaceTarget, {
-    message: 'target must be one of: ' + Object.values(SpaceTarget).join(', '),
-  })
-  target: SpaceTarget;
+  @IsEnum(LanguageCode)
+  language: string;
 
   @ApiProperty({
-    enum: Language,
-    example: Language.ENGLISH,
+    enum: TargetCode,
+    example: TargetCode.COMMUNICATION,
   })
-  @IsEnum(Language, {
-    message: 'language must be one of: ' + Object.values(Language).join(', '),
+  @IsEnum(TargetCode)
+  target: string;
+
+  @ApiProperty({
+    enum: LevelCode,
+    example: LevelCode.INTERMEDIATE,
+    description: 'Current proficiency level',
   })
-  language: Language;
+  @IsEnum(LevelCode)
+  currentLevel: string;
+
+  @ApiProperty({
+    enum: TopicCode,
+    example: TopicCode.BUSINESS,
+    description: 'Main learning topic',
+  })
+  @IsEnum(TopicCode)
+  topic: string;
+
+  @ApiProperty({
+    enum: LevelCode,
+    example: LevelCode.ADVANCED,
+    description: 'Target proficiency level to achieve',
+  })
+  @IsEnum(LevelCode)
+  targetLevel: string;
 }

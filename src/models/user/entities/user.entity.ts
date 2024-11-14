@@ -1,14 +1,9 @@
 import { Field, ID, ObjectType, registerEnumType } from '@nestjs/graphql';
 import { ApiProperty } from '@nestjs/swagger';
 
-import {
-  $Enums,
-  AuthProvider,
-  Prisma,
-  ProficiencyLevel,
-  UserRole,
-} from '@prisma/client';
+import { $Enums, AuthProvider, UserRole } from '@prisma/client';
 
+import { LanguageCode } from 'src/common/enum/common';
 import { CorrectionReply } from 'src/models/correction-reply/entities/correction-reply.entity';
 import { Correction } from 'src/models/correction/entities/correction.entity';
 import { Course } from 'src/models/course/entities/course.entity';
@@ -30,9 +25,9 @@ registerEnumType(AuthProvider, {
   description: 'Authentication providers',
 });
 
-registerEnumType(ProficiencyLevel, {
-  name: 'ProficiencyLevel',
-  description: 'User proficiency levels',
+registerEnumType(LanguageCode, {
+  name: 'LanguageCode',
+  description: 'Available language codes',
 });
 
 @ObjectType()
@@ -82,15 +77,13 @@ export class User implements IUser {
   @ApiProperty({ example: false })
   isEmailVerified: boolean;
 
-  @Field(() => ProficiencyLevel)
-  @ApiProperty({ enum: ProficiencyLevel })
-  currentLevel: $Enums.ProficiencyLevel;
-
-  // @Field(() => Object)
+  @Field(() => LanguageCode)
   @ApiProperty({
-    type: () => Object,
+    enum: LanguageCode,
+    example: LanguageCode.VIETNAMESE,
+    description: "User's native language",
   })
-  languages: Prisma.JsonValue;
+  nativeLanguage: string;
 
   @Field(() => Date, { nullable: true })
   @ApiProperty({ nullable: true })
@@ -103,6 +96,10 @@ export class User implements IUser {
   @Field(() => Date)
   @ApiProperty()
   updatedAt: Date;
+
+  @Field(() => Date)
+  @ApiProperty()
+  deletedAt: Date;
 
   @ApiProperty({ type: () => [Course], nullable: true })
   courses?: Course[];

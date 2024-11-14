@@ -1,12 +1,4 @@
-import {
-  AuthProvider,
-  EssayStatus,
-  Language,
-  Prisma,
-  ProficiencyLevel,
-  SpaceTarget,
-  UserRole,
-} from '@prisma/client';
+import { AuthProvider, EssayStatus, Prisma, UserRole } from '@prisma/client';
 
 // Interface for storing generated IDs
 interface GeneratedIds {
@@ -37,7 +29,7 @@ export const generatedIds: GeneratedIds = {
   notes: [],
   vocabularies: [],
   spaces: [],
-  spaceCourses: [], // Thêm vào
+  spaceCourses: [],
   essays: [],
   hashtags: [],
   essayHashtags: [],
@@ -45,6 +37,238 @@ export const generatedIds: GeneratedIds = {
   correctionSentences: [],
   correctionReplies: [],
 };
+
+export const REFERENCE_TYPES = {
+  LANGUAGE: 'language',
+  LEVEL: 'level',
+  TARGET: 'target',
+  TOPIC: 'topic',
+} as const;
+
+export const REFERENCE = {
+  LANGUAGES: {
+    ENGLISH: 'ENGLISH',
+    VIETNAMESE: 'VIETNAMESE',
+  },
+  LEVELS: {
+    BEGINNER: 'BEGINNER',
+    ELEMENTARY: 'ELEMENTARY',
+    INTERMEDIATE: 'INTERMEDIATE',
+    UPPER_INTERMEDIATE: 'UPPER_INTERMEDIATE',
+    ADVANCED: 'ADVANCED',
+    MASTER: 'MASTER',
+  },
+  TARGETS: {
+    COMMUNICATION: 'COMMUNICATION',
+    IELTS: 'IELTS',
+    TOEIC: 'TOEIC',
+    OTHER: 'OTHER',
+  },
+  TOPICS: {
+    BUSINESS: 'BUSINESS',
+    ACADEMIC: 'ACADEMIC',
+    TRAVEL: 'TRAVEL',
+    DAILY_LIFE: 'DAILY_LIFE',
+    TECHNOLOGY: 'TECHNOLOGY',
+    OTHER: 'OTHER',
+  },
+} as const;
+
+export const referenceData: Prisma.ReferenceDataCreateInput[] = [
+  // Languages
+  {
+    type: REFERENCE_TYPES.LANGUAGE,
+    code: 'ENGLISH',
+    name: 'English',
+    metadata: {
+      flag: '🇬🇧',
+      iso_code: 'en',
+      native_name: 'English',
+    },
+    orderIndex: 1,
+  },
+  {
+    type: REFERENCE_TYPES.LANGUAGE,
+    code: 'VIETNAMESE',
+    name: 'Vietnamese',
+    metadata: {
+      flag: '🇻🇳',
+      iso_code: 'vi',
+      native_name: 'Tiếng Việt',
+    },
+    orderIndex: 2,
+  },
+
+  // Learning Targets
+  {
+    type: REFERENCE_TYPES.TARGET,
+    code: 'COMMUNICATION',
+    name: 'Communication',
+    metadata: {
+      description: 'Focus on speaking and daily communication',
+      recommended_level: 'INTERMEDIATE',
+    },
+    orderIndex: 1,
+  },
+  {
+    type: REFERENCE_TYPES.TARGET,
+    code: 'IELTS',
+    name: 'IELTS Preparation',
+    metadata: {
+      description: 'Prepare for IELTS examination',
+      recommended_level: 'INTERMEDIATE',
+    },
+    orderIndex: 2,
+  },
+  {
+    type: REFERENCE_TYPES.TARGET,
+    code: 'TOEIC',
+    name: 'TOEIC Preparation',
+    metadata: {
+      description: 'Prepare for TOEIC examination',
+      recommended_level: 'INTERMEDIATE',
+    },
+    orderIndex: 3,
+  },
+  {
+    type: REFERENCE_TYPES.TARGET,
+    code: 'OTHER',
+    name: 'Other Purposes',
+    metadata: {
+      description: 'Other learning purposes',
+    },
+    orderIndex: 4,
+  },
+
+  // Topics
+  {
+    type: REFERENCE_TYPES.TOPIC,
+    code: 'BUSINESS',
+    name: 'Business',
+    metadata: {
+      description: 'Business and professional communication',
+      sub_topics: ['Marketing', 'Management', 'Finance'],
+    },
+    orderIndex: 1,
+  },
+  {
+    type: REFERENCE_TYPES.TOPIC,
+    code: 'ACADEMIC',
+    name: 'Academic',
+    metadata: {
+      description: 'Academic studies and research',
+      sub_topics: ['Research', 'Essay Writing', 'Presentations'],
+    },
+    orderIndex: 2,
+  },
+  {
+    type: REFERENCE_TYPES.TOPIC,
+    code: 'TRAVEL',
+    name: 'Travel',
+    metadata: {
+      description: 'Travel and tourism',
+      sub_topics: ['Navigation', 'Culture', 'Food'],
+    },
+    orderIndex: 3,
+  },
+  {
+    type: REFERENCE_TYPES.TOPIC,
+    code: 'DAILY_LIFE',
+    name: 'Daily Life',
+    metadata: {
+      description: 'Everyday conversations and situations',
+      sub_topics: ['Shopping', 'Healthcare', 'Entertainment'],
+    },
+    orderIndex: 4,
+  },
+  {
+    type: REFERENCE_TYPES.TOPIC,
+    code: 'TECHNOLOGY',
+    name: 'Technology',
+    metadata: {
+      description: 'Technology and digital communication',
+      sub_topics: ['Software', 'Internet', 'Gadgets'],
+    },
+    orderIndex: 5,
+  },
+  {
+    type: REFERENCE_TYPES.TOPIC,
+    code: 'OTHER',
+    name: 'Other Topics',
+    metadata: {
+      description: 'Other topics not listed',
+    },
+    orderIndex: 6,
+  },
+
+  // Proficiency Levels
+  {
+    type: REFERENCE_TYPES.LEVEL,
+    code: 'BEGINNER',
+    name: 'Beginner',
+    metadata: {
+      description: 'Basic understanding of the language',
+      cefr_equivalent: 'A1',
+      recommended_study_hours: 100,
+    },
+    orderIndex: 1,
+  },
+  {
+    type: REFERENCE_TYPES.LEVEL,
+    code: 'ELEMENTARY',
+    name: 'Elementary',
+    metadata: {
+      description: 'Can handle simple communications',
+      cefr_equivalent: 'A2',
+      recommended_study_hours: 200,
+    },
+    orderIndex: 2,
+  },
+  {
+    type: REFERENCE_TYPES.LEVEL,
+    code: 'INTERMEDIATE',
+    name: 'Intermediate',
+    metadata: {
+      description: 'Can handle everyday situations',
+      cefr_equivalent: 'B1',
+      recommended_study_hours: 400,
+    },
+    orderIndex: 3,
+  },
+  {
+    type: REFERENCE_TYPES.LEVEL,
+    code: 'UPPER_INTERMEDIATE',
+    name: 'Upper Intermediate',
+    metadata: {
+      description: 'Can handle complex situations',
+      cefr_equivalent: 'B2',
+      recommended_study_hours: 600,
+    },
+    orderIndex: 4,
+  },
+  {
+    type: REFERENCE_TYPES.LEVEL,
+    code: 'ADVANCED',
+    name: 'Advanced',
+    metadata: {
+      description: 'Near-native proficiency',
+      cefr_equivalent: 'C1',
+      recommended_study_hours: 800,
+    },
+    orderIndex: 5,
+  },
+  {
+    type: REFERENCE_TYPES.LEVEL,
+    code: 'MASTER',
+    name: 'Master',
+    metadata: {
+      description: 'Native-like proficiency',
+      cefr_equivalent: 'C2',
+      recommended_study_hours: 1000,
+    },
+    orderIndex: 6,
+  },
+];
 
 // Base users data
 export const users: Prisma.UserCreateInput[] = [
@@ -59,15 +283,8 @@ export const users: Prisma.UserCreateInput[] = [
     lastName: 'One',
     profilePicture: 'https://example.com/student1.jpg',
     isEmailVerified: true,
-    currentLevel: ProficiencyLevel.INTERMEDIATE,
-    languages: JSON.stringify([
-      {
-        language: 'en',
-        proficiency_level: 'INTERMEDIATE',
-        is_native: false,
-      },
-    ]),
     lastLogin: new Date(),
+    nativeLanguage: 'VIETNAMESE',
   },
   {
     username: 'teacher1',
@@ -80,14 +297,7 @@ export const users: Prisma.UserCreateInput[] = [
     lastName: 'One',
     profilePicture: 'https://example.com/teacher1.jpg',
     isEmailVerified: true,
-    currentLevel: ProficiencyLevel.MASTER,
-    languages: JSON.stringify([
-      {
-        language: 'en',
-        proficiency_level: 'NATIVE',
-        is_native: true,
-      },
-    ]),
+    nativeLanguage: 'VIETNAMESE',
     lastLogin: new Date(),
   },
   {
@@ -95,20 +305,13 @@ export const users: Prisma.UserCreateInput[] = [
     email: 'admin@gmail.com',
     passwordHash:
       '$2b$10$11zWAeJIiwBV7rI.TYlF4.nW/kLj67MvHs5j8BFcMeG9XgHXx8pci',
-    role: UserRole.teacher,
+    role: UserRole.admin,
     authProvider: AuthProvider.local,
-    firstName: 'Teacher',
+    firstName: 'Admin',
     lastName: 'One',
-    profilePicture: 'https://example.com/teacher1.jpg',
+    profilePicture: 'https://example.com/admin1.jpg',
     isEmailVerified: true,
-    currentLevel: ProficiencyLevel.MASTER,
-    languages: JSON.stringify([
-      {
-        language: 'en',
-        proficiency_level: 'NATIVE',
-        is_native: true,
-      },
-    ]),
+    nativeLanguage: 'VIETNAMESE',
     lastLogin: new Date(),
   },
 ];
@@ -119,7 +322,7 @@ export const createCourses = (userIds: string[]) =>
       title: 'English Grammar Fundamentals',
       description: 'Master the basics of English grammar',
       thumbnailUrl: 'https://example.com/course1.jpg',
-      level: ProficiencyLevel.INTERMEDIATE,
+      level: 'BEGINNER',
       price: new Prisma.Decimal(29.99),
       totalWeight: 10,
       isPublished: true,
@@ -171,8 +374,11 @@ export const createSpaces = (userIds: string[]) =>
     {
       name: 'English Writing Practice',
       description: 'Space for practicing English writing',
-      target: SpaceTarget.GENERAL_LEARNING,
-      language: Language.ENGLISH,
+      language: 'ENGLISH',
+      target: 'COMMUNICATION',
+      currentLevel: 'BEGINNER',
+      topic: 'ACADEMIC',
+      targetLevel: 'INTERMEDIATE',
       creator: {
         connect: { id: userIds[0] },
       },

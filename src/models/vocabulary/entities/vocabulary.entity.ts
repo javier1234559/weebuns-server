@@ -6,7 +6,6 @@ import { Space } from 'src/models/space/entities/space.entity';
 import { User } from 'src/models/user/entities/user.entity';
 import { IVocabulary } from 'src/models/vocabulary/vocabulary.interface';
 
-// @ObjectType()
 export class Vocabulary implements IVocabulary {
   @ApiProperty({
     type: 'string',
@@ -74,6 +73,13 @@ export class Vocabulary implements IVocabulary {
     format: 'date-time',
   })
   updatedAt: Date;
+
+  @ApiProperty({
+    type: 'string',
+    format: 'date-time',
+  })
+  deletedAt: Date;
+
   @ApiProperty({
     type: () => Space,
     required: false,

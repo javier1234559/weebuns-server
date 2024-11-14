@@ -1,10 +1,14 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 
-import { EssayStatus, Prisma } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 
+import {
+  notDeletedQuery,
+  paginationQuery,
+  searchQuery,
+} from 'src/common/helper/prisma-queries.helper';
 import { IAuthPayload } from 'src/common/interface/auth-payload.interface';
 import { PrismaService } from 'src/common/prisma/prisma.service';
-import { logger } from 'src/common/utils/logger';
 import { calculatePagination } from 'src/common/utils/pagination';
 import { CreateEssayResponseDto } from 'src/models/essay/dto/create-essay-response.dto';
 import { CreateEssayDto } from 'src/models/essay/dto/create-essay.dto';
@@ -40,42 +44,27 @@ export class EssayService {
     user: IAuthPayload,
   ): Promise<EssaysResponse> {
     const { page, perPage, search, status } = query;
-    const skip = (page - 1) * perPage || 0;
 
-    let where: Prisma.EssayWhereInput = {
-      createdBy: String(user.sub), // Use user ID from auth token
+    const queryOptions = {
+      where: {
+        createdBy: String(user.sub),
+        ...notDeletedQuery,
+        ...searchQuery(search, ['title', 'summary']),
+        ...(status && { status }),
+      },
+      include: this.defaultInclude,
+      orderBy: { createdAt: 'desc' },
+      ...paginationQuery(page, perPage),
     };
 
-    if (search) {
-      where = {
-        ...where,
-        OR: [{ title: { contains: search, mode: 'insensitive' } }],
-      };
-    }
-
-    if (status) {
-      where = {
-        ...where,
-        status,
-      };
-    }
-
     const [essays, totalItems] = await Promise.all([
-      this.prisma.essay.findMany({
-        where,
-        skip,
-        take: perPage,
-        orderBy: { createdAt: 'desc' },
-        include: this.defaultInclude,
-      }),
-      this.prisma.essay.count({ where }),
+      this.prisma.essay.findMany(queryOptions),
+      this.prisma.essay.count({ where: queryOptions.where }),
     ]);
-
-    const pagination = calculatePagination(totalItems, query);
 
     return {
       data: essays,
-      pagination,
+      pagination: calculatePagination(totalItems, query),
     };
   }
 
@@ -85,34 +74,146 @@ export class EssayService {
     user: IAuthPayload,
   ): Promise<CreateEssayResponseDto> {
     const { spaceId, hashtag_names, ...data } = createEssayDto;
-    logger.info('hashtagIds', hashtag_names);
 
     const hashtagIds = hashtag_names?.length
       ? await this.hashTagService.findOrCreateHashtags(hashtag_names)
       : [];
 
-    logger.info('hashtagIds', hashtagIds);
-
     const essay = await tx.essay.create({
       data: {
-        ...data,
-        author: {
-          connect: { id: String(user.sub) },
-        },
-        space: {
-          connect: { id: spaceId },
-        },
+        title: data.title,
+        summary: data.summary,
+        content: data.content,
+        coverUrl: data.cover_url,
+        status: data.status,
+        language: data.language,
+        upvoteCount: 0,
+        author: { connect: { id: String(user.sub) } },
+        space: { connect: { id: spaceId } },
         hashtags: {
           create: hashtagIds.map((hashtagId) => ({
-            hashtag: {
-              connect: { id: hashtagId },
-            },
+            hashtag: { connect: { id: hashtagId } },
           })),
         },
       },
       include: this.defaultInclude,
     });
 
+    return this.mapEssayResponse(essay);
+  }
+
+  async findAll(query: FindAllEssaysDto): Promise<EssaysResponse> {
+    const { page, perPage, search, status } = query;
+
+    const queryOptions = {
+      where: {
+        ...notDeletedQuery,
+        ...searchQuery(search, ['title', 'summary']),
+        ...(status && { status }),
+      },
+      include: this.defaultInclude,
+      orderBy: { createdAt: 'desc' },
+      ...paginationQuery(page, perPage),
+    };
+
+    const [essays, totalItems] = await Promise.all([
+      this.prisma.essay.findMany(queryOptions),
+      this.prisma.essay.count({ where: queryOptions.where }),
+    ]);
+
+    return {
+      data: essays,
+      pagination: calculatePagination(totalItems, query),
+    };
+  }
+
+  async findOne(id: string): Promise<FindOneEssayResponseDto> {
+    const essay = await this.prisma.essay.findFirst({
+      where: { id, ...notDeletedQuery },
+      include: this.defaultInclude,
+    });
+
+    if (!essay) throw new NotFoundException(`Essay ${id} not found`);
+
+    return { essay };
+  }
+
+  async update(
+    tx: Prisma.TransactionClient,
+    id: string,
+    updateEssayDto: UpdateEssayDto,
+    user: IAuthPayload,
+  ): Promise<UpdateEssayResponseDto> {
+    const essay = await tx.essay.findFirst({
+      where: {
+        id,
+        createdBy: String(user.sub),
+        ...notDeletedQuery,
+      },
+    });
+
+    if (!essay)
+      throw new NotFoundException(`Essay ${id} not found or unauthorized`);
+
+    const { hashtag_names, ...updateData } = updateEssayDto;
+
+    const hashtagIds = hashtag_names?.length
+      ? await this.hashTagService.findOrCreateHashtags(hashtag_names)
+      : null;
+
+    const updated = await tx.essay.update({
+      where: { id },
+      data: {
+        ...updateData,
+        ...(hashtagIds && {
+          hashtags: {
+            deleteMany: {},
+            create: hashtagIds.map((hashtagId) => ({
+              hashtag: { connect: { id: hashtagId } },
+            })),
+          },
+        }),
+      },
+      include: this.defaultInclude,
+    });
+
+    return { essay: updated };
+  }
+
+  async deleteByUser(id: string): Promise<DeleteEssayResponseDto> {
+    return await this.prisma.$transaction(async (tx) => {
+      const essay = await tx.essay.findFirst({
+        where: { id, ...notDeletedQuery },
+      });
+
+      if (!essay) throw new NotFoundException(`Essay ${id} not found`);
+
+      const deleted = await tx.essay.update({
+        where: { id },
+        data: { deletedAt: new Date() },
+      });
+
+      return { essay: deleted };
+    });
+  }
+
+  async delete(id: string): Promise<DeleteEssayResponseDto> {
+    return await this.prisma.$transaction(async (tx) => {
+      const essay = await tx.essay.findFirst({
+        where: { id },
+      });
+
+      if (!essay) throw new NotFoundException(`Essay ${id} not found`);
+
+      const deleted = await tx.essay.delete({
+        where: { id },
+      });
+
+      return { essay: deleted };
+    });
+  }
+
+  private mapEssayResponse(essay: any): CreateEssayResponseDto {
     return {
       id: essay.id,
       id_space: essay.spaceId,
@@ -126,155 +227,5 @@ export class EssayService {
       hashtags: essay.hashtags,
       author: essay.author,
     };
-  }
-
-  async findAll(findAllEssaysDto: FindAllEssaysDto): Promise<EssaysResponse> {
-    const { page, perPage, search, status } = findAllEssaysDto;
-    const skip = (page - 1) * perPage || 0;
-
-    let where: Prisma.EssayWhereInput = {};
-
-    if (search) {
-      where = {
-        OR: [{ title: { contains: search, mode: 'insensitive' } }],
-      };
-    }
-    console.log(status);
-    if (status) {
-      where = {
-        ...where,
-        status,
-      };
-    }
-
-    const [essays, totalItems] = await Promise.all([
-      this.prisma.essay.findMany({
-        where,
-        skip,
-        take: perPage,
-        orderBy: { createdAt: 'desc' },
-        include: this.defaultInclude,
-      }),
-      this.prisma.essay.count({ where }),
-    ]);
-
-    const pagination = calculatePagination(totalItems, findAllEssaysDto);
-
-    return {
-      data: essays,
-      pagination,
-    };
-  }
-
-  async findOne(id: string): Promise<FindOneEssayResponseDto> {
-    const essay = await this.prisma.essay.findUnique({
-      where: { id },
-      include: {
-        author: true,
-        hashtags: {
-          include: {
-            hashtag: true,
-          },
-        },
-      },
-    });
-
-    if (!essay) {
-      throw new NotFoundException(`Essay with ID ${id} not found`);
-    }
-
-    return {
-      essay,
-    };
-  }
-
-  async update(
-    tx: Prisma.TransactionClient,
-    id: string,
-    updateEssayDto: UpdateEssayDto,
-    user: IAuthPayload,
-  ): Promise<UpdateEssayResponseDto> {
-    // First check if the essay belongs to the user
-    const existingEssay = await tx.essay.findFirst({
-      where: {
-        id,
-        createdBy: String(user.sub),
-      },
-    });
-
-    if (!existingEssay) {
-      throw new NotFoundException(
-        `Essay with ID ${id} not found or you don't have permission to update it`,
-      );
-    }
-
-    const { hashtag_names, ...updateData } = updateEssayDto;
-
-    const hashtagIds = hashtag_names?.length
-      ? await this.hashTagService.findOrCreateHashtags(hashtag_names)
-      : null;
-
-    const essay = await tx.essay.update({
-      where: { id },
-      data: {
-        ...updateData,
-        ...(hashtagIds && {
-          hashtags: {
-            deleteMany: {},
-            create: hashtagIds.map((hashtagId) => ({
-              hashtag: {
-                connect: { id: hashtagId },
-              },
-            })),
-          },
-        }),
-      },
-      include: this.defaultInclude,
-    });
-
-    return {
-      essay,
-    };
-  }
-
-  async delete(id: string): Promise<DeleteEssayResponseDto> {
-    return await this.prisma.$transaction(async (tx) => {
-      const essay = await tx.essay.findUnique({
-        where: { id },
-      });
-
-      if (!essay) {
-        throw new NotFoundException(`Essay with ID ${id} not found`);
-      }
-
-      // Delete the essay
-      await tx.essay.delete({
-        where: { id },
-      });
-
-      return { essay };
-    });
-  }
-
-  async deleteByUser(id: string): Promise<DeleteEssayResponseDto> {
-    return await this.prisma.$transaction(async (tx) => {
-      const essay = await tx.essay.findUnique({
-        where: { id },
-      });
-
-      if (!essay) {
-        throw new NotFoundException(`Essay with ID ${id} not found`);
-      }
-
-      // Soft Delete the essay
-      await tx.essay.update({
-        where: { id },
-        data: {
-          status: EssayStatus.deleted,
-        },
-      });
-
-      return { essay };
-    });
   }
 }

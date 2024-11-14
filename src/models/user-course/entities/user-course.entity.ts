@@ -2,9 +2,8 @@ import { ApiProperty } from '@nestjs/swagger';
 
 import { Prisma } from '@prisma/client';
 
-import { User } from 'src/models/user/entities/user.entity';
-
-import { Course } from '../../course/entities/course.entity';
+import { Course } from '../../../models/course/entities/course.entity';
+import { User } from '../../user/entities/user.entity';
 
 export class UserCourse {
   @ApiProperty({
@@ -20,6 +19,11 @@ export class UserCourse {
   })
   courseId: string;
   @ApiProperty({
+    type: 'integer',
+    format: 'int32',
+  })
+  completedWeight: number;
+  @ApiProperty({
     type: 'string',
     nullable: true,
   })
@@ -32,8 +36,9 @@ export class UserCourse {
   @ApiProperty({
     type: 'number',
     format: 'double',
+    nullable: true,
   })
-  purchasePrice: Prisma.Decimal;
+  purchasePrice: Prisma.Decimal | null;
   @ApiProperty({
     type: 'string',
     format: 'date-time',

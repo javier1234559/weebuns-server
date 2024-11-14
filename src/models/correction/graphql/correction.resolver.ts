@@ -7,7 +7,7 @@ import { AuthGuard } from 'src/common/auth/auth.guard';
 import { Roles, RolesGuard, UserRole } from 'src/common/auth/role.guard';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { TransactionClient } from 'src/common/decorators/transaction-client.decorator';
-import { UseTransaction } from 'src/common/interceptors/transaction.interceptor';
+import { UseTransaction } from 'src/common/interceptor/transaction.interceptor';
 import { IAuthPayload } from 'src/common/interface/auth-payload.interface';
 import { CorrectionService } from 'src/models/correction/correction.service';
 import { CorrectionResponseAllDto } from 'src/models/correction/dto/correction-all-response.dto copy';

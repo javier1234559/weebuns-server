@@ -1,17 +1,28 @@
 import { Field, ID, Int, ObjectType, registerEnumType } from '@nestjs/graphql';
 import { ApiProperty } from '@nestjs/swagger';
 
-import { $Enums, Language, SpaceTarget } from '@prisma/client';
-
+import {
+  LanguageCode,
+  LevelCode,
+  TargetCode,
+  TopicCode,
+} from 'src/common/enum/common';
 import { ISpace } from 'src/models/space/space.interface';
 import { User } from 'src/models/user/entities/user.entity';
 
-registerEnumType(SpaceTarget, {
-  name: 'SpaceTarget',
+registerEnumType(TargetCode, {
+  name: 'TargetCode',
+  description: 'Learning target codes',
 });
 
-registerEnumType(Language, {
-  name: 'Language',
+registerEnumType(TopicCode, {
+  name: 'TopicCode',
+  description: 'Learning topic codes',
+});
+
+registerEnumType(LevelCode, {
+  name: 'LevelCode',
+  description: 'Proficiency level codes',
 });
 
 @ObjectType()
@@ -32,7 +43,7 @@ class SpaceCount {
 @ObjectType()
 export class Space implements ISpace {
   @Field(() => ID)
-  @ApiProperty({ example: 1 })
+  @ApiProperty({ example: '123e4567-e89b-12d3-a456-426614174000' })
   id: string;
 
   @Field()
@@ -40,37 +51,75 @@ export class Space implements ISpace {
   name: string;
 
   @Field(() => String, { nullable: true })
-  @ApiProperty({ example: 'A space for learning English', nullable: true })
+  @ApiProperty({
+    example: 'A space for learning English',
+    nullable: true,
+  })
   description: string | null;
 
-  @Field(() => User)
-  @ApiProperty({ example: 1 })
+  @Field(() => LanguageCode)
+  @ApiProperty({
+    enum: LanguageCode,
+    example: LanguageCode.ENGLISH,
+    description: 'Learning language',
+  })
+  language: string;
+
+  @Field(() => TargetCode)
+  @ApiProperty({
+    enum: TargetCode,
+    example: TargetCode.COMMUNICATION,
+    description: 'Learning target/purpose',
+  })
+  target: string;
+
+  @Field(() => LevelCode)
+  @ApiProperty({
+    enum: LevelCode,
+    example: LevelCode.INTERMEDIATE,
+    description: 'Current proficiency level',
+  })
+  currentLevel: string;
+
+  @Field(() => TopicCode)
+  @ApiProperty({
+    enum: TopicCode,
+    example: TopicCode.BUSINESS,
+    description: 'Main learning topic',
+  })
+  topic: string;
+
+  @Field(() => LevelCode)
+  @ApiProperty({
+    enum: LevelCode,
+    example: LevelCode.ADVANCED,
+    description: 'Target proficiency level to achieve',
+  })
+  targetLevel: string;
+
+  @Field(() => String)
+  @ApiProperty({
+    example: '123e4567-e89b-12d3-a456-426614174000',
+    description: 'ID of the user who created this space',
+  })
   createdBy: string;
 
   @Field(() => Date)
-  @ApiProperty()
+  @ApiProperty({ description: 'Creation timestamp' })
   createdAt: Date;
 
   @Field(() => Date)
-  @ApiProperty()
+  @ApiProperty({ description: 'Last update timestamp' })
   updatedAt: Date;
 
-  @Field(() => $Enums.SpaceTarget)
+  @Field(() => Date)
   @ApiProperty()
-  target: $Enums.SpaceTarget;
-
-  @Field(() => $Enums.Language)
-  @ApiProperty()
-  language: $Enums.Language;
+  deletedAt: Date;
 
   @Field(() => SpaceCount, { nullable: true })
   @ApiProperty({
-    type: 'object',
-    properties: {
-      essays: { type: 'number', example: 0 },
-      notes: { type: 'number', example: 0 },
-      vocabularies: { type: 'number', example: 0 },
-    },
+    type: SpaceCount,
+    description: 'Count of related entities',
     example: {
       essays: 0,
       notes: 0,
@@ -78,4 +127,13 @@ export class Space implements ISpace {
     },
   })
   _count?: SpaceCount;
+
+  // Optional: Add relations if needed
+  @Field(() => User, { nullable: true })
+  @ApiProperty({
+    type: () => User,
+    description: 'Creator user details',
+    nullable: true,
+  })
+  creator?: User;
 }

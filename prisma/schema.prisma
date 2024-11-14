@@ -66,61 +66,46 @@ enum AuthProvider {
   facebook
 }
 
-enum Language {
-  ENGLISH
-  JAPANESE
-  KOREAN
-  CHINESE
-  VIETNAMESE
-  FRENCH
-  GERMAN
-  SPANISH
-}
+model ReferenceData {
+  id         String   @id @default(uuid())
+  type       String // 'language', 'level', 'target', 'topic'
+  code       String // ENGLISH, BEGINNER, BUSINESS,...
+  name       String
+  metadata   Json? // Metadata tùy theo type
+  isActive   Boolean  @default(true) @map("is_active")
+  orderIndex Int      @default(0) @map("order_index")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
 
-enum ProficiencyLevel {
-  BEGINNER
-  ELEMENTARY
-  INTERMEDIATE
-  UPPER_INTERMEDIATE
-  ADVANCED
-  MASTER
-}
-
-enum SpaceTarget {
-  GENERAL_LEARNING
-  TEST_PREPARATION
-  BUSINESS
-  ACADEMIC
-  CONVERSATION
-  TRAVEL
-  PROFESSIONAL
-  ORTHER
+  @@unique([type, code])
+  @@index([type, isActive, orderIndex])
+  @@map("reference_data")
 }
 
 model User {
-  id              String           @id @default(uuid())
-  username        String           @unique
-  email           String           @unique
-  passwordHash    String?          @map("password_hash")
-  role            UserRole         @default(user)
-  authProvider    AuthProvider     @default(local) @map("auth_provider")
-  authProviderId  String?          @map("auth_provider_id")
-  firstName       String?          @map("first_name")
-  lastName        String?          @map("last_name")
-  profilePicture  String?          @map("profile_picture")
-  isEmailVerified Boolean          @default(false) @map("is_email_verified")
-  currentLevel    ProficiencyLevel @default(BEGINNER) @map("current_level")
-  languages       Json             @default("[]")
-  lastLogin       DateTime?        @map("last_login")
-  createdAt       DateTime         @default(now()) @map("created_at")
-  updatedAt       DateTime         @updatedAt @map("updated_at")
+  id              String       @id @default(uuid())
+  username        String       @unique
+  email           String       @unique
+  passwordHash    String?      @map("password_hash")
+  role            UserRole     @default(user)
+  authProvider    AuthProvider @default(local) @map("auth_provider")
+  authProviderId  String?      @map("auth_provider_id")
+  firstName       String?      @map("first_name")
+  lastName        String?      @map("last_name")
+  profilePicture  String?      @map("profile_picture")
+  isEmailVerified Boolean      @default(false) @map("is_email_verified")
+  nativeLanguage  String       @map("native_language") // reference to language code
+  lastLogin       DateTime?    @map("last_login")
+  createdAt       DateTime     @default(now()) @map("created_at")
+  updatedAt       DateTime     @updatedAt @map("updated_at")
+  deletedAt       DateTime?    @map("deleted_at")
 
   // Relations
+  spaces            Space[]
   courses           Course[]
   userCourses       UserCourse[]
   notes             Note[]
   vocabularies      Vocabulary[]
-  spaces            Space[]
   essays            Essay[]
   corrections       Correction[]
   correctionReplies CorrectionReply[]
@@ -130,18 +115,19 @@ model User {
 }
 
 model Course {
-  id            String           @id @default(uuid())
-  currentUnitId String?          @map("current_unit_id")
+  id            String    @id @default(uuid())
+  currentUnitId String?   @map("current_unit_id")
   title         String
   description   String?
-  thumbnailUrl  String?          @map("thumbnail_url")
-  level         ProficiencyLevel
+  thumbnailUrl  String?   @map("thumbnail_url")
+  level         String    @map("level") // reference to level code
   price         Decimal?
-  totalWeight   Int              @default(0) @map("total_weight")
-  isPublished   Boolean          @default(false) @map("is_published")
-  createdBy     String           @map("created_by")
-  createdAt     DateTime         @default(now()) @map("created_at")
-  updatedAt     DateTime         @updatedAt @map("updated_at")
+  totalWeight   Int       @default(0) @map("total_weight")
+  isPublished   Boolean   @default(false) @map("is_published")
+  createdBy     String    @map("created_by")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+  deletedAt     DateTime? @map("deleted_at")
 
   // Relations
   currentUnit Unit?         @relation("CurrentUnit", fields: [currentUnitId], references: [id])
@@ -151,6 +137,7 @@ model Course {
   spaces      SpaceCourse[]
 
   @@index([isPublished, level])
+  @@index([deletedAt, isPublished])
   @@index([createdBy])
   @@map("courses")
 }
@@ -234,14 +221,18 @@ model UnitContent {
 }
 
 model Space {
-  id          String      @id @default(uuid())
-  name        String
-  description String?
-  target      SpaceTarget
-  language    Language
-  createdBy   String      @map("created_by")
-  createdAt   DateTime    @default(now()) @map("created_at")
-  updatedAt   DateTime    @updatedAt @map("updated_at")
+  id           String    @id @default(uuid())
+  name         String
+  description  String?
+  language     String    @map("language") // reference to language code
+  target       String    @map("target") // reference to target code
+  currentLevel String    @map("current_level") // reference to level code
+  topic        String    @map("topic") // reference to topic code
+  targetLevel  String    @map("target_level") // reference to level code
+  createdBy    String    @map("created_by")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+  deletedAt    DateTime? @map("deleted_at")
 
   // Relations
   creator      User          @relation(fields: [createdBy], references: [id])
@@ -250,8 +241,9 @@ model Space {
   notes        Note[]
   courses      SpaceCourse[]
 
+  @@index([language, target, currentLevel, topic])
   @@index([createdBy])
-  @@index([language, target])
+  @@index([deletedAt])
   @@map("spaces")
 }
 
@@ -311,6 +303,7 @@ model Vocabulary {
   createdBy       String    @map("created_by")
   createdAt       DateTime  @default(now()) @map("created_at")
   updatedAt       DateTime  @updatedAt @map("updated_at")
+  deletedAt       DateTime? @map("deleted_at")
 
   // Relations
   space   Space @relation(fields: [spaceId], references: [id])
@@ -332,7 +325,7 @@ model Essay {
   content     String
   coverUrl    String?     @map("cover_url")
   status      EssayStatus
-  language    String
+  language    String      @map("language") // reference to language code
   createdBy   String      @map("created_by")
   createdAt   DateTime    @default(now()) @map("created_at")
   updatedAt   DateTime    @updatedAt @map("updated_at")
@@ -380,13 +373,14 @@ model Hashtag {
 }
 
 model Correction {
-  id             String   @id @default(uuid())
-  essayId        String   @map("essay_id")
-  overallComment String?  @map("overall_comment")
+  id             String    @id @default(uuid())
+  essayId        String    @map("essay_id")
+  overallComment String?   @map("overall_comment")
   rating         Float?
-  createdBy      String   @map("created_by")
-  createdAt      DateTime @default(now()) @map("created_at")
-  updatedAt      DateTime @updatedAt @map("updated_at")
+  createdBy      String    @map("created_by")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+  deletedAt      DateTime? @map("deleted_at")
 
   // Relations
   essay     Essay                @relation(fields: [essayId], references: [id])

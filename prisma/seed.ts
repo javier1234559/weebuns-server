@@ -15,6 +15,7 @@ import {
   createVocabularies,
   generatedIds,
   hashtags,
+  referenceData,
   users,
 } from './data';
 
@@ -38,6 +39,25 @@ async function cleanDatabase() {
   } catch (error) {
     console.log('Error cleaning database:', error);
   }
+}
+
+export async function seedReferenceData() {
+  console.log('Seeding reference data...');
+  const createdRefs: Record<string, Record<string, string>> = {
+    language: {},
+    level: {},
+    target: {},
+    topic: {},
+  };
+
+  for (const ref of referenceData) {
+    const created = await prisma.referenceData.create({
+      data: ref,
+    });
+    createdRefs[ref.type][ref.code] = created.id;
+  }
+
+  return createdRefs;
 }
 
 async function seedUsers() {
@@ -224,6 +244,7 @@ async function seedAll() {
     await cleanDatabase();
 
     // Seed all data in the correct order
+    await seedReferenceData();
     await seedUsers();
     await seedCourses();
     await seedUnits();

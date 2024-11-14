@@ -31,4 +31,9 @@ export class RegisterDto {
   //docs
   @ApiProperty()
   lastName?: string;
+
+  @IsString()
+  //docs
+  @ApiProperty()
+  nativeLanguage: string;
 }
