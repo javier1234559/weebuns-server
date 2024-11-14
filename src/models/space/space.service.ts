@@ -10,10 +10,13 @@ import { CreateSpaceDto } from 'src/models/space/dto/create-space.dto';
 import { DeleteSpaceResponseDto } from 'src/models/space/dto/delete-space-response.dto';
 import { FindAllSpacesDto } from 'src/models/space/dto/find-all-spaces.dto';
 import { FindOneSpaceResponseDto } from 'src/models/space/dto/find-one-space-response.dto';
+import { GetSpacesUserDto } from 'src/models/space/dto/get-space-user.dto';
 import { GetUserSpacesDto } from 'src/models/space/dto/get-user-space.dto';
+import { SpaceCoursesResponseDto } from 'src/models/space/dto/space-courses-response.dto';
 import { SpacesResponse } from 'src/models/space/dto/spaces-response.dto';
 import { UpdateSpaceResponseDto } from 'src/models/space/dto/update-space-response.dto';
 import { UpdateSpaceDto } from 'src/models/space/dto/update-space.dto';
+import { CourseRawResult } from 'src/models/space/interface/course-raw-result.interface';
 
 @Injectable()
 export class SpaceService {
@@ -217,5 +220,119 @@ export class SpaceService {
     }
 
     return response;
+  }
+
+  async getSpacesUser(
+    userId: string,
+    query: GetSpacesUserDto,
+  ): Promise<SpacesResponse> {
+    const { page, perPage, search } = query;
+    const skip = (page - 1) * perPage;
+
+    const where: Prisma.SpaceWhereInput = {
+      createdBy: userId,
+      ...(search && { name: { contains: search, mode: 'insensitive' } }),
+    };
+
+    const [spaces, totalItems] = await Promise.all([
+      this.prisma.space.findMany({
+        where,
+        skip,
+        take: perPage,
+        orderBy: { createdAt: 'desc' },
+        include: {
+          creator: {
+            select: {
+              id: true,
+              username: true,
+              profilePicture: true,
+            },
+          },
+        },
+      }),
+      this.prisma.space.count({ where }),
+    ]);
+
+    const pagination = {
+      totalItems: totalItems,
+      currentPage: page,
+      itemsPerPage: perPage,
+      totalPages: Math.ceil(totalItems / perPage),
+      hasNextPage: page * perPage < totalItems,
+      hasPreviousPage: page > 1,
+    };
+
+    return {
+      data: spaces,
+      pagination,
+    };
+  }
+
+  async getSpaceCourses(
+    spaceId: string,
+    page: number,
+    perPage: number,
+  ): Promise<SpaceCoursesResponseDto> {
+    const skip = (page - 1) * perPage;
+
+    const [courses, total] = await Promise.all([
+      this.prisma.$queryRaw<CourseRawResult[]>`
+        SELECT
+          c.id,
+          c.title,
+          c.description,
+          c.thumbnail_url AS "thumbnailUrl",
+          c.level,
+          c.price,
+          c.total_weight AS "totalWeight",
+          c.is_published AS "isPublished",
+          c.created_at AS "createdAt",
+          u.id AS "creatorId",
+          u.username,
+          u.profile_picture AS "profilePicture",
+          sc.joined_at AS "joinedAt",
+          CASE WHEN sc.course_id IS NOT NULL THEN true ELSE false END AS "isJoined"
+        FROM courses c
+        LEFT JOIN space_courses sc ON c.id = sc.course_id AND sc.space_id = ${spaceId}
+        LEFT JOIN users u ON c.created_by = u.id
+        WHERE c.is_published = true
+        ORDER BY c.created_at DESC
+        LIMIT ${perPage} OFFSET ${skip}
+      `,
+      this.prisma.course.count({
+        where: {
+          isPublished: true,
+        },
+      }),
+    ]);
+
+    const totalPages = Math.ceil(total / perPage);
+
+    return {
+      data: courses.map((course) => ({
+        id: course.id,
+        title: course.title,
+        description: course.description,
+        thumbnailUrl: course.thumbnailUrl,
+        level: course.level,
+        price: course.price,
+        totalWeight: course.totalWeight,
+        isPublished: course.isPublished,
+        createdAt: course.createdAt,
+        creator: {
+          id: course.creatorId,
+          username: course.username,
+          profilePicture: course.profilePicture,
+        },
+        is_joined: course.isJoined,
+        joined_at: course.joinedAt,
+      })),
+      pagination: {
+        total,
+        page,
+        perPage,
+        totalPages,
+      },
+    };
   }
 }

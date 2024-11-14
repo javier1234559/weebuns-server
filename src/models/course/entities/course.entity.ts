@@ -2,13 +2,14 @@ import { ApiProperty } from '@nestjs/swagger';
 
 import { Prisma, ProficiencyLevel } from '@prisma/client';
 
+import { ICourse } from 'src/models/course/course.interface';
 import { SpaceCourse } from 'src/models/space-course/entities/space-course.entity';
 
 import { Unit } from '../../unit/entities/unit.entity';
 import { UserCourse } from '../../user-course/entities/user-course.entity';
 import { User } from '../../user/entities/user.entity';
 
-export class Course {
+export class Course implements ICourse {
   @ApiProperty({
     type: 'string',
   })

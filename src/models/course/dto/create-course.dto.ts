@@ -26,6 +26,8 @@ export class CreateCourseDto {
   @ApiProperty({
     type: 'number',
     format: 'double',
+    required: false,
+    nullable: true,
   })
-  price: Prisma.Decimal;
+  price?: Prisma.Decimal | null;
 }

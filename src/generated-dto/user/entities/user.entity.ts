@@ -7,6 +7,7 @@ import {
   UserRole,
 } from '@prisma/client';
 
+import { Activity } from '../../activity/entities/activity.entity';
 import { CorrectionReply } from '../../correction-reply/entities/correction-reply.entity';
 import { Correction } from '../../correction/entities/correction.entity';
 import { Course } from '../../course/entities/course.entity';
@@ -145,4 +146,10 @@ export class User {
     required: false,
   })
   unitComments?: UnitComment[];
+  @ApiProperty({
+    type: () => Activity,
+    isArray: true,
+    required: false,
+  })
+  activities?: Activity[];
 }
