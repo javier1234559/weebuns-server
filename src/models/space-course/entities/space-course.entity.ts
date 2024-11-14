@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-import { Course } from 'src/models/course/entities/course.entity';
-import { Space } from 'src/models/space/entities/space.entity';
+import { Course } from '../../course/entities/course.entity';
+import { Space } from '../../space/entities/space.entity';
 
 export class SpaceCourse {
   @ApiProperty({

@@ -51,6 +51,10 @@ export class Correction implements ICorrection {
   @ApiProperty()
   updatedAt: Date;
 
+  @Field(() => Date)
+  @ApiProperty()
+  deletedAt: Date;
+
   @Field(() => Essay, { nullable: true })
   @ApiProperty({ type: () => Essay, nullable: true })
   essay?: Essay;

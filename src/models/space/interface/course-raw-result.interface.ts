@@ -1,4 +1,3 @@
-import { ProficiencyLevel } from '@prisma/client';
 import { Decimal } from '@prisma/client/runtime/library';
 
 export interface CourseRawResult {
@@ -6,7 +5,7 @@ export interface CourseRawResult {
   title: string;
   description: string | null;
   thumbnailUrl: string | null;
-  level: ProficiencyLevel;
+  level: string;
   price: Decimal | null;
   totalWeight: number;
   isPublished: boolean;

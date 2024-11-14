@@ -96,10 +96,11 @@ export class AuthService {
     registerDto: RegisterDto,
     res: Response,
   ): Promise<UserRegisterResponse> {
-    const { username, email, password, firstName, lastName } = registerDto;
+    const { username, email, password, firstName, lastName, nativeLanguage } =
+      registerDto;
 
     const existingUser = await this.prisma.user.findFirst({
-      where: { OR: [{ email }, { username }] },
+      where: { OR: [{ email }] },
     });
 
     if (existingUser) {
@@ -115,6 +116,7 @@ export class AuthService {
           passwordHash: hashedPassword,
           firstName: firstName,
           lastName: lastName,
+          nativeLanguage: nativeLanguage,
           role: UserRole.user,
           authProvider: AuthProvider.local,
         },
@@ -244,6 +246,7 @@ export class AuthService {
           username: userData.name,
           firstName: userData.firstName,
           lastName: userData.lastName,
+          nativeLanguage: 'en',
           role: UserRole.user,
           authProvider: userData.provider,
           profilePicture: userData.picture,

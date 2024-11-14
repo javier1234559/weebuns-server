@@ -1,15 +1,5 @@
-import { ApiPropertyOptional } from '@nestjs/swagger';
+import { PartialType } from '@nestjs/swagger';
 
-import { IsOptional, IsString } from 'class-validator';
+import { CreateSpaceDto } from 'src/models/space/dto/create-space.dto';
 
-export class UpdateSpaceDto {
-  @ApiPropertyOptional()
-  @IsString()
-  @IsOptional()
-  name?: string;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsString()
-  description?: string;
-}
+export class UpdateSpaceDto extends PartialType(CreateSpaceDto) {}

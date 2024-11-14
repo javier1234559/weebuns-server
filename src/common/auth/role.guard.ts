@@ -6,6 +6,7 @@ import { GqlExecutionContext } from '@nestjs/graphql';
 export enum UserRole {
   USER = 'user',
   ADMIN = 'admin',
+  TEACHER = 'teacher',
 }
 
 export const ROLES_KEY = 'roles';
@@ -32,8 +33,8 @@ export class RolesGuard implements CanActivate {
       user = ctx.getContext().req.user;
     }
 
-    // console.log('User role:', user);
-    // console.log('Required role at this route:', requiredRoles);
+    console.log('User role:', user);
+    console.log('Required role at this route:', requiredRoles);
 
     if (!user) {
       return false;

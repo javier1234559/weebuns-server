@@ -16,12 +16,9 @@ import { AuthGuard } from 'src/common/auth/auth.guard';
 import { Roles, RolesGuard, UserRole } from 'src/common/auth/role.guard';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { IAuthPayload } from 'src/common/interface/auth-payload.interface';
-import { CreateVocabularyResponseDto } from 'src/models/vocabulary/dto/create-vocabulary-response.dto';
 import { CreateVocabularyDto } from 'src/models/vocabulary/dto/create-vocabulary.dto';
-import { DeleteVocabularyResponseDto } from 'src/models/vocabulary/dto/delete-vocabulary-response.dto';
 import { FindAllVocabularyDto } from 'src/models/vocabulary/dto/find-all-vocabulary.dto';
 import { FindOneVocabularyResponseDto } from 'src/models/vocabulary/dto/find-one-vocabulary-response.dto';
-import { UpdateVocabularyResponseDto } from 'src/models/vocabulary/dto/update-vocabulary-response.dto';
 import { UpdateVocabularyDto } from 'src/models/vocabulary/dto/update-vocabulary.dto';
 import { VocabularyResponse } from 'src/models/vocabulary/dto/vocabulary-response.dto';
 import { VocabularyService } from 'src/models/vocabulary/vocabulary.service';
@@ -37,12 +34,12 @@ export class VocabularyController {
   @ApiResponse({
     status: HttpStatus.CREATED,
     description: 'Vocabulary created successfully',
-    type: CreateVocabularyResponseDto,
+    type: FindOneVocabularyResponseDto,
   })
   async create(
     @CurrentUser() currentUser: IAuthPayload,
     @Body() createVocabularyDto: CreateVocabularyDto,
-  ): Promise<CreateVocabularyResponseDto> {
+  ): Promise<FindOneVocabularyResponseDto> {
     return this.vocabularyService.create(createVocabularyDto, currentUser);
   }
 
@@ -63,7 +60,6 @@ export class VocabularyController {
   @Get(':id')
   @ApiParam({
     name: 'id',
-    description: 'Vocabulary ID',
     type: String,
     required: true,
   })
@@ -85,12 +81,12 @@ export class VocabularyController {
   })
   @ApiResponse({
     status: HttpStatus.OK,
-    type: UpdateVocabularyResponseDto,
+    type: FindOneVocabularyResponseDto,
   })
   async update(
     @Param('id') id: string,
     @Body() updateVocabularyDto: UpdateVocabularyDto,
-  ): Promise<UpdateVocabularyResponseDto> {
+  ): Promise<FindOneVocabularyResponseDto> {
     return this.vocabularyService.update(id, updateVocabularyDto);
   }
 
@@ -102,9 +98,9 @@ export class VocabularyController {
   })
   @ApiResponse({
     status: HttpStatus.OK,
-    type: DeleteVocabularyResponseDto,
+    type: FindOneVocabularyResponseDto,
   })
-  async delete(@Param('id') id: string): Promise<DeleteVocabularyResponseDto> {
+  async delete(@Param('id') id: string): Promise<FindOneVocabularyResponseDto> {
     return this.vocabularyService.delete(id);
   }
 }

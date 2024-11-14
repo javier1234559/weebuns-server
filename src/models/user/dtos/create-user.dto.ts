@@ -60,6 +60,13 @@ export class CreateUserDto {
   @Field(() => String)
   password: string;
 
+  @IsString()
+  //docs
+  @ApiProperty()
+  // graphql
+  @Field(() => String)
+  nativeLanguage: string;
+
   // validation
   @IsOptional()
   @IsString()

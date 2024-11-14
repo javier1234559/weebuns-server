@@ -1,8 +1,15 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Injectable, NotFoundException } from '@nestjs/common';
 
-import { AuthProvider, Prisma, UserRole } from '@prisma/client';
+import { AuthProvider, UserRole } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 
+import {
+  notDeletedQuery,
+  paginationQuery,
+  searchQuery,
+  softDeleteQuery,
+} from 'src/common/helper/prisma-queries.helper';
 import { PrismaService } from 'src/common/prisma/prisma.service';
 import { calculatePagination } from 'src/common/utils/pagination';
 import { CreateUserDto } from 'src/models/user/dtos/create-user.dto';
@@ -26,64 +33,54 @@ export class UserService {
 
     const newUser = await this.prisma.user.create({
       data: {
-        ...userData,
+        username: userData.username,
+        email: userData.email,
+        firstName: userData.first_name,
+        lastName: userData.last_name,
+        nativeLanguage: userData.nativeLanguage,
+        profilePicture: userData.profile_picture,
         passwordHash: hashedPassword,
-        role: UserRole.user,
+        role: userData.role || UserRole.user,
         authProvider: AuthProvider.local,
       },
     });
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { passwordHash, ...userWithoutPassword } = newUser;
     return { user: userWithoutPassword };
   }
 
   async findAll(findAllUsersDto: FindAllUsersDto): Promise<UsersResponse> {
     const { page, perPage, search } = findAllUsersDto;
-    const skip = (page - 1) * perPage || 0;
 
-    let where: Prisma.UserWhereInput = {};
-
-    if (search) {
-      where = {
-        OR: [
-          { username: { contains: search, mode: 'insensitive' } },
-          { email: { contains: search, mode: 'insensitive' } },
-          { firstName: { contains: search, mode: 'insensitive' } },
-          { lastName: { contains: search, mode: 'insensitive' } },
-        ],
-      };
-    }
+    const queryOptions = {
+      where: {
+        ...notDeletedQuery,
+        ...searchQuery(search, ['username', 'email', 'firstName', 'lastName']),
+      },
+      orderBy: { createdAt: 'desc' },
+      ...paginationQuery(page, perPage),
+    };
 
     const [users, totalItems] = await Promise.all([
-      this.prisma.user.findMany({
-        where,
-        skip,
-        take: perPage,
-        orderBy: { createdAt: 'desc' },
-      }),
-      this.prisma.user.count({ where }),
+      this.prisma.user.findMany(queryOptions),
+      this.prisma.user.count({ where: queryOptions.where }),
     ]);
 
-    const pagination = calculatePagination(totalItems, findAllUsersDto);
-
     return {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       users: users.map(({ passwordHash, ...user }) => user),
-      pagination,
+      pagination: calculatePagination(totalItems, findAllUsersDto),
     };
   }
 
   async findOne(id: string): Promise<UserResponse> {
     const user = await this.prisma.user.findUnique({
-      where: { id },
+      where: { id, ...notDeletedQuery },
     });
 
     if (!user) {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { passwordHash, ...userWithoutPassword } = user;
     return { user: userWithoutPassword };
   }
@@ -92,22 +89,37 @@ export class UserService {
     id: string,
     updateUserInput: UpdateUserDto,
   ): Promise<UpdateUserResponse> {
-    const updatedUser = await this.prisma.user.update({
-      where: { id },
-      data: updateUserInput,
+    const user = await this.prisma.user.findFirst({
+      where: { id, ...notDeletedQuery },
     });
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    if (!user) {
+      throw new NotFoundException(`User with ID ${id} not found`);
+    }
+
+    const updatedUser = await this.prisma.user.update({
+      where: { id },
+      data: {
+        ...updateUserInput,
+        firstName: updateUserInput.first_name,
+        lastName: updateUserInput.last_name,
+      },
+    });
+
     const { passwordHash, ...userWithoutPassword } = updatedUser;
     return { user: userWithoutPassword };
   }
 
   async remove(id: string): Promise<DeleteUserResponse> {
-    const deletedUser = await this.prisma.user.delete({
-      where: { id },
+    const user = await this.prisma.user.findFirst({
+      where: { id, ...notDeletedQuery },
     });
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    if (!user) {
+      throw new NotFoundException(`User with ID ${id} not found`);
+    }
+
+    const deletedUser = await this.prisma.user.update(softDeleteQuery(id));
     const { passwordHash, ...userWithoutPassword } = deletedUser;
     return { user: userWithoutPassword };
   }

@@ -1,13 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-import { Prisma, ProficiencyLevel } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 
 import { ICourse } from 'src/models/course/course.interface';
 import { SpaceCourse } from 'src/models/space-course/entities/space-course.entity';
-
-import { Unit } from '../../unit/entities/unit.entity';
-import { UserCourse } from '../../user-course/entities/user-course.entity';
-import { User } from '../../user/entities/user.entity';
+import { Unit } from 'src/models/unit/entities/unit.entity';
+import { UserCourse } from 'src/models/user-course/entities/user-course.entity';
+import { User } from 'src/models/user/entities/user.entity';
 
 export class Course implements ICourse {
   @ApiProperty({
@@ -34,14 +33,15 @@ export class Course implements ICourse {
   })
   thumbnailUrl: string | null;
   @ApiProperty({
-    enum: ProficiencyLevel,
+    type: 'string',
   })
-  level: ProficiencyLevel;
+  level: string;
   @ApiProperty({
     type: 'number',
     format: 'double',
+    nullable: true,
   })
-  price: Prisma.Decimal;
+  price: Prisma.Decimal | null;
   @ApiProperty({
     type: 'integer',
     format: 'int32',
@@ -51,11 +51,6 @@ export class Course implements ICourse {
     type: 'boolean',
   })
   isPublished: boolean;
-  @ApiProperty({
-    example: '[{',
-    type: () => Object,
-  })
-  reviews: Prisma.JsonValue;
   @ApiProperty({
     type: 'string',
   })
@@ -70,6 +65,13 @@ export class Course implements ICourse {
     format: 'date-time',
   })
   updatedAt: Date;
+
+  @ApiProperty({
+    type: 'string',
+    format: 'date-time',
+  })
+  deletedAt: Date;
+
   @ApiProperty({
     type: () => Unit,
     required: false,

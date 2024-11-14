@@ -1,6 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-import { Prisma, ProficiencyLevel } from '@prisma/client';
+import { Prisma } from '@prisma/client';
+
+import { LevelCode } from 'src/common/enum/common';
 
 export class CreateCourseDto {
   @ApiProperty({
@@ -20,9 +22,9 @@ export class CreateCourseDto {
   })
   thumbnailUrl?: string | null;
   @ApiProperty({
-    enum: ProficiencyLevel,
+    enum: LevelCode,
   })
-  level: ProficiencyLevel;
+  level: string;
   @ApiProperty({
     type: 'number',
     format: 'double',

@@ -1,17 +1,17 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 
-import { Prisma } from '@prisma/client';
-
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
+import {
+  notDeletedQuery,
+  paginationQuery,
+  searchQuery,
+} from 'src/common/helper/prisma-queries.helper';
 import { IAuthPayload } from 'src/common/interface/auth-payload.interface';
 import { PrismaService } from 'src/common/prisma/prisma.service';
 import { calculatePagination } from 'src/common/utils/pagination';
-import { CreateVocabularyResponseDto } from 'src/models/vocabulary/dto/create-vocabulary-response.dto';
 import { CreateVocabularyDto } from 'src/models/vocabulary/dto/create-vocabulary.dto';
-import { DeleteVocabularyResponseDto } from 'src/models/vocabulary/dto/delete-vocabulary-response.dto';
 import { FindAllVocabularyDto } from 'src/models/vocabulary/dto/find-all-vocabulary.dto';
 import { FindOneVocabularyResponseDto } from 'src/models/vocabulary/dto/find-one-vocabulary-response.dto';
-import { UpdateVocabularyResponseDto } from 'src/models/vocabulary/dto/update-vocabulary-response.dto';
 import { UpdateVocabularyDto } from 'src/models/vocabulary/dto/update-vocabulary.dto';
 import { VocabularyResponse } from 'src/models/vocabulary/dto/vocabulary-response.dto';
 
@@ -19,91 +19,73 @@ import { VocabularyResponse } from 'src/models/vocabulary/dto/vocabulary-respons
 export class VocabularyService {
   constructor(private readonly prisma: PrismaService) {}
 
+  private readonly includeQuery = {
+    creator: true,
+    space: true,
+  } as const;
+
   async create(
     createVocabularyDto: CreateVocabularyDto,
-    @CurrentUser() _currentUser: IAuthPayload,
-  ): Promise<CreateVocabularyResponseDto> {
-    const created_id = String(_currentUser.sub);
+    @CurrentUser() currentUser: IAuthPayload,
+  ): Promise<FindOneVocabularyResponseDto> {
     const { spaceId, ...data } = createVocabularyDto;
+    const creatorId = String(currentUser.sub);
 
-    const space = await this.prisma.space.findUnique({
-      where: { id: spaceId },
+    const space = await this.prisma.space.findFirst({
+      where: { id: spaceId, ...notDeletedQuery },
     });
 
-    if (!space) {
-      throw new NotFoundException(`Space with ID ${spaceId} not found`);
-    }
+    if (!space) throw new NotFoundException(`Space ${spaceId} not found`);
 
-    // Kiểm tra sự tồn tại của created_by
-    const user = await this.prisma.user.findUnique({
-      where: { id: created_id },
+    const user = await this.prisma.user.findFirst({
+      where: { id: creatorId, ...notDeletedQuery },
     });
 
-    if (!user) {
-      throw new NotFoundException(`User with ID ${created_id} not found`);
-    }
+    if (!user) throw new NotFoundException(`User ${creatorId} not found`);
 
     const vocabulary = await this.prisma.vocabulary.create({
       data: {
         ...data,
-        createdBy: created_id,
-        spaceId: spaceId,
+        createdBy: creatorId,
+        spaceId,
       },
-      include: {
-        creator: true,
-        space: true,
-      },
+      include: this.includeQuery,
     });
 
-    return {
-      vocabulary,
-    };
+    return { vocabulary };
   }
 
-  async findAll(
-    findAllVocabularyDto: FindAllVocabularyDto,
-  ): Promise<VocabularyResponse> {
-    const { page, perPage, search } = findAllVocabularyDto;
-    const skip = (page - 1) * perPage || 0;
+  async findAll(query: FindAllVocabularyDto): Promise<VocabularyResponse> {
+    const { page, perPage, search } = query;
 
-    let where: Prisma.VocabularyWhereInput = {};
-
-    if (search) {
-      where = {
-        OR: [{ term: { contains: search, mode: 'insensitive' } }],
-      };
-    }
+    const queryOptions = {
+      where: {
+        ...notDeletedQuery,
+        ...searchQuery(search, ['term']),
+      },
+      include: this.includeQuery,
+      orderBy: { createdAt: 'desc' },
+      ...paginationQuery(page, perPage),
+    };
 
     const [vocabulary, totalItems] = await Promise.all([
-      this.prisma.vocabulary.findMany({
-        where,
-        skip,
-        take: perPage,
-        orderBy: { createdAt: 'desc' },
-      }),
-      this.prisma.vocabulary.count({ where }),
+      this.prisma.vocabulary.findMany(queryOptions),
+      this.prisma.vocabulary.count({ where: queryOptions.where }),
     ]);
-
-    const pagination = calculatePagination(totalItems, findAllVocabularyDto);
 
     return {
       data: vocabulary,
-      pagination,
+      pagination: calculatePagination(totalItems, query),
     };
   }
 
   async findOne(id: string): Promise<FindOneVocabularyResponseDto> {
-    const vocabulary = await this.prisma.vocabulary.findUnique({
-      where: { id },
-      include: {
-        creator: true,
-        space: true,
-      },
+    const vocabulary = await this.prisma.vocabulary.findFirst({
+      where: { id, ...notDeletedQuery },
+      include: this.includeQuery,
     });
 
-    if (!vocabulary) {
-      throw new NotFoundException(`Vocabulary with ID ${id} not found`);
-    }
+    if (!vocabulary) throw new NotFoundException(`Vocabulary ${id} not found`);
 
     return { vocabulary };
   }
@@ -111,36 +93,34 @@ export class VocabularyService {
   async update(
     id: string,
     updateVocabularyDto: UpdateVocabularyDto,
-  ): Promise<UpdateVocabularyResponseDto> {
-    const vocabulary = await this.prisma.vocabulary.update({
+  ): Promise<FindOneVocabularyResponseDto> {
+    const vocabulary = await this.prisma.vocabulary.findFirst({
+      where: { id, ...notDeletedQuery },
+    });
+
+    if (!vocabulary) throw new NotFoundException(`Vocabulary ${id} not found`);
+
+    const updated = await this.prisma.vocabulary.update({
       where: { id },
       data: updateVocabularyDto,
+      include: this.includeQuery,
     });
 
-    if (!vocabulary) {
-      throw new NotFoundException(`Vocabulary with ID ${id} not found`);
-    }
-
-    return {
-      vocabulary,
-    };
+    return { vocabulary: updated };
   }
 
-  async delete(id: string): Promise<DeleteVocabularyResponseDto> {
-    const vocabulary = await this.prisma.vocabulary.findUnique({
-      where: { id },
+  async delete(id: string): Promise<FindOneVocabularyResponseDto> {
+    const vocabulary = await this.prisma.vocabulary.findFirst({
+      where: { id, ...notDeletedQuery },
     });
 
-    if (!vocabulary) {
-      throw new NotFoundException(`Vocabulary with ID ${id} not found`);
-    }
+    if (!vocabulary) throw new NotFoundException(`Vocabulary ${id} not found`);
 
-    await this.prisma.vocabulary.delete({
+    const softDeletedVocabulary = await this.prisma.vocabulary.update({
       where: { id },
+      data: { deletedAt: new Date() },
     });
 
-    return {
-      message: `Vocabulary with ID ${id} has been successfully deleted.`,
-    };
+    return { vocabulary: softDeletedVocabulary };
   }
 }

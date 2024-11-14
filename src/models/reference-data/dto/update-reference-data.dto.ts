@@ -2,24 +2,26 @@ import { ApiProperty } from '@nestjs/swagger';
 
 import { Prisma } from '@prisma/client';
 
-export class CreateUserCourseDto {
+export class UpdateReferenceDataDto {
   @ApiProperty({
     type: 'string',
     required: false,
-    nullable: true,
   })
-  paymentId?: string | null;
+  type?: string;
   @ApiProperty({
     type: 'string',
     required: false,
-    nullable: true,
   })
-  paymentStatus?: string | null;
+  code?: string;
   @ApiProperty({
-    type: 'number',
-    format: 'double',
+    type: 'string',
+    required: false,
+  })
+  name?: string;
+  @ApiProperty({
+    type: () => Object,
     required: false,
     nullable: true,
   })
-  purchasePrice?: Prisma.Decimal | null;
+  metadata?: Prisma.InputJsonValue | Prisma.NullableJsonNullValueInput;
 }

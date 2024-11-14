@@ -11,7 +11,6 @@ export class UpdateUserCourseDto {
   paymentId?: string | null;
   @ApiProperty({
     type: 'string',
-    default: 'pending',
     required: false,
     nullable: true,
   })
@@ -20,6 +19,7 @@ export class UpdateUserCourseDto {
     type: 'number',
     format: 'double',
     required: false,
+    nullable: true,
   })
-  purchasePrice?: Prisma.Decimal;
+  purchasePrice?: Prisma.Decimal | null;
 }

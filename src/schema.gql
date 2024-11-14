@@ -72,34 +72,51 @@ type Space {
   id: ID!
   name: String!
   description: String
-  createdBy: User!
+  language: LanguageCode!
+  target: TargetCode!
+  currentLevel: LevelCode!
+  topic: TopicCode!
+  targetLevel: LevelCode!
+  createdBy: String!
   createdAt: DateTime!
   updatedAt: DateTime!
-  target: SpaceTarget!
-  language: Language!
+  deletedAt: DateTime!
   _count: SpaceCount
+  creator: User
 }
 
-enum SpaceTarget {
-  GENERAL_LEARNING
-  TEST_PREPARATION
+"""Available language codes"""
+enum LanguageCode {
+  ENGLISH
+  VIETNAMESE
+}
+
+"""Learning target codes"""
+enum TargetCode {
+  COMMUNICATION
+  IELTS
+  TOEIC
+  OTHER
+}
+
+"""Proficiency level codes"""
+enum LevelCode {
+  BEGINNER
+  ELEMENTARY
+  INTERMEDIATE
+  UPPER_INTERMEDIATE
+  ADVANCED
+  MASTER
+}
+
+"""Learning topic codes"""
+enum TopicCode {
   BUSINESS
   ACADEMIC
-  CONVERSATION
   TRAVEL
-  PROFESSIONAL
-  ORTHER
-}
-
-enum Language {
-  ENGLISH
-  JAPANESE
-  KOREAN
-  CHINESE
-  VIETNAMESE
-  FRENCH
-  GERMAN
-  SPANISH
+  DAILY_LIFE
+  TECHNOLOGY
+  OTHER
 }
 
 type Essay {
@@ -138,6 +155,7 @@ type Correction {
   createdBy: String!
   createdAt: DateTime!
   updatedAt: DateTime!
+  deletedAt: DateTime!
   essay: Essay
   creator: User
   sentences: [CorrectionSentence!]
@@ -156,10 +174,11 @@ type User {
   lastName: String
   profilePicture: String
   isEmailVerified: Boolean!
-  currentLevel: ProficiencyLevel!
+  nativeLanguage: LanguageCode!
   lastLogin: DateTime
   createdAt: DateTime!
   updatedAt: DateTime!
+  deletedAt: DateTime!
 }
 
 """User roles in the system"""
@@ -174,16 +193,6 @@ enum AuthProvider {
   local
   google
   facebook
-}
-
-"""User proficiency levels"""
-enum ProficiencyLevel {
-  BEGINNER
-  ELEMENTARY
-  INTERMEDIATE
-  UPPER_INTERMEDIATE
-  ADVANCED
-  MASTER
 }
 
 type CorrectionResponseOneDto {
