@@ -20,6 +20,8 @@ import { CreateSpaceDto } from 'src/models/space/dto/create-space.dto';
 import { DeleteSpaceResponseDto } from 'src/models/space/dto/delete-space-response.dto';
 import { FindAllSpacesDto } from 'src/models/space/dto/find-all-spaces.dto';
 import { FindOneSpaceResponseDto } from 'src/models/space/dto/find-one-space-response.dto';
+import { GetSpacesUserDto } from 'src/models/space/dto/get-space-user.dto';
+import { SpaceCoursesResponseDto } from 'src/models/space/dto/space-courses-response.dto';
 import { SpacesResponse } from 'src/models/space/dto/spaces-response.dto';
 import { UpdateSpaceDto } from 'src/models/space/dto/update-space.dto';
 import { SpaceService } from 'src/models/space/space.service';
@@ -36,6 +38,17 @@ export class SpaceController {
   async findAll(@Query() query: FindAllSpacesDto): Promise<SpacesResponse> {
     return this.spaceService.findAll(query);
   }
+
+  @Get('user')
+  @Roles(UserRole.USER)
+  @ApiResponse({ status: HttpStatus.OK, type: SpacesResponse })
+  async getUserSpaces(
+    @CurrentUser() user: IAuthPayload,
+    @Query() query: GetSpacesUserDto,
+  ): Promise<SpacesResponse> {
+    return this.spaceService.getSpacesUser(user.sub.toString(), query);
+  }
+
   @Get(':id')
   @Roles(UserRole.USER, UserRole.ADMIN)
   @ApiParam({ name: 'id', type: String })
@@ -72,5 +85,19 @@ export class SpaceController {
   @ApiResponse({ status: HttpStatus.OK, type: DeleteSpaceResponseDto })
   async delete(@Param('id') id: string): Promise<DeleteSpaceResponseDto> {
     return this.spaceService.delete(id);
+  }
+
+  @Get(':id/courses')
+  @Roles(UserRole.USER, UserRole.ADMIN)
+  @ApiResponse({
+    status: 200,
+    type: SpaceCoursesResponseDto,
+  })
+  async getSpaceCourses(
+    @Param('id') spaceId: string,
+    @Query('page') page: number = 1,
+    @Query('perPage') perPage: number = 10,
+  ): Promise<SpaceCoursesResponseDto> {
+    return this.spaceService.getSpaceCourses(spaceId, page, perPage);
   }
 }

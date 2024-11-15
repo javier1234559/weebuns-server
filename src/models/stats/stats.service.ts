@@ -5,6 +5,7 @@ import {
   ActivityStreakResponseDto,
   DailyActivityDto,
 } from 'src/models/stats/dto/activity-streak.dto';
+import { UserOverviewDto } from 'src/models/stats/dto/user-overview.dto';
 
 @Injectable()
 export class StatsService {
@@ -75,6 +76,24 @@ export class StatsService {
       },
     };
   }
+
+  async getUserOverview(userId: string): Promise<UserOverviewDto> {
+    const [essayCount, vocabCount, courseJoinedCount, notesCount] =
+      await Promise.all([
+        this.prisma.essay.count({ where: { createdBy: userId } }),
+        this.prisma.vocabulary.count({ where: { createdBy: userId } }),
+        this.prisma.userCourse.count({ where: { userId } }),
+        this.prisma.note.count({ where: { createdBy: userId } }),
+      ]);
+
+    return {
+      essayCount,
+      vocabCount,
+      courseJoinedCount,
+      notesCount,
+    };
+  }
+
   // async getSpaceStats(spaceId: string) {
   //   const [essays, notes, vocabularies, courses] = await Promise.all([
   //     this.prisma.essay.count({ where: { spaceId } }),

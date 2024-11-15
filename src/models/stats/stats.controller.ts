@@ -9,6 +9,7 @@ import {
   ActivityStreakResponseDto,
   GetActivityStreakDto,
 } from 'src/models/stats/dto/activity-streak.dto';
+import { UserOverviewDto } from 'src/models/stats/dto/user-overview.dto';
 import { StatsService } from 'src/models/stats/stats.service';
 
 @ApiTags('Stats')
@@ -32,5 +33,17 @@ export class StatsController {
     const startDate = query.startDate || `${currentYear}-01-01`;
     const endDate = query.endDate || `${currentYear}-12-31`;
     return this.statsService.getUserActivityStreak(userId, startDate, endDate);
+  }
+
+  @Get('user/overview')
+  @ApiResponse({
+    status: 200,
+    type: UserOverviewDto,
+  })
+  async getUserOverview(
+    @CurrentUser() currentUser: IAuthPayload,
+  ): Promise<UserOverviewDto> {
+    const userId = String(currentUser.sub);
+    return this.statsService.getUserOverview(userId);
   }
 }

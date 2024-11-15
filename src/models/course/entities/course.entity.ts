@@ -2,13 +2,13 @@ import { ApiProperty } from '@nestjs/swagger';
 
 import { Prisma } from '@prisma/client';
 
+import { ICourse } from 'src/models/course/course.interface';
+import { SpaceCourse } from 'src/models/space-course/entities/space-course.entity';
 import { Unit } from 'src/models/unit/entities/unit.entity';
 import { UserCourse } from 'src/models/user-course/entities/user-course.entity';
 import { User } from 'src/models/user/entities/user.entity';
 
-import { SpaceCourse } from '../../space-course/entities/space-course.entity';
-
-export class Course {
+export class Course implements ICourse {
   @ApiProperty({
     type: 'string',
   })
@@ -65,6 +65,13 @@ export class Course {
     format: 'date-time',
   })
   updatedAt: Date;
+
+  @ApiProperty({
+    type: 'string',
+    format: 'date-time',
+  })
+  deletedAt: Date;
+
   @ApiProperty({
     type: () => Unit,
     required: false,
