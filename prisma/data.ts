@@ -269,7 +269,6 @@ export const createCourses = (userIds: string[]) =>
       maxLevel: 'INTERMEDIATE',
       topics: ['ACADEMIC', 'DAILY_LIFE'],
       courseType: 'COMMUNICATION',
-      price: new Prisma.Decimal(29.99),
       totalWeight: 10,
       isPublished: true,
       creator: {
@@ -285,7 +284,6 @@ export const createCourses = (userIds: string[]) =>
       maxLevel: 'ADVANCED',
       topics: ['ACADEMIC', 'BUSINESS'],
       courseType: 'IELTS',
-      price: new Prisma.Decimal(49.99),
       totalWeight: 20,
       isPublished: true,
       creator: {
@@ -295,12 +293,14 @@ export const createCourses = (userIds: string[]) =>
   ] as Prisma.CourseCreateInput[];
 
 // Create units
-export const createUnits = (courseIds: string[]) =>
+export const createUnits = (courseIds: string[], userIds: string[]) =>
   [
     {
       title: 'Present Tenses',
       description: 'Learn all about present tenses in English',
       orderIndex: 1,
+      isPremium: false,
+      createdBy: userIds[1], // Teacher ID
       course: {
         connect: { id: courseIds[0] },
       },
@@ -309,6 +309,8 @@ export const createUnits = (courseIds: string[]) =>
       title: 'Past Tenses',
       description: 'Learn all about past tenses in English',
       orderIndex: 2,
+      isPremium: true,
+      createdBy: userIds[1], // Teacher ID
       course: {
         connect: { id: courseIds[0] },
       },

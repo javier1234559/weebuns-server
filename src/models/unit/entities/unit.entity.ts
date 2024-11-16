@@ -1,11 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
 
+import { CourseProgress } from 'src/models/course-progress/entities/course-progress.entity';
 import { Course } from 'src/models/course/entities/course.entity';
 import { Note } from 'src/models/note/entities/note.entity';
 import { UnitComment } from 'src/models/unit-comment/entities/unit-comment.entity';
 import { UnitContent } from 'src/models/unit-content/entities/unit-content.entity';
+import { UnitProgress } from 'src/models/unit-progress/entities/unit-progress.entity';
 import { IUnit } from 'src/models/unit/unit.interface';
-import { User } from 'src/models/user/entities/user.entity';
 
 export class Unit implements IUnit {
   @ApiProperty({
@@ -33,6 +34,10 @@ export class Unit implements IUnit {
   @ApiProperty({
     type: 'string',
   })
+  @ApiProperty({
+    type: 'boolean',
+  })
+  isPremium: boolean;
   createdBy: string;
   @ApiProperty({
     type: 'string',
@@ -49,11 +54,6 @@ export class Unit implements IUnit {
     required: false,
   })
   course?: Course;
-  @ApiProperty({
-    type: () => User,
-    required: false,
-  })
-  creator?: User;
   @ApiProperty({
     type: () => UnitContent,
     isArray: true,
@@ -73,9 +73,15 @@ export class Unit implements IUnit {
   })
   comments?: UnitComment[];
   @ApiProperty({
-    type: () => Course,
+    type: () => UnitProgress,
     isArray: true,
     required: false,
   })
-  currentInCourses?: Course[];
+  progress?: UnitProgress[];
+  @ApiProperty({
+    type: () => CourseProgress,
+    isArray: true,
+    required: false,
+  })
+  courseProgress?: CourseProgress[];
 }

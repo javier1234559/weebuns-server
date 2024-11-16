@@ -18,24 +18,24 @@
 //   fileNamingStyle                 = "kebab"
 // }
 
-// generator nestjsDto {
-//   provider                        = "prisma-generator-nestjs-dto"
-//   output                          = "../src/generated-dto"
-//   outputToNestJsResourceStructure = "true"
-//   flatResourceStructure           = "false"
-//   exportRelationModifierClasses   = "true"
-//   reExport                        = "false"
-//   createDtoPrefix                 = "Create"
-//   updateDtoPrefix                 = "Update"
-//   dtoSuffix                       = "Dto"
-//   entityPrefix                    = ""
-//   entitySuffix                    = ""
-//   classValidation                 = "false"
-//   fileNamingStyle                 = "kebab"
-//   noDependencies                  = "false"
-//   outputType                      = "class"
-//   prettier                        = "true"
-// }
+generator nestjsDto {
+  provider                        = "prisma-generator-nestjs-dto"
+  output                          = "../src/generated-dto"
+  outputToNestJsResourceStructure = "true"
+  flatResourceStructure           = "false"
+  exportRelationModifierClasses   = "true"
+  reExport                        = "false"
+  createDtoPrefix                 = "Create"
+  updateDtoPrefix                 = "Update"
+  dtoSuffix                       = "Dto"
+  entityPrefix                    = ""
+  entitySuffix                    = ""
+  classValidation                 = "false"
+  fileNamingStyle                 = "kebab"
+  noDependencies                  = "false"
+  outputType                      = "class"
+  prettier                        = "true"
+}
 
 generator client {
   provider = "prisma-client-js"
@@ -185,7 +185,7 @@ model Course {
   maxLevel     String    @map("max_level")
   topics       String[]  @map("topics")
   courseType   String    @map("course_type")
-  price        Decimal?
+  // price        Decimal?
   totalWeight  Int       @default(0) @map("total_weight")
   isPublished  Boolean   @default(false) @map("is_published")
   createdBy    String    @map("created_by")
@@ -230,6 +230,7 @@ model Unit {
   title       String
   description String?
   orderIndex  Int      @map("order_index")
+  isPremium   Boolean  @default(false) @map("is_premium")
   createdBy   String   @map("created_by")
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")

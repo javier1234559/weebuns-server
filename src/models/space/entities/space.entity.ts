@@ -83,11 +83,11 @@ export class Space implements ISpace {
 
   @Field(() => TopicCode)
   @ApiProperty({
-    enum: TopicCode,
-    example: TopicCode.BUSINESS,
+    enum: [TopicCode],
+    example: [TopicCode.ACADEMIC, TopicCode.DAILY_LIFE],
     description: 'Main learning topic',
   })
-  topic: string;
+  topics: string[];
 
   @Field(() => LevelCode)
   @ApiProperty({

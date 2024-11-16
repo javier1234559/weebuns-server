@@ -1,3 +1,11 @@
-import { BaseSpaceDto } from 'src/models/course/dto/base-space.dto';
+import { ApiProperty } from '@nestjs/swagger';
 
-export class JoinCourseRequestDto extends BaseSpaceDto {}
+import { IsUUID } from 'class-validator';
+
+export class JoinCourseRequestDto {
+  @ApiProperty({
+    type: 'string',
+  })
+  @IsUUID()
+  spaceId: string;
+}

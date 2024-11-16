@@ -1,21 +1,5 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { PartialType } from '@nestjs/swagger';
 
-export class UpdateUnitDto {
-  @ApiProperty({
-    type: 'string',
-    required: false,
-  })
-  title?: string;
-  @ApiProperty({
-    type: 'string',
-    required: false,
-    nullable: true,
-  })
-  description?: string | null;
-  @ApiProperty({
-    type: 'integer',
-    format: 'int32',
-    required: false,
-  })
-  orderIndex?: number;
-}
+import { CreateUnitDto } from 'src/models/unit/dto/create-unit.dto';
+
+export class UpdateUnitDto extends PartialType(CreateUnitDto) {}

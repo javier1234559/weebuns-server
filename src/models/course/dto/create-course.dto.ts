@@ -1,53 +1,55 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-import { Prisma } from '@prisma/client';
-
-import { LevelCode } from 'src/common/enum/common';
+import {
+  IsArray,
+  IsBoolean,
+  IsNumber,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 
 export class CreateCourseDto {
-  @ApiProperty({
-    type: 'string',
-  })
+  @ApiProperty({ example: 'English Grammar Course' })
+  @IsString()
   title: string;
 
-  @ApiProperty({
-    type: 'string',
-    required: false,
-    nullable: true,
-  })
-  description?: string | null;
+  @ApiProperty({ example: 'Learn English grammar from basic to advanced' })
+  @IsString()
+  @IsOptional()
+  description?: string;
 
-  @ApiProperty({
-    type: 'string',
-    required: false,
-    nullable: true,
-  })
-  thumbnailUrl?: string | null;
+  @ApiProperty({ example: 'https://example.com/thumbnail.jpg' })
+  @IsString()
+  @IsOptional()
+  thumbnailUrl?: string;
 
-  @ApiProperty({ enum: LevelCode })
-  level: string;
+  @ApiProperty({ example: 'ENGLISH' })
+  @IsString()
+  language: string;
 
-  @ApiProperty({
-    type: 'number',
-    format: 'double',
-    required: false,
-    nullable: true,
-  })
-  price?: Prisma.Decimal | null;
+  @ApiProperty({ example: 'BEGINNER' })
+  @IsString()
+  minLevel: string;
 
-  @ApiProperty({
-    type: 'number',
-    format: 'int32',
-  })
+  @ApiProperty({ example: 'INTERMEDIATE' })
+  @IsString()
+  maxLevel: string;
+
+  @ApiProperty({ example: '100' })
+  @IsNumber()
   totalWeight: number;
 
-  @ApiProperty({
-    type: 'boolean',
-  })
-  isPublished: boolean;
+  @ApiProperty({ example: ['ACADEMIC', 'BUSINESS'] })
+  @IsArray()
+  @IsString({ each: true })
+  topics: string[];
 
-  @ApiProperty({
-    type: 'string',
-  })
-  createdBy: string;
+  @ApiProperty({ example: 'COMMUNICATION' })
+  @IsString()
+  courseType: string;
+
+  @ApiProperty({ example: false })
+  @IsBoolean()
+  @IsOptional()
+  isPublished?: boolean = false;
 }

@@ -3,29 +3,30 @@ import { ApiProperty } from '@nestjs/swagger';
 export class CreateUnitDto {
   @ApiProperty({
     type: 'string',
+    required: false,
   })
-  title: string;
-
+  title?: string;
   @ApiProperty({
     type: 'string',
     required: false,
     nullable: true,
   })
   description?: string | null;
-
   @ApiProperty({
     type: 'integer',
     format: 'int32',
+    required: false,
   })
-  orderIndex: number;
+  orderIndex?: number;
+
+  @ApiProperty({
+    type: 'boolean',
+    required: false,
+  })
+  isPremium?: boolean;
 
   @ApiProperty({
     type: 'string',
   })
   courseId: string;
-
-  @ApiProperty({
-    type: 'string',
-  })
-  createdBy: string;
 }

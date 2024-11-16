@@ -1,8 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-import { UnitDetailDto } from 'src/models/unit/dto/unit-detail.dto';
+import { Unit } from 'src/models/unit/entities/unit.entity';
 
 export class GetUnitResponseDto {
-  @ApiProperty({ type: UnitDetailDto })
-  unit: UnitDetailDto;
+  @ApiProperty({ type: Unit })
+  unit: Unit;
 }

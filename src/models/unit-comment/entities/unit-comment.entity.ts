@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-import { Unit } from 'src/models/unit/entities/unit.entity';
-import { User } from 'src/models/user/entities/user.entity';
+import { Unit } from '../../unit/entities/unit.entity';
+import { User } from '../../user/entities/user.entity';
 
 export class UnitComment {
   @ApiProperty({

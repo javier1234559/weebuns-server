@@ -78,12 +78,34 @@ export class StatsService {
   }
 
   async getUserOverview(userId: string): Promise<UserOverviewDto> {
-    const [essayCount, vocabCount, courseJoinedCount, notesCount] =
+    const [essayCount, vocabCount, notesCount, courseJoinedCount] =
       await Promise.all([
-        this.prisma.essay.count({ where: { createdBy: userId } }),
-        this.prisma.vocabulary.count({ where: { createdBy: userId } }),
-        this.prisma.userCourse.count({ where: { userId } }),
-        this.prisma.note.count({ where: { createdBy: userId } }),
+        this.prisma.essay.count({
+          where: {
+            createdBy: userId,
+            deletedAt: null,
+          },
+        }),
+        this.prisma.vocabulary.count({
+          where: {
+            createdBy: userId,
+            deletedAt: null,
+          },
+        }),
+        this.prisma.note.count({
+          where: {
+            createdBy: userId,
+            deletedAt: null,
+          },
+        }),
+        this.prisma.spaceCourse.count({
+          where: {
+            space: {
+              createdBy: userId,
+              deletedAt: null,
+            },
+          },
+        }),
       ]);
 
     return {

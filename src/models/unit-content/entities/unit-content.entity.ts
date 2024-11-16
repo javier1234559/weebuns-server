@@ -3,8 +3,9 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Prisma } from '@prisma/client';
 
 import { IUnitContent } from 'src/models/unit-content/unit-content.interface';
+import { Unit } from 'src/models/unit/entities/unit.entity';
 
-import { Unit } from '../../../models/unit/entities/unit.entity';
+import { UnitContentProgress } from '../../unit-content-progress/entities/unit-content-progress.entity';
 
 export class UnitContent implements IUnitContent {
   @ApiProperty({
@@ -46,10 +47,6 @@ export class UnitContent implements IUnitContent {
   })
   completeWeight: number;
   @ApiProperty({
-    type: 'boolean',
-  })
-  isDone: boolean;
-  @ApiProperty({
     type: 'string',
     format: 'date-time',
   })
@@ -64,4 +61,11 @@ export class UnitContent implements IUnitContent {
     required: false,
   })
   unit?: Unit;
+
+  @ApiProperty({
+    type: () => UnitContentProgress,
+    isArray: true,
+    required: false,
+  })
+  progress?: UnitContentProgress[];
 }

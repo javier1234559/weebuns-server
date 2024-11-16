@@ -18,7 +18,6 @@ import { IAuthPayload } from 'src/common/interface/auth-payload.interface';
 import { CreateNoteDto } from 'src/models/note/dto/create-note.dto';
 import { CreateUpdateNoteResponseDto } from 'src/models/note/dto/note-response.dto';
 import { NoteService } from 'src/models/note/note.service';
-import { CreateUnitResponseDto } from 'src/models/unit/dto/create-unit-response.dto';
 import { CreateUnitDto } from 'src/models/unit/dto/create-unit.dto';
 import { GetUnitContentsResponseDto } from 'src/models/unit/dto/get-unit-contents-response.dto';
 import { GetUnitResponseDto } from 'src/models/unit/dto/get-unit-response.dto';
@@ -36,12 +35,13 @@ export class UnitController {
 
   @Post()
   @Roles(UserRole.USER, UserRole.ADMIN)
-  @ApiResponse({ status: HttpStatus.CREATED, type: CreateUnitResponseDto })
+  @ApiResponse({ status: HttpStatus.CREATED, type: GetUnitResponseDto })
   async createUnit(
     @Body() createUnitDto: CreateUnitDto,
     @CurrentUser() user: IAuthPayload,
-  ): Promise<CreateUnitResponseDto> {
-    return this.unitService.create(createUnitDto, user);
+  ): Promise<GetUnitResponseDto> {
+    const userId = user.sub.toString();
+    return this.unitService.create(createUnitDto, userId);
   }
 
   @Get(':id')
@@ -50,15 +50,10 @@ export class UnitController {
   @ApiParam({
     name: 'id',
     type: String,
-    description: 'The ID of the Unit to retrieve',
   })
   @ApiResponse({ status: HttpStatus.OK, type: GetUnitResponseDto })
-  async getUnit(
-    @Param('id') unitId: string,
-    @CurrentUser() user: IAuthPayload,
-  ): Promise<GetUnitResponseDto> {
-    const userId = user.sub.toString(); // Assuming 'sub' is the userId in IAuthPayload
-    return this.unitService.getUnit(unitId, userId);
+  async getUnit(@Param('id') unitId: string): Promise<GetUnitResponseDto> {
+    return this.unitService.getUnit(unitId);
   }
 
   @Get(':id/unit-contents')
@@ -67,12 +62,11 @@ export class UnitController {
   @ApiParam({
     name: 'id',
     type: String,
-    description: 'The ID of the Unit to retrieve contents for',
   })
   @ApiResponse({ status: HttpStatus.OK, type: [GetUnitContentsResponseDto] })
   async getUnitContents(
     @Param('id') unitId: string,
-  ): Promise<GetUnitContentsResponseDto[]> {
+  ): Promise<GetUnitContentsResponseDto> {
     return this.unitService.getUnitContents(unitId);
   }
 

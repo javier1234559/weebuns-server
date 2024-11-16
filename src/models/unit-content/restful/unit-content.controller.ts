@@ -13,9 +13,10 @@ import { ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 import { AuthGuard } from 'src/common/auth/auth.guard';
 import { Roles, RolesGuard, UserRole } from 'src/common/auth/role.guard';
-import { CreateUnitContentResponseDto } from 'src/models/unit-content/dto/create-unit-content-response.dto';
+import { CurrentUser } from 'src/common/decorators/current-user.decorator';
+import { IAuthPayload } from 'src/common/interface/auth-payload.interface';
 import { CreateUnitContentDto } from 'src/models/unit-content/dto/create-unit-content.dto';
-import { GetUnitContentDetailResponseDto } from 'src/models/unit-content/dto/get-unit-content-detail-response.dto';
+import { GetUnitContentResponseDto } from 'src/models/unit-content/dto/get-unit-content-response.dto';
 import { UnitContentService } from 'src/models/unit-content/unit-content.service';
 
 @ApiTags('UnitContents')
@@ -29,12 +30,12 @@ export class UnitContentController {
   @Roles(UserRole.USER, UserRole.ADMIN)
   @ApiResponse({
     status: HttpStatus.CREATED,
-    type: CreateUnitContentResponseDto,
+    type: GetUnitContentResponseDto,
   })
   async createUnitContent(
     @Param('unitId') unitId: string,
     @Body() createUnitContentDto: CreateUnitContentDto,
-  ): Promise<CreateUnitContentResponseDto> {
+  ): Promise<GetUnitContentResponseDto> {
     return this.unitContentService.createUnitContent(
       unitId,
       createUnitContentDto,
@@ -47,12 +48,13 @@ export class UnitContentController {
   @ApiParam({
     name: 'id',
     type: String,
-    description: 'The ID of the Unit Content to retrieve',
   })
-  @ApiResponse({ status: HttpStatus.OK, type: GetUnitContentDetailResponseDto })
+  @ApiResponse({ status: HttpStatus.OK, type: GetUnitContentResponseDto })
   async getUnitContentDetail(
+    @CurrentUser() user: IAuthPayload,
     @Param('id') contentId: string,
-  ): Promise<GetUnitContentDetailResponseDto> {
-    return this.unitContentService.getUnitContentDetail(contentId);
+  ): Promise<GetUnitContentResponseDto> {
+    const userId = user ? String(user.sub) : undefined;
+    return this.unitContentService.getUnitContentDetail(contentId, userId);
   }
 }

@@ -75,7 +75,7 @@ type Space {
   language: LanguageCode!
   target: TargetCode!
   currentLevel: LevelCode!
-  topic: TopicCode!
+  topics: TopicCode!
   targetLevel: LevelCode!
   createdBy: String!
   createdAt: DateTime!
@@ -178,7 +178,7 @@ type User {
   lastLogin: DateTime
   createdAt: DateTime!
   updatedAt: DateTime!
-  deletedAt: DateTime!
+  deletedAt: DateTime
 }
 
 """User roles in the system"""

@@ -129,7 +129,7 @@ async function seedCourses() {
 // Seed units
 async function seedUnits() {
   console.log('Seeding units...');
-  const units = createUnits(generatedIds.courses);
+  const units = createUnits(generatedIds.courses, generatedIds.users);
   for (const unit of units) {
     const createdUnit = await prisma.unit.create({
       data: unit,

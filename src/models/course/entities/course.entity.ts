@@ -1,11 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-import { Prisma } from '@prisma/client';
-
+import { CourseProgress } from 'src/models/course-progress/entities/course-progress.entity';
 import { ICourse } from 'src/models/course/course.interface';
 import { SpaceCourse } from 'src/models/space-course/entities/space-course.entity';
 import { Unit } from 'src/models/unit/entities/unit.entity';
-import { UserCourse } from 'src/models/user-course/entities/user-course.entity';
 import { User } from 'src/models/user/entities/user.entity';
 
 export class Course implements ICourse {
@@ -13,11 +11,6 @@ export class Course implements ICourse {
     type: 'string',
   })
   id: string;
-  @ApiProperty({
-    type: 'string',
-    nullable: true,
-  })
-  currentUnitId: string | null;
   @ApiProperty({
     type: 'string',
   })
@@ -35,13 +28,24 @@ export class Course implements ICourse {
   @ApiProperty({
     type: 'string',
   })
-  level: string;
+  language: string;
   @ApiProperty({
-    type: 'number',
-    format: 'double',
-    nullable: true,
+    type: 'string',
   })
-  price: Prisma.Decimal | null;
+  minLevel: string;
+  @ApiProperty({
+    type: 'string',
+  })
+  maxLevel: string;
+  @ApiProperty({
+    type: 'string',
+    isArray: true,
+  })
+  topics: string[];
+  @ApiProperty({
+    type: 'string',
+  })
+  courseType: string;
   @ApiProperty({
     type: 'integer',
     format: 'int32',
@@ -65,19 +69,12 @@ export class Course implements ICourse {
     format: 'date-time',
   })
   updatedAt: Date;
-
   @ApiProperty({
     type: 'string',
     format: 'date-time',
-  })
-  deletedAt: Date;
-
-  @ApiProperty({
-    type: () => Unit,
-    required: false,
     nullable: true,
   })
-  currentUnit?: Unit | null;
+  deletedAt: Date | null;
   @ApiProperty({
     type: () => User,
     required: false,
@@ -90,11 +87,11 @@ export class Course implements ICourse {
   })
   units?: Unit[];
   @ApiProperty({
-    type: () => UserCourse,
+    type: () => CourseProgress,
     isArray: true,
     required: false,
   })
-  userCourses?: UserCourse[];
+  progress?: CourseProgress[];
   @ApiProperty({
     type: () => SpaceCourse,
     isArray: true,
