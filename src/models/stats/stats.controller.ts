@@ -36,6 +36,7 @@ export class StatsController {
   }
 
   @Get('user/overview')
+  @Roles(UserRole.USER, UserRole.ADMIN)
   @ApiResponse({
     status: 200,
     type: UserOverviewDto,

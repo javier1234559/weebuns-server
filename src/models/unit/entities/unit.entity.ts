@@ -1,13 +1,13 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-import { Prisma } from '@prisma/client';
-
+import { Course } from 'src/models/course/entities/course.entity';
 import { Note } from 'src/models/note/entities/note.entity';
+import { UnitComment } from 'src/models/unit-comment/entities/unit-comment.entity';
 import { UnitContent } from 'src/models/unit-content/entities/unit-content.entity';
+import { IUnit } from 'src/models/unit/unit.interface';
+import { User } from 'src/models/user/entities/user.entity';
 
-import { Course } from '../../course/entities/course.entity';
-
-export class Unit {
+export class Unit implements IUnit {
   @ApiProperty({
     type: 'string',
   })
@@ -31,10 +31,9 @@ export class Unit {
   })
   orderIndex: number;
   @ApiProperty({
-    example: '[{',
-    type: () => Object,
+    type: 'string',
   })
-  comments: Prisma.JsonValue;
+  createdBy: string;
   @ApiProperty({
     type: 'string',
     format: 'date-time',
@@ -51,6 +50,11 @@ export class Unit {
   })
   course?: Course;
   @ApiProperty({
+    type: () => User,
+    required: false,
+  })
+  creator?: User;
+  @ApiProperty({
     type: () => UnitContent,
     isArray: true,
     required: false,
@@ -62,6 +66,12 @@ export class Unit {
     required: false,
   })
   notes?: Note[];
+  @ApiProperty({
+    type: () => UnitComment,
+    isArray: true,
+    required: false,
+  })
+  comments?: UnitComment[];
   @ApiProperty({
     type: () => Course,
     isArray: true,
