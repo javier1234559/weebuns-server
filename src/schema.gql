@@ -31,8 +31,8 @@ type CorrectionSentence {
   correctionId: ID!
   index: Float!
   originalText: String!
-  correctedText: String!
-  explanation: String!
+  correctedText: String
+  explanation: String
   isCorrect: Boolean!
   rating: Float!
   createdAt: DateTime!
@@ -219,7 +219,7 @@ type SpacesResponse {
 
 type Query {
   getUserSpaces(input: GetUserSpacesDto!): SpacesResponse!
-  getCorrectionsByEssay(input: GetCorrectionsByEssayDto!): CorrectionResponseAllDto!
+  getCorrectionsByEssay(input: GetCorrectionsByEssayDto!): CorrectionResponseAllDto
   getCorrectionIfExist(essayId: String!): CorrectionResponseOneDto
 }
 

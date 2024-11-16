@@ -21,11 +21,11 @@ export class CorrectionSentence implements ICorrectionSentence {
   @ApiProperty({ example: 'original text' })
   originalText: string;
 
-  @Field()
+  @Field(() => String, { nullable: true })
   @ApiProperty({ example: 'corrected text' })
   correctedText: string;
 
-  @Field()
+  @Field(() => String, { nullable: true })
   @ApiProperty({ example: 'explanation' })
   explanation: string;
 
