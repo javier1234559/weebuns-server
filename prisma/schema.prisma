@@ -18,24 +18,24 @@
 //   fileNamingStyle                 = "kebab"
 // }
 
-generator nestjsDto {
-  provider                        = "prisma-generator-nestjs-dto"
-  output                          = "../src/generated-dto"
-  outputToNestJsResourceStructure = "true"
-  flatResourceStructure           = "false"
-  exportRelationModifierClasses   = "true"
-  reExport                        = "false"
-  createDtoPrefix                 = "Create"
-  updateDtoPrefix                 = "Update"
-  dtoSuffix                       = "Dto"
-  entityPrefix                    = ""
-  entitySuffix                    = ""
-  classValidation                 = "false"
-  fileNamingStyle                 = "kebab"
-  noDependencies                  = "false"
-  outputType                      = "class"
-  prettier                        = "true"
-}
+// generator nestjsDto {
+//   provider                        = "prisma-generator-nestjs-dto"
+//   output                          = "../src/generated-dto"
+//   outputToNestJsResourceStructure = "true"
+//   flatResourceStructure           = "false"
+//   exportRelationModifierClasses   = "true"
+//   reExport                        = "false"
+//   createDtoPrefix                 = "Create"
+//   updateDtoPrefix                 = "Update"
+//   dtoSuffix                       = "Dto"
+//   entityPrefix                    = ""
+//   entitySuffix                    = ""
+//   classValidation                 = "false"
+//   fileNamingStyle                 = "kebab"
+//   noDependencies                  = "false"
+//   outputType                      = "class"
+//   prettier                        = "true"
+// }
 
 generator client {
   provider = "prisma-client-js"
@@ -46,7 +46,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Enums
 enum UserRole {
   user
   admin
@@ -66,6 +65,19 @@ enum AuthProvider {
   facebook
 }
 
+enum SubscriptionType {
+  FREE
+  BASIC
+  PREMIUM
+}
+
+enum PaymentType {
+  STRIPE
+  MOMO
+  ZALOPAY
+}
+
+// Reference Data
 model ReferenceData {
   id         String   @id @default(uuid())
   type       String // 'language', 'level', 'target', 'topic'
@@ -94,7 +106,7 @@ model User {
   lastName        String?      @map("last_name")
   profilePicture  String?      @map("profile_picture")
   isEmailVerified Boolean      @default(false) @map("is_email_verified")
-  nativeLanguage  String       @map("native_language") // reference to language code
+  nativeLanguage  String       @map("native_language")
   lastLogin       DateTime?    @map("last_login")
   createdAt       DateTime     @default(now()) @map("created_at")
   updatedAt       DateTime     @updatedAt @map("updated_at")
@@ -103,79 +115,113 @@ model User {
   // Relations
   spaces            Space[]
   courses           Course[]
-  userCourses       UserCourse[]
+  courseProgress    CourseProgress[]
   notes             Note[]
   vocabularies      Vocabulary[]
   essays            Essay[]
   corrections       Correction[]
   correctionReplies CorrectionReply[]
   unitComments      UnitComment[]
-  activities        Activity[]
-  Unit              Unit[]
+  subscriptions     Subscription[]
+  correctionCredits CorrectionCredit[]
 
   @@map("users")
 }
 
-model Activity {
-  id        String   @id @default(uuid())
-  userId    String
-  date      DateTime
-  level     Int
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+model Subscription {
+  id                String           @id @default(uuid())
+  userId            String           @map("user_id")
+  type              SubscriptionType
+  startDate         DateTime         @map("start_date")
+  endDate           DateTime?        @map("end_date")
+  status            String // ACTIVE, EXPIRED, CANCELLED
+  correctionBalance Int              @default(0) @map("correction_balance")
+
+  // Relations
+  user     User                  @relation(fields: [userId], references: [id])
+  payments SubscriptionPayment[]
+
+  @@index([userId, status])
+  @@map("subscriptions")
+}
+
+model SubscriptionPayment {
+  id             String      @id @default(uuid())
+  subscriptionId String      @map("subscription_id")
+  amount         Decimal
+  paymentType    PaymentType @map("payment_type")
+  paymentDate    DateTime    @map("payment_date")
+  status         String // SUCCESS, PENDING, FAILED
+
+  // Relations
+  subscription Subscription @relation(fields: [subscriptionId], references: [id])
+
+  @@map("subscription_payments")
+}
+
+model CorrectionCredit {
+  id          String      @id @default(uuid())
+  userId      String      @map("user_id")
+  amount      Int
+  price       Decimal
+  paymentId   String?     @map("payment_id")
+  paymentType PaymentType @map("payment_type")
+  expireDate  DateTime?   @map("expire_date")
+  createdAt   DateTime    @default(now()) @map("created_at")
 
   // Relations
   user User @relation(fields: [userId], references: [id])
 
-  @@index([userId, date])
-  @@map("activities")
+  @@map("correction_credits")
 }
 
 model Course {
-  id            String    @id @default(uuid())
-  currentUnitId String?   @map("current_unit_id")
-  title         String
-  description   String?
-  thumbnailUrl  String?   @map("thumbnail_url")
-  level         String    @map("level") // reference to level code
-  price         Decimal?
-  totalWeight   Int       @default(0) @map("total_weight")
-  isPublished   Boolean   @default(false) @map("is_published")
-  createdBy     String    @map("created_by")
-  createdAt     DateTime  @default(now()) @map("created_at")
-  updatedAt     DateTime  @updatedAt @map("updated_at")
-  deletedAt     DateTime? @map("deleted_at")
+  id           String    @id @default(uuid())
+  title        String
+  description  String?
+  thumbnailUrl String?   @map("thumbnail_url")
+  language     String    @map("language")
+  minLevel     String    @map("min_level")
+  maxLevel     String    @map("max_level")
+  topics       String[]  @map("topics")
+  courseType   String    @map("course_type")
+  price        Decimal?
+  totalWeight  Int       @default(0) @map("total_weight")
+  isPublished  Boolean   @default(false) @map("is_published")
+  createdBy    String    @map("created_by")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+  deletedAt    DateTime? @map("deleted_at")
 
   // Relations
-  currentUnit Unit?         @relation("CurrentUnit", fields: [currentUnitId], references: [id])
-  creator     User          @relation(fields: [createdBy], references: [id])
-  units       Unit[]
-  userCourses UserCourse[]
-  spaces      SpaceCourse[]
+  creator  User             @relation(fields: [createdBy], references: [id])
+  units    Unit[]
+  progress CourseProgress[]
+  spaces   SpaceCourse[]
 
-  @@index([isPublished, level])
+  @@index([isPublished, language, minLevel, maxLevel])
   @@index([deletedAt, isPublished])
   @@index([createdBy])
   @@map("courses")
 }
 
-model UserCourse {
-  id              String   @id @default(uuid())
-  userId          String   @map("user_id")
-  courseId        String   @map("course_id")
-  completedWeight Int      @default(0) @map("completed_weight")
-  paymentId       String?  @map("payment_id")
-  paymentStatus   String?  @map("payment_status")
-  purchasePrice   Decimal? @map("purchase_price") @db.Decimal(10, 2)
-  purchasedAt     DateTime @default(now()) @map("purchased_at")
+model CourseProgress {
+  id              String    @id @default(uuid())
+  userId          String    @map("user_id")
+  courseId        String    @map("course_id")
+  currentUnitId   String?   @map("current_unit_id")
+  completedWeight Int       @default(0) @map("completed_weight")
+  lastAccessedAt  DateTime? @map("last_accessed_at")
 
   // Relations
-  user   User   @relation(fields: [userId], references: [id])
-  course Course @relation(fields: [courseId], references: [id])
+  user         User           @relation(fields: [userId], references: [id])
+  course       Course         @relation(fields: [courseId], references: [id])
+  currentUnit  Unit?          @relation(fields: [currentUnitId], references: [id])
+  unitProgress UnitProgress[]
 
   @@unique([userId, courseId])
-  @@index([paymentStatus])
-  @@map("user_courses")
+  @@index([lastAccessedAt])
+  @@map("course_progress")
 }
 
 model Unit {
@@ -189,16 +235,70 @@ model Unit {
   updatedAt   DateTime @updatedAt @map("updated_at")
 
   // Relations
-  course           Course        @relation(fields: [courseId], references: [id])
-  creator          User          @relation(fields: [createdBy], references: [id])
-  contents         UnitContent[]
-  notes            Note[]
-  comments         UnitComment[]
-  currentInCourses Course[]      @relation("CurrentUnit")
+  course         Course           @relation(fields: [courseId], references: [id])
+  contents       UnitContent[]
+  notes          Note[]
+  comments       UnitComment[]
+  progress       UnitProgress[]
+  courseProgress CourseProgress[] // For currentUnit relation
 
   @@index([courseId, orderIndex])
   @@index([createdBy])
   @@map("units")
+}
+
+model UnitProgress {
+  id               String    @id @default(uuid())
+  courseProgressId String    @map("course_progress_id")
+  unitId           String    @map("unit_id")
+  completedWeight  Int       @default(0) @map("completed_weight")
+  lastAccessedAt   DateTime? @map("last_accessed_at")
+  isCompleted      Boolean   @default(false) @map("is_completed")
+
+  // Relations
+  courseProgress  CourseProgress        @relation(fields: [courseProgressId], references: [id])
+  unit            Unit                  @relation(fields: [unitId], references: [id])
+  contentProgress UnitContentProgress[]
+
+  @@unique([courseProgressId, unitId])
+  @@map("unit_progress")
+}
+
+model UnitContent {
+  id             String   @id @default(uuid())
+  unitId         String   @map("unit_id")
+  title          String
+  contentType    String   @map("content_type")
+  content        Json
+  orderIndex     Int      @map("order_index")
+  isPremium      Boolean  @default(false) @map("is_premium")
+  isRequired     Boolean  @default(true) @map("is_required")
+  completeWeight Int      @default(1) @map("complete_weight")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  unit     Unit                  @relation(fields: [unitId], references: [id])
+  progress UnitContentProgress[]
+
+  @@index([unitId, orderIndex])
+  @@index([unitId, isPremium])
+  @@map("unit_contents")
+}
+
+model UnitContentProgress {
+  id             String    @id @default(uuid())
+  unitProgressId String    @map("unit_progress_id")
+  unitContentId  String    @map("unit_content_id")
+  isCompleted    Boolean   @default(false) @map("is_completed")
+  completedAt    DateTime? @map("completed_at")
+
+  // Relations
+  unitProgress UnitProgress @relation(fields: [unitProgressId], references: [id])
+  unitContent  UnitContent  @relation(fields: [unitContentId], references: [id])
+
+  @@unique([unitProgressId, unitContentId])
+  @@map("unit_content_progress")
 }
 
 model UnitComment {
@@ -218,37 +318,16 @@ model UnitComment {
   @@map("unit_comments")
 }
 
-model UnitContent {
-  id             String   @id @default(uuid())
-  unitId         String   @map("unit_id")
-  title          String
-  contentType    String   @map("content_type")
-  content        Json
-  orderIndex     Int      @map("order_index")
-  isPremium      Boolean  @default(false) @map("is_premium")
-  isRequired     Boolean  @default(true) @map("is_required")
-  completeWeight Int      @default(1) @map("complete_weight")
-  isDone         Boolean  @default(false) @map("is_done")
-  createdAt      DateTime @default(now()) @map("created_at")
-  updatedAt      DateTime @updatedAt @map("updated_at")
-
-  // Relations
-  unit Unit @relation(fields: [unitId], references: [id])
-
-  @@index([unitId, orderIndex])
-  @@index([unitId, isPremium])
-  @@map("unit_contents")
-}
-
+// Space Management
 model Space {
   id           String    @id @default(uuid())
   name         String
   description  String?
-  language     String    @map("language") // reference to language code
-  target       String    @map("target") // reference to target code
-  currentLevel String    @map("current_level") // reference to level code
-  topic        String    @map("topic") // reference to topic code
-  targetLevel  String    @map("target_level") // reference to level code
+  language     String    @map("language")
+  target       String    @map("target")
+  currentLevel String    @map("current_level")
+  topics       String[]  @map("topics")
+  targetLevel  String    @map("target_level")
   createdBy    String    @map("created_by")
   createdAt    DateTime  @default(now()) @map("created_at")
   updatedAt    DateTime  @updatedAt @map("updated_at")
@@ -261,7 +340,7 @@ model Space {
   notes        Note[]
   courses      SpaceCourse[]
 
-  @@index([language, target, currentLevel, topic])
+  @@index([language, target, currentLevel])
   @@index([createdBy])
   @@index([deletedAt])
   @@map("spaces")

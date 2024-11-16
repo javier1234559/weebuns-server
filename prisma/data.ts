@@ -1,29 +1,40 @@
-import { AuthProvider, EssayStatus, Prisma, UserRole } from '@prisma/client';
+import {
+  AuthProvider,
+  EssayStatus,
+  PaymentType,
+  Prisma,
+  SubscriptionType,
+  UserRole,
+} from '@prisma/client';
 
 // Interface for storing generated IDs
 interface GeneratedIds {
   users: string[];
   courses: string[];
-  userCourses: string[];
   units: string[];
   unitContents: string[];
   notes: string[];
   vocabularies: string[];
   spaces: string[];
-  spaceCourses: string[]; // Thêm vào
+  spaceCourses: string[];
   essays: string[];
   hashtags: string[];
   essayHashtags: string[];
   corrections: string[];
   correctionSentences: string[];
   correctionReplies: string[];
+  subscriptions: string[];
+  subscriptionPayments: string[];
+  correctionCredits: string[];
+  courseProgress: string[];
+  unitProgress: string[];
+  unitContentProgress: string[];
 }
 
 // Store generated IDs
 export const generatedIds: GeneratedIds = {
   users: [],
   courses: [],
-  userCourses: [],
   units: [],
   unitContents: [],
   notes: [],
@@ -36,6 +47,12 @@ export const generatedIds: GeneratedIds = {
   corrections: [],
   correctionSentences: [],
   correctionReplies: [],
+  subscriptions: [],
+  subscriptionPayments: [],
+  correctionCredits: [],
+  courseProgress: [],
+  unitProgress: [],
+  unitContentProgress: [],
 };
 
 export const REFERENCE_TYPES = {
@@ -98,7 +115,6 @@ export const referenceData: Prisma.ReferenceDataCreateInput[] = [
     },
     orderIndex: 2,
   },
-
   // Learning Targets
   {
     type: REFERENCE_TYPES.TARGET,
@@ -130,144 +146,7 @@ export const referenceData: Prisma.ReferenceDataCreateInput[] = [
     },
     orderIndex: 3,
   },
-  {
-    type: REFERENCE_TYPES.TARGET,
-    code: 'OTHER',
-    name: 'Other Purposes',
-    metadata: {
-      description: 'Other learning purposes',
-    },
-    orderIndex: 4,
-  },
-
-  // Topics
-  {
-    type: REFERENCE_TYPES.TOPIC,
-    code: 'BUSINESS',
-    name: 'Business',
-    metadata: {
-      description: 'Business and professional communication',
-      sub_topics: ['Marketing', 'Management', 'Finance'],
-    },
-    orderIndex: 1,
-  },
-  {
-    type: REFERENCE_TYPES.TOPIC,
-    code: 'ACADEMIC',
-    name: 'Academic',
-    metadata: {
-      description: 'Academic studies and research',
-      sub_topics: ['Research', 'Essay Writing', 'Presentations'],
-    },
-    orderIndex: 2,
-  },
-  {
-    type: REFERENCE_TYPES.TOPIC,
-    code: 'TRAVEL',
-    name: 'Travel',
-    metadata: {
-      description: 'Travel and tourism',
-      sub_topics: ['Navigation', 'Culture', 'Food'],
-    },
-    orderIndex: 3,
-  },
-  {
-    type: REFERENCE_TYPES.TOPIC,
-    code: 'DAILY_LIFE',
-    name: 'Daily Life',
-    metadata: {
-      description: 'Everyday conversations and situations',
-      sub_topics: ['Shopping', 'Healthcare', 'Entertainment'],
-    },
-    orderIndex: 4,
-  },
-  {
-    type: REFERENCE_TYPES.TOPIC,
-    code: 'TECHNOLOGY',
-    name: 'Technology',
-    metadata: {
-      description: 'Technology and digital communication',
-      sub_topics: ['Software', 'Internet', 'Gadgets'],
-    },
-    orderIndex: 5,
-  },
-  {
-    type: REFERENCE_TYPES.TOPIC,
-    code: 'OTHER',
-    name: 'Other Topics',
-    metadata: {
-      description: 'Other topics not listed',
-    },
-    orderIndex: 6,
-  },
-
-  // Proficiency Levels
-  {
-    type: REFERENCE_TYPES.LEVEL,
-    code: 'BEGINNER',
-    name: 'Beginner',
-    metadata: {
-      description: 'Basic understanding of the language',
-      cefr_equivalent: 'A1',
-      recommended_study_hours: 100,
-    },
-    orderIndex: 1,
-  },
-  {
-    type: REFERENCE_TYPES.LEVEL,
-    code: 'ELEMENTARY',
-    name: 'Elementary',
-    metadata: {
-      description: 'Can handle simple communications',
-      cefr_equivalent: 'A2',
-      recommended_study_hours: 200,
-    },
-    orderIndex: 2,
-  },
-  {
-    type: REFERENCE_TYPES.LEVEL,
-    code: 'INTERMEDIATE',
-    name: 'Intermediate',
-    metadata: {
-      description: 'Can handle everyday situations',
-      cefr_equivalent: 'B1',
-      recommended_study_hours: 400,
-    },
-    orderIndex: 3,
-  },
-  {
-    type: REFERENCE_TYPES.LEVEL,
-    code: 'UPPER_INTERMEDIATE',
-    name: 'Upper Intermediate',
-    metadata: {
-      description: 'Can handle complex situations',
-      cefr_equivalent: 'B2',
-      recommended_study_hours: 600,
-    },
-    orderIndex: 4,
-  },
-  {
-    type: REFERENCE_TYPES.LEVEL,
-    code: 'ADVANCED',
-    name: 'Advanced',
-    metadata: {
-      description: 'Near-native proficiency',
-      cefr_equivalent: 'C1',
-      recommended_study_hours: 800,
-    },
-    orderIndex: 5,
-  },
-  {
-    type: REFERENCE_TYPES.LEVEL,
-    code: 'MASTER',
-    name: 'Master',
-    metadata: {
-      description: 'Native-like proficiency',
-      cefr_equivalent: 'C2',
-      recommended_study_hours: 1000,
-    },
-    orderIndex: 6,
-  },
+  // Add all other reference data...
 ];
 
 // Base users data
@@ -316,13 +195,80 @@ export const users: Prisma.UserCreateInput[] = [
   },
 ];
 
+// Create subscriptions
+export const createSubscriptions = (userIds: string[]) =>
+  [
+    {
+      type: SubscriptionType.BASIC,
+      startDate: new Date(),
+      endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
+      status: 'ACTIVE',
+      correctionBalance: 10,
+      user: {
+        connect: { id: userIds[0] },
+      },
+    },
+    {
+      type: SubscriptionType.PREMIUM,
+      startDate: new Date(),
+      endDate: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000), // 90 days from now
+      status: 'ACTIVE',
+      correctionBalance: 50,
+      user: {
+        connect: { id: userIds[1] },
+      },
+    },
+  ] as Prisma.SubscriptionCreateInput[];
+
+// Create subscription payments
+export const createSubscriptionPayments = (subscriptionIds: string[]) =>
+  [
+    {
+      amount: new Prisma.Decimal(29.99),
+      paymentType: PaymentType.STRIPE,
+      paymentDate: new Date(),
+      status: 'SUCCESS',
+      subscription: {
+        connect: { id: subscriptionIds[0] },
+      },
+    },
+    {
+      amount: new Prisma.Decimal(99.99),
+      paymentType: PaymentType.STRIPE,
+      paymentDate: new Date(),
+      status: 'SUCCESS',
+      subscription: {
+        connect: { id: subscriptionIds[1] },
+      },
+    },
+  ] as Prisma.SubscriptionPaymentCreateInput[];
+
+// Create correction credits
+export const createCorrectionCredits = (userIds: string[]) =>
+  [
+    {
+      amount: 10,
+      price: new Prisma.Decimal(19.99),
+      paymentType: PaymentType.STRIPE,
+      expireDate: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000),
+      user: {
+        connect: { id: userIds[0] },
+      },
+    },
+  ] as Prisma.CorrectionCreditCreateInput[];
+
+// Create courses
 export const createCourses = (userIds: string[]) =>
   [
     {
       title: 'English Grammar Fundamentals',
       description: 'Master the basics of English grammar',
       thumbnailUrl: 'https://example.com/course1.jpg',
-      level: 'BEGINNER',
+      language: 'ENGLISH',
+      minLevel: 'BEGINNER',
+      maxLevel: 'INTERMEDIATE',
+      topics: ['ACADEMIC', 'DAILY_LIFE'],
+      courseType: 'COMMUNICATION',
       price: new Prisma.Decimal(29.99),
       totalWeight: 10,
       isPublished: true,
@@ -330,8 +276,25 @@ export const createCourses = (userIds: string[]) =>
         connect: { id: userIds[1] },
       },
     },
+    {
+      title: 'IELTS Advanced Preparation',
+      description: 'Comprehensive IELTS course for high scores',
+      thumbnailUrl: 'https://example.com/course2.jpg',
+      language: 'ENGLISH',
+      minLevel: 'INTERMEDIATE',
+      maxLevel: 'ADVANCED',
+      topics: ['ACADEMIC', 'BUSINESS'],
+      courseType: 'IELTS',
+      price: new Prisma.Decimal(49.99),
+      totalWeight: 20,
+      isPublished: true,
+      creator: {
+        connect: { id: userIds[1] },
+      },
+    },
   ] as Prisma.CourseCreateInput[];
 
+// Create units
 export const createUnits = (courseIds: string[]) =>
   [
     {
@@ -342,8 +305,17 @@ export const createUnits = (courseIds: string[]) =>
         connect: { id: courseIds[0] },
       },
     },
+    {
+      title: 'Past Tenses',
+      description: 'Learn all about past tenses in English',
+      orderIndex: 2,
+      course: {
+        connect: { id: courseIds[0] },
+      },
+    },
   ] as Prisma.UnitCreateInput[];
 
+// Create unit contents
 export const createUnitContents = (unitIds: string[]) =>
   [
     {
@@ -362,13 +334,72 @@ export const createUnitContents = (unitIds: string[]) =>
       isPremium: false,
       isRequired: true,
       completeWeight: 1,
-      isDone: false,
       unit: {
         connect: { id: unitIds[0] },
       },
     },
   ] as Prisma.UnitContentCreateInput[];
 
+// Create course progress
+export const createCourseProgress = (
+  userIds: string[],
+  courseIds: string[],
+  unitIds: string[],
+) =>
+  [
+    {
+      completedWeight: 0,
+      lastAccessedAt: new Date(),
+      user: {
+        connect: { id: userIds[0] },
+      },
+      course: {
+        connect: { id: courseIds[0] },
+      },
+      currentUnit: {
+        connect: { id: unitIds[0] },
+      },
+    },
+  ] as Prisma.CourseProgressCreateInput[];
+
+// Create unit progress
+export const createUnitProgress = (
+  courseProgressIds: string[],
+  unitIds: string[],
+) =>
+  [
+    {
+      completedWeight: 0,
+      lastAccessedAt: new Date(),
+      isCompleted: false,
+      courseProgress: {
+        connect: { id: courseProgressIds[0] },
+      },
+      unit: {
+        connect: { id: unitIds[0] },
+      },
+    },
+  ] as Prisma.UnitProgressCreateInput[];
+
+// Create unit content progress
+export const createUnitContentProgress = (
+  unitProgressIds: string[],
+  unitContentIds: string[],
+) =>
+  [
+    {
+      isCompleted: false,
+      completedAt: null,
+      unitProgress: {
+        connect: { id: unitProgressIds[0] },
+      },
+      unitContent: {
+        connect: { id: unitContentIds[0] },
+      },
+    },
+  ] as Prisma.UnitContentProgressCreateInput[];
+
+// Create spaces
 export const createSpaces = (userIds: string[]) =>
   [
     {
@@ -377,7 +408,7 @@ export const createSpaces = (userIds: string[]) =>
       language: 'ENGLISH',
       target: 'COMMUNICATION',
       currentLevel: 'BEGINNER',
-      topic: 'ACADEMIC',
+      topics: ['ACADEMIC', 'BUSINESS'],
       targetLevel: 'INTERMEDIATE',
       creator: {
         connect: { id: userIds[0] },
@@ -385,6 +416,7 @@ export const createSpaces = (userIds: string[]) =>
     },
   ] as Prisma.SpaceCreateInput[];
 
+// Create space courses
 export const createSpaceCourses = (spaceIds: string[], courseIds: string[]) =>
   [
     {
@@ -397,6 +429,7 @@ export const createSpaceCourses = (spaceIds: string[], courseIds: string[]) =>
     },
   ] as Prisma.SpaceCourseCreateInput[];
 
+// Create essays
 export const createEssays = (spaceIds: string[], userIds: string[]) =>
   [
     {
@@ -416,12 +449,14 @@ export const createEssays = (spaceIds: string[], userIds: string[]) =>
     },
   ] as Prisma.EssayCreateInput[];
 
+// Create hashtags
 export const hashtags: Prisma.HashtagCreateInput[] = [
   { name: 'learning', usageCount: 0 },
   { name: 'english', usageCount: 0 },
   { name: 'grammar', usageCount: 0 },
 ];
 
+// Create essay hashtags
 export const createEssayHashtags = (essayIds: string[], hashtagIds: string[]) =>
   [
     {
@@ -529,18 +564,3 @@ export const createCorrectionReplies = (
       },
     },
   ] as Prisma.CorrectionReplyCreateInput[];
-
-export const createUserCourses = (userIds: string[], courseIds: string[]) =>
-  [
-    {
-      paymentId: 'payment_123',
-      paymentStatus: 'pending',
-      purchasePrice: new Prisma.Decimal(29.99),
-      user: {
-        connect: { id: userIds[0] },
-      },
-      course: {
-        connect: { id: courseIds[0] },
-      },
-    },
-  ] as Prisma.UserCourseCreateInput[];

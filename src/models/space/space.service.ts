@@ -264,10 +264,12 @@ export class SpaceService {
         joined_at: course.joinedAt,
       })),
       pagination: {
-        total,
-        page,
-        perPage,
+        totalItems: total,
+        currentPage: page,
         totalPages,
+        itemsPerPage: perPage,
+        hasNextPage: page * perPage < total,
+        hasPreviousPage: page > 1,
       },
     };
   }

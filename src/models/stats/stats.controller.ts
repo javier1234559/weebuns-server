@@ -12,7 +12,7 @@ import {
 import { UserOverviewDto } from 'src/models/stats/dto/user-overview.dto';
 import { StatsService } from 'src/models/stats/stats.service';
 
-@ApiTags('Stats')
+@ApiTags('stats')
 @Controller('stats')
 @UseGuards(AuthGuard, RolesGuard)
 export class StatsController {
@@ -36,7 +36,7 @@ export class StatsController {
   }
 
   @Get('user/overview')
-  @Roles(UserRole.USER, UserRole.ADMIN)
+  @Roles(UserRole.USER)
   @ApiResponse({
     status: 200,
     type: UserOverviewDto,
