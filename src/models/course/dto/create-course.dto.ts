@@ -9,22 +9,24 @@ export class CreateCourseDto {
     type: 'string',
   })
   title: string;
+
   @ApiProperty({
     type: 'string',
     required: false,
     nullable: true,
   })
   description?: string | null;
+
   @ApiProperty({
     type: 'string',
     required: false,
     nullable: true,
   })
   thumbnailUrl?: string | null;
-  @ApiProperty({
-    enum: LevelCode,
-  })
+
+  @ApiProperty({ enum: LevelCode })
   level: string;
+
   @ApiProperty({
     type: 'number',
     format: 'double',
@@ -32,4 +34,20 @@ export class CreateCourseDto {
     nullable: true,
   })
   price?: Prisma.Decimal | null;
+
+  @ApiProperty({
+    type: 'number',
+    format: 'int32',
+  })
+  totalWeight: number;
+
+  @ApiProperty({
+    type: 'boolean',
+  })
+  isPublished: boolean;
+
+  @ApiProperty({
+    type: 'string',
+  })
+  createdBy: string;
 }

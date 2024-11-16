@@ -1,27 +1,22 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-export class CreateNoteDto {
+export class UnitCommentDto {
   @ApiProperty({
     type: 'string',
   })
-  title: string;
-
+  id: string;
   @ApiProperty({
     type: 'string',
   })
   content: string;
-
-  @ApiProperty({
-    type: 'string',
-    isArray: true,
-  })
-  tags: string[];
-
   @ApiProperty({
     type: 'string',
     format: 'date-time',
-    required: false,
-    nullable: true,
   })
-  deletedAt?: Date | null;
+  createdAt: Date;
+  @ApiProperty({
+    type: 'string',
+    format: 'date-time',
+  })
+  updatedAt: Date;
 }

@@ -2,9 +2,11 @@ import { ApiProperty } from '@nestjs/swagger';
 
 import { Prisma } from '@prisma/client';
 
+import { IUnitContent } from 'src/models/unit-content/unit-content.interface';
+
 import { Unit } from '../../../models/unit/entities/unit.entity';
 
-export class UnitContent {
+export class UnitContent implements IUnitContent {
   @ApiProperty({
     type: 'string',
   })

@@ -230,6 +230,7 @@ model Unit {
   title       String
   description String?
   orderIndex  Int      @map("order_index")
+  createdBy   String   @map("created_by")
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
 
@@ -242,6 +243,7 @@ model Unit {
   courseProgress CourseProgress[] // For currentUnit relation
 
   @@index([courseId, orderIndex])
+  @@index([createdBy])
   @@map("units")
 }
 
