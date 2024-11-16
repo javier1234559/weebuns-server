@@ -1,17 +1,22 @@
 import { PrismaClient } from '@prisma/client';
 
 import {
+  createCorrectionCredits,
   createCorrectionReplies,
   createCorrections,
+  createCourseProgress,
   createCourses,
   createEssayHashtags,
   createEssays,
   createNotes,
   createSpaceCourses,
-  createSpaces, // Thêm mới
+  createSpaces,
+  createSubscriptionPayments,
+  createSubscriptions,
+  createUnitContentProgress,
   createUnitContents,
+  createUnitProgress,
   createUnits,
-  createUserCourses,
   createVocabularies,
   generatedIds,
   hashtags,
@@ -21,6 +26,7 @@ import {
 
 const prisma = new PrismaClient();
 
+// Clean database
 async function cleanDatabase() {
   console.log('Cleaning database...');
   const tablenames = await prisma.$queryRaw<Array<{ tablename: string }>>`
@@ -41,7 +47,8 @@ async function cleanDatabase() {
   }
 }
 
-export async function seedReferenceData() {
+// Seed reference data
+async function seedReferenceData() {
   console.log('Seeding reference data...');
   const createdRefs: Record<string, Record<string, string>> = {
     language: {},
@@ -60,6 +67,7 @@ export async function seedReferenceData() {
   return createdRefs;
 }
 
+// Seed users
 async function seedUsers() {
   console.log('Seeding users...');
   for (const user of users) {
@@ -70,6 +78,43 @@ async function seedUsers() {
   }
 }
 
+// Seed subscriptions
+async function seedSubscriptions() {
+  console.log('Seeding subscriptions...');
+  const subscriptions = createSubscriptions(generatedIds.users);
+  for (const subscription of subscriptions) {
+    const created = await prisma.subscription.create({
+      data: subscription,
+    });
+    generatedIds.subscriptions.push(created.id);
+  }
+}
+
+// Seed subscription payments
+async function seedSubscriptionPayments() {
+  console.log('Seeding subscription payments...');
+  const payments = createSubscriptionPayments(generatedIds.subscriptions);
+  for (const payment of payments) {
+    const created = await prisma.subscriptionPayment.create({
+      data: payment,
+    });
+    generatedIds.subscriptionPayments.push(created.id);
+  }
+}
+
+// Seed correction credits
+async function seedCorrectionCredits() {
+  console.log('Seeding correction credits...');
+  const credits = createCorrectionCredits(generatedIds.users);
+  for (const credit of credits) {
+    const created = await prisma.correctionCredit.create({
+      data: credit,
+    });
+    generatedIds.correctionCredits.push(created.id);
+  }
+}
+
+// Seed courses
 async function seedCourses() {
   console.log('Seeding courses...');
   const courses = createCourses(generatedIds.users);
@@ -81,6 +126,7 @@ async function seedCourses() {
   }
 }
 
+// Seed units
 async function seedUnits() {
   console.log('Seeding units...');
   const units = createUnits(generatedIds.courses);
@@ -92,6 +138,7 @@ async function seedUnits() {
   }
 }
 
+// Seed unit contents
 async function seedUnitContents() {
   console.log('Seeding unit contents...');
   const unitContents = createUnitContents(generatedIds.units);
@@ -103,9 +150,56 @@ async function seedUnitContents() {
   }
 }
 
+// Seed course progress
+async function seedCourseProgress() {
+  console.log('Seeding course progress...');
+  const progress = createCourseProgress(
+    generatedIds.users,
+    generatedIds.courses,
+    generatedIds.units,
+  );
+  for (const item of progress) {
+    const created = await prisma.courseProgress.create({
+      data: item,
+    });
+    generatedIds.courseProgress.push(created.id);
+  }
+}
+
+// Seed unit progress
+async function seedUnitProgress() {
+  console.log('Seeding unit progress...');
+  const progress = createUnitProgress(
+    generatedIds.courseProgress,
+    generatedIds.units,
+  );
+  for (const item of progress) {
+    const created = await prisma.unitProgress.create({
+      data: item,
+    });
+    generatedIds.unitProgress.push(created.id);
+  }
+}
+
+// Seed unit content progress
+async function seedUnitContentProgress() {
+  console.log('Seeding unit content progress...');
+  const progress = createUnitContentProgress(
+    generatedIds.unitProgress,
+    generatedIds.unitContents,
+  );
+  for (const item of progress) {
+    const created = await prisma.unitContentProgress.create({
+      data: item,
+    });
+    generatedIds.unitContentProgress.push(created.id);
+  }
+}
+
+// Seed spaces
 async function seedSpaces() {
   console.log('Seeding spaces...');
-  const spaces = createSpaces(generatedIds.users); // Đã update params
+  const spaces = createSpaces(generatedIds.users);
   for (const space of spaces) {
     const createdSpace = await prisma.space.create({
       data: space,
@@ -114,7 +208,7 @@ async function seedSpaces() {
   }
 }
 
-// Thêm mới: seed SpaceCourses
+// Seed space courses
 async function seedSpaceCourses() {
   console.log('Seeding space courses...');
   const spaceCourses = createSpaceCourses(
@@ -129,6 +223,7 @@ async function seedSpaceCourses() {
   }
 }
 
+// Seed hashtags
 async function seedHashtags() {
   console.log('Seeding hashtags...');
   for (const hashtag of hashtags) {
@@ -139,6 +234,7 @@ async function seedHashtags() {
   }
 }
 
+// Seed essays
 async function seedEssays() {
   console.log('Seeding essays...');
   const essays = createEssays(generatedIds.spaces, generatedIds.users);
@@ -150,6 +246,7 @@ async function seedEssays() {
   }
 }
 
+// Seed essay hashtags
 async function seedEssayHashtags() {
   console.log('Seeding essay hashtags...');
   const essayHashtags = createEssayHashtags(
@@ -164,6 +261,7 @@ async function seedEssayHashtags() {
   }
 }
 
+// Seed vocabularies
 async function seedVocabularies() {
   console.log('Seeding vocabularies...');
   const vocabularies = createVocabularies(
@@ -178,11 +276,12 @@ async function seedVocabularies() {
   }
 }
 
+// Seed notes
 async function seedNotes() {
   console.log('Seeding notes...');
   const notes = createNotes(
     generatedIds.units,
-    generatedIds.spaces, // Thêm spaces ID
+    generatedIds.spaces,
     generatedIds.users,
   );
   for (const note of notes) {
@@ -193,6 +292,7 @@ async function seedNotes() {
   }
 }
 
+// Seed corrections
 async function seedCorrections() {
   console.log('Seeding corrections...');
   const corrections = createCorrections(
@@ -210,6 +310,7 @@ async function seedCorrections() {
   }
 }
 
+// Seed correction replies
 async function seedCorrectionReplies() {
   console.log('Seeding correction replies...');
   const replies = createCorrectionReplies(
@@ -224,33 +325,34 @@ async function seedCorrectionReplies() {
   }
 }
 
-async function seedUserCourses() {
-  console.log('Seeding user courses...');
-  const userCourses = createUserCourses(
-    generatedIds.users,
-    generatedIds.courses,
-  );
-  for (const userCourse of userCourses) {
-    const created = await prisma.userCourse.create({
-      data: userCourse,
-    });
-    generatedIds.userCourses.push(created.id);
-  }
-}
-
+// Main seeding function
 async function seedAll() {
   try {
-    // Clear the database first
+    // Clean the database first
     await cleanDatabase();
 
-    // Seed all data in the correct order
+    // Seed basic data
     await seedReferenceData();
     await seedUsers();
+
+    // Seed subscription-related data
+    await seedSubscriptions();
+    await seedSubscriptionPayments();
+    await seedCorrectionCredits();
+
+    // Seed course structure
     await seedCourses();
     await seedUnits();
     await seedUnitContents();
+
+    // Seed progress tracking
+    await seedCourseProgress();
+    await seedUnitProgress();
+    await seedUnitContentProgress();
+
+    // Seed space and content
     await seedSpaces();
-    await seedSpaceCourses(); // Thêm vào đây
+    await seedSpaceCourses();
     await seedHashtags();
     await seedEssays();
     await seedEssayHashtags();
@@ -258,7 +360,6 @@ async function seedAll() {
     await seedNotes();
     await seedCorrections();
     await seedCorrectionReplies();
-    await seedUserCourses();
 
     console.log('Database has been seeded successfully');
     console.log('Generated IDs:', generatedIds);

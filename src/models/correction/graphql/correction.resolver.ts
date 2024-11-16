@@ -23,7 +23,7 @@ export class CorrectionResolver {
   constructor(private readonly correctService: CorrectionService) {}
 
   @Roles(UserRole.USER)
-  @Query(() => CorrectionResponseAllDto)
+  @Query(() => CorrectionResponseAllDto, { nullable: true })
   async getCorrectionsByEssay(
     @Args('input') input: GetCorrectionsByEssayDto,
   ): Promise<CorrectionResponseAllDto> {
