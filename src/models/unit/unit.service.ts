@@ -4,6 +4,7 @@ import { PrismaService } from 'src/common/prisma/prisma.service';
 import { CreateUnitDto } from 'src/models/unit/dto/create-unit.dto';
 import { GetUnitContentsResponseDto } from 'src/models/unit/dto/get-unit-contents-response.dto';
 import { GetUnitResponseDto } from 'src/models/unit/dto/get-unit-response.dto';
+import { UnitLearnResponseDto } from 'src/models/unit/dto/unit-learn.dto';
 
 @Injectable()
 export class UnitService {
@@ -50,5 +51,28 @@ export class UnitService {
     });
 
     return { unitContents: contents };
+  }
+
+  async getUnitForLearning(unitId: string): Promise<UnitLearnResponseDto> {
+    const unit = await this.prisma.unit.findUnique({
+      where: {
+        id: unitId,
+      },
+      include: {
+        contents: {
+          orderBy: {
+            orderIndex: 'asc',
+          },
+        },
+      },
+    });
+
+    if (!unit) {
+      throw new NotFoundException(`Unit with ID ${unitId} not found`);
+    }
+
+    return {
+      unit,
+    };
   }
 }

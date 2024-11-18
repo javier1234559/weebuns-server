@@ -186,6 +186,7 @@ model Course {
   topics       String[]  @map("topics")
   courseType   String    @map("course_type")
   // price        Decimal?
+  isPremium    Boolean   @default(false) @map("is_premium")
   totalWeight  Int       @default(0) @map("total_weight")
   isPublished  Boolean   @default(false) @map("is_published")
   createdBy    String    @map("created_by")

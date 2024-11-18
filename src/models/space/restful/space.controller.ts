@@ -16,13 +16,14 @@ import { AuthGuard } from 'src/common/auth/auth.guard';
 import { Roles, RolesGuard, UserRole } from 'src/common/auth/role.guard';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { IAuthPayload } from 'src/common/interface/auth-payload.interface';
+import { SpaceCoursesJoinedResponseDto } from 'src/models/space/dto/course-joined.dto';
 import { CreateSpaceDto } from 'src/models/space/dto/create-space.dto';
 import { DeleteSpaceResponseDto } from 'src/models/space/dto/delete-space-response.dto';
+import { ExploreCoursesQueryDto } from 'src/models/space/dto/explore-course-query.dto';
 import { FindAllSpacesDto } from 'src/models/space/dto/find-all-spaces.dto';
 import { FindOneSpaceResponseDto } from 'src/models/space/dto/find-one-space-response.dto';
 import { GetSpacesUserDto } from 'src/models/space/dto/get-space-user.dto';
 import { SpaceCoursesAllResponseDto } from 'src/models/space/dto/space-course-all-response.dto';
-import { SpaceCoursesResponseDto } from 'src/models/space/dto/space-courses-response.dto';
 import { SpacesResponse } from 'src/models/space/dto/spaces-response.dto';
 import { UpdateSpaceDto } from 'src/models/space/dto/update-space.dto';
 import { SpaceService } from 'src/models/space/space.service';
@@ -92,14 +93,14 @@ export class SpaceController {
   @Roles(UserRole.USER)
   @ApiResponse({
     status: 200,
-    type: SpaceCoursesResponseDto,
+    type: SpaceCoursesJoinedResponseDto,
   })
   async getSpaceCoursesJoined(
     @CurrentUser() user: IAuthPayload,
     @Param('id') spaceId: string,
     @Query('page') page: number = 1,
     @Query('perPage') perPage: number = 10,
-  ): Promise<SpaceCoursesResponseDto> {
+  ): Promise<SpaceCoursesJoinedResponseDto> {
     const userId = String(user.sub);
     const validPage = page > 0 ? page : 1;
     const validPerPage = perPage > 0 ? perPage : 10;
@@ -111,26 +112,22 @@ export class SpaceController {
     );
   }
 
-  @Get(':id/courses')
+  @Get(':id/courses/explore')
   @Roles(UserRole.USER)
   @ApiResponse({
     status: 200,
-    type: SpaceCoursesResponseDto,
+    type: SpaceCoursesAllResponseDto,
   })
   async getSpaceCourses(
     @CurrentUser() user: IAuthPayload,
     @Param('id') spaceId: string,
-    @Query('page') page: number = 1,
-    @Query('perPage') perPage: number = 10,
+    @Query() query: ExploreCoursesQueryDto,
   ): Promise<SpaceCoursesAllResponseDto> {
     const userId = String(user.sub);
-    const validPage = page > 0 ? page : 1;
-    const validPerPage = perPage > 0 ? perPage : 10;
-    return this.spaceService.getSpaceCourses(
-      userId,
-      spaceId,
-      validPage,
-      validPerPage,
-    );
+    return this.spaceService.getSpaceCourses(userId, spaceId, {
+      ...query,
+      page: query.page > 0 ? query.page : 1,
+      perPage: query.perPage > 0 ? query.perPage : 10,
+    });
   }
 }

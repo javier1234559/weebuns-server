@@ -2,6 +2,12 @@ import { ApiProperty } from '@nestjs/swagger';
 
 import { IsDateString, IsOptional } from 'class-validator';
 
+export interface RawActivityDto {
+  date: string;
+  level: number;
+  streak: number;
+}
+
 export class GetActivityStreakDto {
   @ApiProperty({
     example: '2024-01-01',
@@ -20,29 +26,46 @@ export class GetActivityStreakDto {
   endDate?: string;
 }
 
-export class DailyActivityDto {
-  @ApiProperty({ example: '2024-03-15' })
-  date: string;
-
+export class ActivityDataDto {
   @ApiProperty({
     example: 2,
   })
   level: number;
 
   @ApiProperty({
-    example: 5,
+    example: {
+      streak: 5,
+    },
   })
-  streak: number;
+  data: {
+    streak: number;
+  };
 }
 
 export class ActivityStreakResponseDto {
   @ApiProperty({
-    type: [DailyActivityDto],
+    example: [
+      {
+        '2024-03-15': {
+          level: 2,
+          data: {
+            streak: 5,
+          },
+        },
+      },
+    ],
+    isArray: true,
+    type: 'array',
   })
-  activities: DailyActivityDto[];
+  activities: Record<string, ActivityDataDto>[];
 
   @ApiProperty({
-    type: DailyActivityDto,
+    example: {
+      level: 2,
+      data: {
+        streak: 5,
+      },
+    },
   })
-  currentStreak: DailyActivityDto;
+  currentStreak: ActivityDataDto;
 }

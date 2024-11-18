@@ -54,6 +54,10 @@ export class Course implements ICourse {
   @ApiProperty({
     type: 'boolean',
   })
+  isPremium: boolean;
+  @ApiProperty({
+    type: 'boolean',
+  })
   isPublished: boolean;
   @ApiProperty({
     type: 'string',

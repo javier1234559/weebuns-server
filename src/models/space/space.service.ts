@@ -3,22 +3,23 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 
 import {
+  isPublishedQuery,
   notDeletedQuery,
-  notPublishedQuery,
   paginationQuery,
   searchQuery,
 } from 'src/common/helper/prisma-queries.helper';
 import { IAuthPayload } from 'src/common/interface/auth-payload.interface';
 import { PrismaService } from 'src/common/prisma/prisma.service';
 import { calculatePagination } from 'src/common/utils/pagination';
+import { SpaceCoursesJoinedResponseDto } from 'src/models/space/dto/course-joined.dto';
 import { CreateSpaceDto } from 'src/models/space/dto/create-space.dto';
 import { DeleteSpaceResponseDto } from 'src/models/space/dto/delete-space-response.dto';
+import { ExploreCoursesQueryDto } from 'src/models/space/dto/explore-course-query.dto';
 import { FindAllSpacesDto } from 'src/models/space/dto/find-all-spaces.dto';
 import { FindOneSpaceResponseDto } from 'src/models/space/dto/find-one-space-response.dto';
 import { GetSpacesUserDto } from 'src/models/space/dto/get-space-user.dto';
 import { GetUserSpacesDto } from 'src/models/space/dto/get-user-space.dto';
 import { SpaceCoursesAllResponseDto } from 'src/models/space/dto/space-course-all-response.dto';
-import { SpaceCoursesResponseDto } from 'src/models/space/dto/space-courses-response.dto';
 import { SpacesResponse } from 'src/models/space/dto/spaces-response.dto';
 import { UpdateSpaceDto } from 'src/models/space/dto/update-space.dto';
 
@@ -210,7 +211,7 @@ export class SpaceService {
     spaceId: string,
     page: number,
     perPage: number,
-  ): Promise<SpaceCoursesResponseDto> {
+  ): Promise<SpaceCoursesJoinedResponseDto> {
     const skip = (page - 1) * perPage;
 
     const [courses, total] = await Promise.all([
@@ -224,22 +225,10 @@ export class SpaceService {
           ...notDeletedQuery,
         },
         include: {
-          // Creator information
           creator: true,
-          // Course progress for current user
           progress: {
             where: {
               userId,
-            },
-            include: {
-              currentUnit: true,
-              unitProgress: {
-                orderBy: {
-                  unit: {
-                    orderIndex: 'asc',
-                  },
-                },
-              },
             },
           },
         },
@@ -263,7 +252,10 @@ export class SpaceService {
     ]);
 
     return {
-      data: courses,
+      data: courses.map((course) => ({
+        ...course,
+        progress: course.progress[0] || null,
+      })),
       pagination: {
         totalItems: total,
         currentPage: page,
@@ -278,74 +270,77 @@ export class SpaceService {
   async getSpaceCourses(
     userId: string | null,
     spaceId: string,
-    page: number,
-    perPage: number,
+    query: ExploreCoursesQueryDto,
   ): Promise<SpaceCoursesAllResponseDto> {
+    const {
+      page,
+      perPage,
+      search,
+      language,
+      minLevel,
+      maxLevel,
+      topics,
+      courseType,
+    } = query;
     const skip = (page - 1) * perPage;
+
+    console.log(query);
+
+    const whereClause: Prisma.CourseWhereInput = {
+      ...notDeletedQuery,
+      ...isPublishedQuery,
+      ...(search && {
+        OR: [
+          { title: { contains: search, mode: 'insensitive' } },
+          { description: { contains: search, mode: 'insensitive' } },
+        ],
+      }),
+      ...(language && { language }),
+      ...(minLevel && { minLevel }),
+      ...(maxLevel && { maxLevel }),
+      ...(courseType && { courseType }),
+      ...(topics?.length && { topics: { hasEvery: topics } }),
+    };
 
     const [courses, total] = await Promise.all([
       this.prisma.course.findMany({
-        where: {
-          ...notDeletedQuery,
-          ...notPublishedQuery,
-        },
+        where: whereClause,
         include: {
-          // Creator information
           creator: true,
-          // Check if course is joined
           spaces: {
-            where: {
-              spaceId,
-            },
-            select: {
-              joinedAt: true,
-            },
+            where: { spaceId },
+            select: { joinedAt: true },
           },
-          // Course progress for current user (if exists)
           progress: userId
             ? {
-                where: {
-                  userId,
-                },
-                include: {
+                where: { userId },
+                select: {
+                  id: true,
+                  currentUnitId: true,
+                  currentUnitContentId: true,
+                  completedWeight: true,
+                  completedUnits: true,
+                  completedContents: true,
+                  lastAccessedAt: true,
                   currentUnit: true,
-                  unitProgress: {
-                    orderBy: {
-                      unit: {
-                        orderIndex: 'asc',
-                      },
-                    },
-                  },
                 },
               }
             : false,
         },
         skip,
         take: perPage,
-        orderBy: {
-          createdAt: 'desc',
-        },
+        orderBy: { createdAt: 'desc' },
       }),
-
-      this.prisma.course.count({
-        where: {
-          ...notDeletedQuery,
-        },
-      }),
+      this.prisma.course.count({ where: whereClause }),
     ]);
 
-    // Transform the data to include isJoined and joinedAt
-    const transformedCourses = courses.map((course) => {
-      const spaceConnection = course.spaces[0]; // Will be undefined if not joined
-
-      return {
-        ...course,
-        isJoined: !!spaceConnection,
-        joinedAt: spaceConnection?.joinedAt || null,
-        spaces: undefined, // Remove the spaces array from response
-        progress: course.progress?.[0] || null, // First progress record or null
-      };
-    });
+    const transformedCourses = courses.map((course) => ({
+      ...course,
+      isJoined: !!course.spaces[0],
+      joinedAt: course.spaces[0]?.joinedAt || null,
+      spaces: undefined,
+      progress: course.progress?.[0] || null,
+    }));
 
     return {
       data: transformedCourses,
@@ -359,6 +354,96 @@ export class SpaceService {
       },
     };
   }
+
+  // async getSpaceCourses(
+  //   userId: string | null,
+  //   spaceId: string,
+  //   page: number,
+  //   perPage: number,
+  // ): Promise<SpaceCoursesAllResponseDto> {
+  //   const skip = (page - 1) * perPage;
+
+  //   const [courses, total] = await Promise.all([
+  //     this.prisma.course.findMany({
+  //       where: {
+  //         ...notDeletedQuery,
+  //         ...isPublishedQuery,
+  //       },
+  //       include: {
+  //         // Creator information
+  //         creator: true,
+  //         // Check if course is joined
+  //         spaces: {
+  //           where: {
+  //             spaceId,
+  //           },
+  //           select: {
+  //             joinedAt: true,
+  //           },
+  //         },
+  //         // Updated: Course progress with new schema
+  //         progress: userId
+  //           ? {
+  //               where: {
+  //                 userId,
+  //               },
+  //               select: {
+  //                 id: true,
+  //                 currentUnitId: true,
+  //                 currentUnitContentId: true,
+  //                 completedWeight: true,
+  //                 completedUnits: true,
+  //                 completedContents: true,
+  //                 lastAccessedAt: true,
+  //                 currentUnit: true,
+  //               },
+  //             }
+  //           : false,
+  //       },
+  //       skip,
+  //       take: perPage,
+  //       orderBy: {
+  //         createdAt: 'desc',
+  //       },
+  //     }),
+
+  //     this.prisma.course.count({
+  //       where: {
+  //         ...notDeletedQuery,
+  //         ...isPublishedQuery,
+  //       },
+  //     }),
+  //   ]);
+
+  //   // Transform data with updated progress structure
+
+  //   console.log(courses);
+
+  //   const transformedCourses = courses.map((course) => {
+  //     const spaceConnection = course.spaces[0];
+
+  //     return {
+  //       ...course,
+  //       isJoined: !!spaceConnection,
+  //       joinedAt: spaceConnection?.joinedAt || null,
+  //       spaces: undefined,
+  //       // Updated: Get first progress record with new structure
+  //       progress: course.progress?.[0] || null,
+  //     };
+  //   });
+
+  //   return {
+  //     data: transformedCourses,
+  //     pagination: {
+  //       totalItems: total,
+  //       currentPage: page,
+  //       itemsPerPage: perPage,
+  //       totalPages: Math.ceil(total / perPage),
+  //       hasNextPage: page * perPage < total,
+  //       hasPreviousPage: page > 1,
+  //     },
+  //   };
+  // }
 
   // async getSpaceCourses(
   //   spaceId: string,

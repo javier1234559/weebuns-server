@@ -256,6 +256,7 @@ export const createCourses = (userIds: string[]) =>
       maxLevel: 'INTERMEDIATE',
       topics: ['ACADEMIC', 'DAILY_LIFE'],
       courseType: 'GRAMMAR',
+      isPremium: false,
       totalWeight: 100,
       isPublished: true,
       creator: {
@@ -273,6 +274,7 @@ export const createCourses = (userIds: string[]) =>
       topics: ['ACADEMIC', 'BUSINESS'],
       courseType: 'IELTS',
       totalWeight: 200,
+      isPremium: false,
       isPublished: true,
       creator: {
         connect: { id: userIds[1] },
@@ -304,6 +306,17 @@ export const createUnits = (courseIds: string[], userIds: string[]) =>
         connect: { id: courseIds[0] },
       },
     },
+    {
+      title: 'Part 1',
+      description: 'Learn about solving task 1 IELTS writing',
+      orderIndex: 1,
+      isPremium: false,
+      unitWeight: 30,
+      createdBy: userIds[1],
+      course: {
+        connect: { id: courseIds[0] },
+      },
+    },
   ] as Prisma.UnitCreateInput[];
 
 export const createUnitContents = (unitIds: string[]) =>
@@ -325,6 +338,27 @@ export const createUnitContents = (unitIds: string[]) =>
     },
     {
       title: 'Present Simple Practice',
+      contentType: 'exercise',
+      content: {
+        type: 'quiz',
+        questions: [
+          {
+            question: 'What is the correct form?',
+            options: ['he go', 'he goes', 'he going'],
+            answer: 1,
+          },
+        ],
+      },
+      orderIndex: 2,
+      isPremium: false,
+      isRequired: true,
+      contentWeight: 10,
+      unit: {
+        connect: { id: unitIds[0] },
+      },
+    },
+    {
+      title: 'Writing Task 1 Introduction',
       contentType: 'exercise',
       content: {
         type: 'quiz',

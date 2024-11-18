@@ -17,6 +17,11 @@ import { Roles, RolesGuard, UserRole } from 'src/common/auth/role.guard';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { IAuthPayload } from 'src/common/interface/auth-payload.interface';
 import { CourseService } from 'src/models/course/course.service';
+import { CourseLearnResponseDto } from 'src/models/course/dto/course-learn-response.dto';
+import {
+  CourseProgressResponseDto,
+  UpdateCourseProgressDto,
+} from 'src/models/course/dto/course-progress.dto';
 import { CourseResponseDto } from 'src/models/course/dto/course-response.dto';
 import { CreateCourseDto } from 'src/models/course/dto/create-course.dto';
 import {
@@ -118,11 +123,59 @@ export class CourseController {
   })
   async joinCourse(
     @Param('id') courseId: string,
+    @CurrentUser() user: IAuthPayload,
     @Body() joinCourseRequestDto: JoinCourseRequestDto,
   ): Promise<JoinCourseResponseDto> {
+    const userId = String(user.sub);
     return this.courseService.joinCourse(
+      userId,
       courseId,
       joinCourseRequestDto.spaceId,
+    );
+  }
+
+  @Get(':id/learn')
+  @Roles(UserRole.USER)
+  @ApiResponse({
+    status: HttpStatus.OK,
+    type: CourseLearnResponseDto,
+  })
+  async learnCourse(
+    @Param('id') courseId: string,
+  ): Promise<CourseLearnResponseDto> {
+    return this.courseService.getLearnCourse(courseId);
+  }
+
+  @Get(':id/progress')
+  @Roles(UserRole.USER)
+  @ApiResponse({
+    status: HttpStatus.OK,
+    type: CourseProgressResponseDto,
+  })
+  async getCourseProgress(
+    @Param('id') courseId: string,
+    @CurrentUser() user: IAuthPayload,
+  ): Promise<CourseProgressResponseDto> {
+    const userId = String(user.sub);
+    return this.courseService.getCourseProgress(courseId, userId);
+  }
+
+  @Patch(':id/progress')
+  @Roles(UserRole.USER)
+  @ApiResponse({
+    status: HttpStatus.OK,
+    type: CourseProgressResponseDto,
+  })
+  async updateCourseProgress(
+    @Param('id') courseId: string,
+    @CurrentUser() user: IAuthPayload,
+    @Body() updateProgressDto: UpdateCourseProgressDto,
+  ): Promise<CourseProgressResponseDto> {
+    const userId = String(user.sub);
+    return this.courseService.updateCourseProgress(
+      courseId,
+      userId,
+      updateProgressDto,
     );
   }
 }

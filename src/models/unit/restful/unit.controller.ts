@@ -21,6 +21,7 @@ import { NoteService } from 'src/models/note/note.service';
 import { CreateUnitDto } from 'src/models/unit/dto/create-unit.dto';
 import { GetUnitContentsResponseDto } from 'src/models/unit/dto/get-unit-contents-response.dto';
 import { GetUnitResponseDto } from 'src/models/unit/dto/get-unit-response.dto';
+import { UnitLearnResponseDto } from 'src/models/unit/dto/unit-learn.dto';
 import { UnitService } from 'src/models/unit/unit.service';
 
 @ApiTags('Units')
@@ -79,5 +80,20 @@ export class UnitController {
     @Body() createNoteDto: CreateNoteDto,
   ): Promise<CreateUpdateNoteResponseDto> {
     return this.noteService.createOrUpdateNote(unitId, user, createNoteDto);
+  }
+
+  @Get(':id/learn')
+  @Roles(UserRole.USER)
+  @CacheTTL(300) // Cache for 5 minutes
+  @ApiParam({
+    name: 'id',
+    type: String,
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    type: UnitLearnResponseDto,
+  })
+  async learnUnit(@Param('id') unitId: string): Promise<UnitLearnResponseDto> {
+    return this.unitService.getUnitForLearning(unitId);
   }
 }

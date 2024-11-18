@@ -2,8 +2,9 @@ import { Injectable } from '@nestjs/common';
 
 import { PrismaService } from 'src/common/prisma/prisma.service';
 import {
+  ActivityDataDto,
   ActivityStreakResponseDto,
-  DailyActivityDto,
+  RawActivityDto,
 } from 'src/models/stats/dto/activity-streak.dto';
 import { UserOverviewDto } from 'src/models/stats/dto/user-overview.dto';
 
@@ -16,67 +17,83 @@ export class StatsService {
     startDate: string,
     endDate: string,
   ): Promise<ActivityStreakResponseDto> {
-    // Get activities with streak count
-    const activities = await this.prisma.$queryRaw<DailyActivityDto[]>`
-      WITH daily_activities AS (
-        SELECT 
-          time::date as date,
-          COUNT(*) as activity_count,
-          MAX(streak_count) as streak_count  -- Get streak count
-        FROM user_activities
-        WHERE 
-          user_id = ${userId}::uuid
-          AND time >= ${startDate}::timestamp
-          AND time <= ${endDate}::timestamp
-        GROUP BY time::date
-      )
-      SELECT
-        to_char(d.date, 'YYYY-MM-DD') as date,
-        CASE 
-          WHEN da.activity_count IS NULL THEN 0
-          WHEN da.activity_count = 1 THEN 1
-          WHEN da.activity_count = 2 THEN 2
-          WHEN da.activity_count = 3 THEN 3
-          ELSE 4
-        END as level,
-        COALESCE(da.streak_count, 0) as streak
-      FROM generate_series(
-        ${startDate}::date,
-        ${endDate}::date,
-        '1 day'
-      ) d(date)
-      LEFT JOIN daily_activities da ON d.date = da.date
-      ORDER BY date DESC;
-    `;
-
-    // Get current day's activity
-    const [currentStreak] = await this.prisma.$queryRaw<DailyActivityDto[]>`
+    const rawActivities = await this.prisma.$queryRaw<RawActivityDto[]>`
+    WITH daily_activities AS (
       SELECT 
-        to_char(time::date, 'YYYY-MM-DD') as date,
-        CASE 
-          WHEN COUNT(*) = 1 THEN 1
-          WHEN COUNT(*) = 2 THEN 2
-          WHEN COUNT(*) = 3 THEN 3
-          ELSE 4
-        END as level,
-        MAX(streak_count) as streak
+        time::date as date,
+        COUNT(*) as activity_count,
+        MAX(streak_count) as streak_count
       FROM user_activities
       WHERE 
         user_id = ${userId}::uuid
-        AND DATE_TRUNC('day', time) = DATE_TRUNC('day', NOW())
-      GROUP BY time::date;
-    `;
+        AND time >= ${startDate}::timestamp
+        AND time <= ${endDate}::timestamp
+      GROUP BY time::date
+    )
+    SELECT
+      to_char(d.date, 'YYYY-MM-DD') as date,
+      CASE 
+        WHEN da.activity_count IS NULL THEN 0
+        WHEN da.activity_count = 1 THEN 1
+        WHEN da.activity_count = 2 THEN 2
+        WHEN da.activity_count = 3 THEN 3
+        ELSE 4
+      END as level,
+      COALESCE(da.streak_count, 0) as streak
+    FROM generate_series(
+      ${startDate}::date,
+      ${endDate}::date,
+      '1 day'
+    ) d(date)
+    LEFT JOIN daily_activities da ON d.date = da.date
+    ORDER BY date DESC;
+  `;
+
+    const activities = rawActivities.map((activity) => ({
+      [activity.date]: {
+        level: activity.level,
+        data: {
+          streak: activity.streak,
+        },
+      },
+    }));
+
+    const [currentStreak] = await this.prisma.$queryRaw<RawActivityDto[]>`
+    SELECT 
+      to_char(time::date, 'YYYY-MM-DD') as date,
+      CASE 
+        WHEN COUNT(*) = 1 THEN 1
+        WHEN COUNT(*) = 2 THEN 2
+        WHEN COUNT(*) = 3 THEN 3
+        ELSE 4
+      END as level,
+      MAX(streak_count) as streak
+    FROM user_activities
+    WHERE 
+      user_id = ${userId}::uuid
+      AND DATE_TRUNC('day', time) = DATE_TRUNC('day', NOW())
+    GROUP BY time::date;
+  `;
+
+    const currentStreakData: ActivityDataDto = currentStreak
+      ? {
+          level: currentStreak.level,
+          data: {
+            streak: currentStreak.streak,
+          },
+        }
+      : {
+          level: 0,
+          data: {
+            streak: 0,
+          },
+        };
 
     return {
       activities,
-      currentStreak: currentStreak || {
-        date: new Date().toISOString().split('T')[0],
-        level: 0,
-        streak: 0,
-      },
+      currentStreak: currentStreakData,
     };
   }
-
   async getUserOverview(userId: string): Promise<UserOverviewDto> {
     const [essayCount, vocabCount, notesCount, courseJoinedCount] =
       await Promise.all([
