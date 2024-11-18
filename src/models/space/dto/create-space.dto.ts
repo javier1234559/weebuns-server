@@ -42,12 +42,11 @@ export class CreateSpaceDto {
   currentLevel: string;
 
   @ApiProperty({
-    enum: TopicCode,
-    example: TopicCode.BUSINESS,
-    description: 'Main learning topic',
+    type: 'string',
+    example: [TopicCode.BUSINESS, TopicCode.ACADEMIC],
+    isArray: true,
   })
-  @IsEnum(TopicCode)
-  topic: string;
+  topics: string[];
 
   @ApiProperty({
     enum: LevelCode,

@@ -7,7 +7,6 @@ import {
   UserRole,
 } from '@prisma/client';
 
-// Interface for storing generated IDs
 interface GeneratedIds {
   users: string[];
   courses: string[];
@@ -27,11 +26,8 @@ interface GeneratedIds {
   subscriptionPayments: string[];
   correctionCredits: string[];
   courseProgress: string[];
-  unitProgress: string[];
-  unitContentProgress: string[];
 }
 
-// Store generated IDs
 export const generatedIds: GeneratedIds = {
   users: [],
   courses: [],
@@ -51,8 +47,6 @@ export const generatedIds: GeneratedIds = {
   subscriptionPayments: [],
   correctionCredits: [],
   courseProgress: [],
-  unitProgress: [],
-  unitContentProgress: [],
 };
 
 export const REFERENCE_TYPES = {
@@ -92,7 +86,6 @@ export const REFERENCE = {
 } as const;
 
 export const referenceData: Prisma.ReferenceDataCreateInput[] = [
-  // Languages
   {
     type: REFERENCE_TYPES.LANGUAGE,
     code: 'ENGLISH',
@@ -115,7 +108,6 @@ export const referenceData: Prisma.ReferenceDataCreateInput[] = [
     },
     orderIndex: 2,
   },
-  // Learning Targets
   {
     type: REFERENCE_TYPES.TARGET,
     code: 'COMMUNICATION',
@@ -146,13 +138,11 @@ export const referenceData: Prisma.ReferenceDataCreateInput[] = [
     },
     orderIndex: 3,
   },
-  // Add all other reference data...
 ];
 
-// Base users data
 export const users: Prisma.UserCreateInput[] = [
   {
-    username: 'test user',
+    username: 'test_user',
     email: 'test@gmail.com',
     passwordHash:
       '$2b$10$11zWAeJIiwBV7rI.TYlF4.nW/kLj67MvHs5j8BFcMeG9XgHXx8pci',
@@ -162,8 +152,8 @@ export const users: Prisma.UserCreateInput[] = [
     lastName: 'One',
     profilePicture: 'https://example.com/student1.jpg',
     isEmailVerified: true,
-    lastLogin: new Date(),
     nativeLanguage: 'VIETNAMESE',
+    lastLogin: new Date(),
   },
   {
     username: 'teacher1',
@@ -195,13 +185,12 @@ export const users: Prisma.UserCreateInput[] = [
   },
 ];
 
-// Create subscriptions
 export const createSubscriptions = (userIds: string[]) =>
   [
     {
       type: SubscriptionType.BASIC,
       startDate: new Date(),
-      endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
+      endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
       status: 'ACTIVE',
       correctionBalance: 10,
       user: {
@@ -211,7 +200,7 @@ export const createSubscriptions = (userIds: string[]) =>
     {
       type: SubscriptionType.PREMIUM,
       startDate: new Date(),
-      endDate: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000), // 90 days from now
+      endDate: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000),
       status: 'ACTIVE',
       correctionBalance: 50,
       user: {
@@ -220,7 +209,6 @@ export const createSubscriptions = (userIds: string[]) =>
     },
   ] as Prisma.SubscriptionCreateInput[];
 
-// Create subscription payments
 export const createSubscriptionPayments = (subscriptionIds: string[]) =>
   [
     {
@@ -243,7 +231,6 @@ export const createSubscriptionPayments = (subscriptionIds: string[]) =>
     },
   ] as Prisma.SubscriptionPaymentCreateInput[];
 
-// Create correction credits
 export const createCorrectionCredits = (userIds: string[]) =>
   [
     {
@@ -257,19 +244,19 @@ export const createCorrectionCredits = (userIds: string[]) =>
     },
   ] as Prisma.CorrectionCreditCreateInput[];
 
-// Create courses
 export const createCourses = (userIds: string[]) =>
   [
     {
       title: 'English Grammar Fundamentals',
       description: 'Master the basics of English grammar',
-      thumbnailUrl: 'https://example.com/course1.jpg',
+      thumbnailUrl:
+        'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTbgFlVtm-qZLJ9J4RJ149JHki8MAlylS1CY0ltDaMoLlFgofm3RstlPPeoXE7C7XrAgNA&usqp=CAU',
       language: 'ENGLISH',
       minLevel: 'BEGINNER',
       maxLevel: 'INTERMEDIATE',
       topics: ['ACADEMIC', 'DAILY_LIFE'],
-      courseType: 'COMMUNICATION',
-      totalWeight: 10,
+      courseType: 'GRAMMAR',
+      totalWeight: 100,
       isPublished: true,
       creator: {
         connect: { id: userIds[1] },
@@ -278,13 +265,14 @@ export const createCourses = (userIds: string[]) =>
     {
       title: 'IELTS Advanced Preparation',
       description: 'Comprehensive IELTS course for high scores',
-      thumbnailUrl: 'https://example.com/course2.jpg',
+      thumbnailUrl:
+        'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTbgFlVtm-qZLJ9J4RJ149JHki8MAlylS1CY0ltDaMoLlFgofm3RstlPPeoXE7C7XrAgNA&usqp=CAU',
       language: 'ENGLISH',
       minLevel: 'INTERMEDIATE',
       maxLevel: 'ADVANCED',
       topics: ['ACADEMIC', 'BUSINESS'],
       courseType: 'IELTS',
-      totalWeight: 20,
+      totalWeight: 200,
       isPublished: true,
       creator: {
         connect: { id: userIds[1] },
@@ -292,7 +280,6 @@ export const createCourses = (userIds: string[]) =>
     },
   ] as Prisma.CourseCreateInput[];
 
-// Create units
 export const createUnits = (courseIds: string[], userIds: string[]) =>
   [
     {
@@ -300,7 +287,8 @@ export const createUnits = (courseIds: string[], userIds: string[]) =>
       description: 'Learn all about present tenses in English',
       orderIndex: 1,
       isPremium: false,
-      createdBy: userIds[1], // Teacher ID
+      unitWeight: 20,
+      createdBy: userIds[1],
       course: {
         connect: { id: courseIds[0] },
       },
@@ -310,48 +298,62 @@ export const createUnits = (courseIds: string[], userIds: string[]) =>
       description: 'Learn all about past tenses in English',
       orderIndex: 2,
       isPremium: true,
-      createdBy: userIds[1], // Teacher ID
+      unitWeight: 30,
+      createdBy: userIds[1],
       course: {
         connect: { id: courseIds[0] },
       },
     },
   ] as Prisma.UnitCreateInput[];
 
-// Create unit contents
 export const createUnitContents = (unitIds: string[]) =>
   [
     {
-      title: 'Present Simple vs Present Continuous',
+      title: 'Present Simple Introduction',
       contentType: 'theory',
-      content: JSON.stringify({
-        blocks: [
-          {
-            type: 'paragraph',
-            content:
-              'Learn the differences between present simple and present continuous tenses.',
-          },
-        ],
-      }),
+      content: {
+        type: 'text',
+        body: 'Introduction to Present Simple tense...',
+      },
       orderIndex: 1,
       isPremium: false,
       isRequired: true,
-      completeWeight: 1,
+      contentWeight: 5,
+      unit: {
+        connect: { id: unitIds[0] },
+      },
+    },
+    {
+      title: 'Present Simple Practice',
+      contentType: 'exercise',
+      content: {
+        type: 'quiz',
+        questions: [
+          {
+            question: 'What is the correct form?',
+            options: ['he go', 'he goes', 'he going'],
+            answer: 1,
+          },
+        ],
+      },
+      orderIndex: 2,
+      isPremium: false,
+      isRequired: true,
+      contentWeight: 10,
       unit: {
         connect: { id: unitIds[0] },
       },
     },
   ] as Prisma.UnitContentCreateInput[];
 
-// Create course progress
 export const createCourseProgress = (
   userIds: string[],
   courseIds: string[],
   unitIds: string[],
+  unitContentIds: string[],
 ) =>
   [
     {
-      completedWeight: 0,
-      lastAccessedAt: new Date(),
       user: {
         connect: { id: userIds[0] },
       },
@@ -361,47 +363,16 @@ export const createCourseProgress = (
       currentUnit: {
         connect: { id: unitIds[0] },
       },
+      currentContent: {
+        connect: { id: unitContentIds[0] },
+      },
+      completedWeight: 0,
+      completedUnits: [],
+      completedContents: [],
+      lastAccessedAt: new Date(),
     },
   ] as Prisma.CourseProgressCreateInput[];
 
-// Create unit progress
-export const createUnitProgress = (
-  courseProgressIds: string[],
-  unitIds: string[],
-) =>
-  [
-    {
-      completedWeight: 0,
-      lastAccessedAt: new Date(),
-      isCompleted: false,
-      courseProgress: {
-        connect: { id: courseProgressIds[0] },
-      },
-      unit: {
-        connect: { id: unitIds[0] },
-      },
-    },
-  ] as Prisma.UnitProgressCreateInput[];
-
-// Create unit content progress
-export const createUnitContentProgress = (
-  unitProgressIds: string[],
-  unitContentIds: string[],
-) =>
-  [
-    {
-      isCompleted: false,
-      completedAt: null,
-      unitProgress: {
-        connect: { id: unitProgressIds[0] },
-      },
-      unitContent: {
-        connect: { id: unitContentIds[0] },
-      },
-    },
-  ] as Prisma.UnitContentProgressCreateInput[];
-
-// Create spaces
 export const createSpaces = (userIds: string[]) =>
   [
     {
@@ -418,7 +389,6 @@ export const createSpaces = (userIds: string[]) =>
     },
   ] as Prisma.SpaceCreateInput[];
 
-// Create space courses
 export const createSpaceCourses = (spaceIds: string[], courseIds: string[]) =>
   [
     {
@@ -431,7 +401,6 @@ export const createSpaceCourses = (spaceIds: string[], courseIds: string[]) =>
     },
   ] as Prisma.SpaceCourseCreateInput[];
 
-// Create essays
 export const createEssays = (spaceIds: string[], userIds: string[]) =>
   [
     {
@@ -451,14 +420,12 @@ export const createEssays = (spaceIds: string[], userIds: string[]) =>
     },
   ] as Prisma.EssayCreateInput[];
 
-// Create hashtags
 export const hashtags: Prisma.HashtagCreateInput[] = [
   { name: 'learning', usageCount: 0 },
   { name: 'english', usageCount: 0 },
   { name: 'grammar', usageCount: 0 },
 ];
 
-// Create essay hashtags
 export const createEssayHashtags = (essayIds: string[], hashtagIds: string[]) =>
   [
     {

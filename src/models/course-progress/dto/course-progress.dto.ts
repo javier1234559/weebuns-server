@@ -16,4 +16,14 @@ export class CourseProgressDto {
     nullable: true,
   })
   lastAccessedAt: Date | null;
+  @ApiProperty({
+    type: 'string',
+    isArray: true,
+  })
+  completedUnits: string[];
+  @ApiProperty({
+    type: 'string',
+    isArray: true,
+  })
+  completedContents: string[];
 }

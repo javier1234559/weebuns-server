@@ -2,10 +2,9 @@ import { ApiProperty } from '@nestjs/swagger';
 
 import { Prisma } from '@prisma/client';
 
+import { CourseProgress } from 'src/models/course-progress/entities/course-progress.entity';
 import { IUnitContent } from 'src/models/unit-content/unit-content.interface';
 import { Unit } from 'src/models/unit/entities/unit.entity';
-
-import { UnitContentProgress } from '../../unit-content-progress/entities/unit-content-progress.entity';
 
 export class UnitContent implements IUnitContent {
   @ApiProperty({
@@ -45,7 +44,7 @@ export class UnitContent implements IUnitContent {
     type: 'integer',
     format: 'int32',
   })
-  completeWeight: number;
+  contentWeight: number;
   @ApiProperty({
     type: 'string',
     format: 'date-time',
@@ -61,11 +60,16 @@ export class UnitContent implements IUnitContent {
     required: false,
   })
   unit?: Unit;
-
   @ApiProperty({
-    type: () => UnitContentProgress,
+    type: () => CourseProgress,
     isArray: true,
     required: false,
   })
-  progress?: UnitContentProgress[];
+  currentInProgress?: CourseProgress[];
+  @ApiProperty({
+    type: () => CourseProgress,
+    isArray: true,
+    required: false,
+  })
+  nextInProgress?: CourseProgress[];
 }

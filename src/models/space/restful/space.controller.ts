@@ -21,6 +21,7 @@ import { DeleteSpaceResponseDto } from 'src/models/space/dto/delete-space-respon
 import { FindAllSpacesDto } from 'src/models/space/dto/find-all-spaces.dto';
 import { FindOneSpaceResponseDto } from 'src/models/space/dto/find-one-space-response.dto';
 import { GetSpacesUserDto } from 'src/models/space/dto/get-space-user.dto';
+import { SpaceCoursesAllResponseDto } from 'src/models/space/dto/space-course-all-response.dto';
 import { SpaceCoursesResponseDto } from 'src/models/space/dto/space-courses-response.dto';
 import { SpacesResponse } from 'src/models/space/dto/spaces-response.dto';
 import { UpdateSpaceDto } from 'src/models/space/dto/update-space.dto';
@@ -87,17 +88,49 @@ export class SpaceController {
     return this.spaceService.delete(id);
   }
 
+  @Get(':id/courses/joined')
+  @Roles(UserRole.USER)
+  @ApiResponse({
+    status: 200,
+    type: SpaceCoursesResponseDto,
+  })
+  async getSpaceCoursesJoined(
+    @CurrentUser() user: IAuthPayload,
+    @Param('id') spaceId: string,
+    @Query('page') page: number = 1,
+    @Query('perPage') perPage: number = 10,
+  ): Promise<SpaceCoursesResponseDto> {
+    const userId = String(user.sub);
+    const validPage = page > 0 ? page : 1;
+    const validPerPage = perPage > 0 ? perPage : 10;
+    return this.spaceService.getSpaceCoursesJoined(
+      userId,
+      spaceId,
+      validPage,
+      validPerPage,
+    );
+  }
+
   @Get(':id/courses')
-  @Roles(UserRole.USER, UserRole.ADMIN)
+  @Roles(UserRole.USER)
   @ApiResponse({
     status: 200,
     type: SpaceCoursesResponseDto,
   })
   async getSpaceCourses(
+    @CurrentUser() user: IAuthPayload,
     @Param('id') spaceId: string,
     @Query('page') page: number = 1,
     @Query('perPage') perPage: number = 10,
-  ): Promise<SpaceCoursesResponseDto> {
-    return this.spaceService.getSpaceCourses(spaceId, page, perPage);
+  ): Promise<SpaceCoursesAllResponseDto> {
+    const userId = String(user.sub);
+    const validPage = page > 0 ? page : 1;
+    const validPerPage = perPage > 0 ? perPage : 10;
+    return this.spaceService.getSpaceCourses(
+      userId,
+      spaceId,
+      validPage,
+      validPerPage,
+    );
   }
 }

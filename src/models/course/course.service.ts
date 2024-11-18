@@ -16,12 +16,13 @@ import {
 } from 'src/models/course/dto/get-course-units.dto';
 import { GetCoursesRequestDto } from 'src/models/course/dto/get-courses.dto';
 import { JoinCourseResponseDto } from 'src/models/course/dto/join-course-response.dto';
+import { UpdateCourseDto } from 'src/models/course/dto/update-course.dto';
 
 @Injectable()
 export class CourseService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async createCourse(
+  async create(
     createCourseDto: CreateCourseDto,
     userId: string,
   ): Promise<CourseResponseDto> {
@@ -49,9 +50,62 @@ export class CourseService {
     return { course };
   }
 
-  async getCourses(
-    query: GetCoursesRequestDto,
-  ): Promise<CourseListResponseDto> {
+  async update(
+    id: string,
+    updateCourseDto: UpdateCourseDto,
+  ): Promise<CourseResponseDto> {
+    const course = await this.prisma.course.findFirst({
+      where: { id, deletedAt: null },
+    });
+
+    if (!course) {
+      throw new NotFoundException(`Course ${id} not found`);
+    }
+
+    const updated = await this.prisma.course.update({
+      where: { id },
+      data: updateCourseDto,
+      include: {
+        creator: true,
+        units: {
+          include: {
+            contents: true,
+          },
+          orderBy: {
+            orderIndex: 'asc',
+          },
+        },
+      },
+    });
+
+    return { course: updated };
+  }
+
+  async delete(id: string): Promise<CourseResponseDto> {
+    const course = await this.prisma.course.findFirst({
+      where: { id, deletedAt: null },
+    });
+
+    if (!course) {
+      throw new NotFoundException(`Course with ID ${id} not found`);
+    }
+
+    const deletedCourse = await this.prisma.course.update({
+      where: { id },
+      data: {
+        deletedAt: new Date(),
+      },
+      include: {
+        creator: true,
+      },
+    });
+
+    return {
+      course: deletedCourse,
+    };
+  }
+
+  async getAll(query: GetCoursesRequestDto): Promise<CourseListResponseDto> {
     const { search, page, perPage } = query;
 
     const queryOptions = {
@@ -83,7 +137,7 @@ export class CourseService {
     };
   }
 
-  async getCourseById(id: string): Promise<CourseResponseDto> {
+  async getById(id: string): Promise<CourseResponseDto> {
     const course = await this.prisma.course.findFirst({
       where: {
         id,

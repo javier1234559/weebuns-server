@@ -83,7 +83,8 @@ export class Space implements ISpace {
 
   @Field(() => TopicCode)
   @ApiProperty({
-    enum: [TopicCode],
+    type: 'string',
+    isArray: true,
     example: [TopicCode.ACADEMIC, TopicCode.DAILY_LIFE],
     description: 'Main learning topic',
   })

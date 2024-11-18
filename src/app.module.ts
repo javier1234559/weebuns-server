@@ -43,10 +43,10 @@ import { VocabularyModule } from 'src/models/vocabulary/vocabulary.module';
     HealthModule,
     HashTagModule,
     StatsModule,
-    AiModule,
     CourseModule,
     UnitModule,
     UnitContentModule,
+    AiModule,
   ],
   providers: [
     {

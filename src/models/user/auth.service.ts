@@ -239,8 +239,6 @@ export class AuthService {
       where: { email: userData.email },
     });
 
-    console.log(user.profilePicture, userData.picture);
-
     if (!user) {
       // Create new user
       user = await this.prisma.user.create({
@@ -252,14 +250,6 @@ export class AuthService {
           nativeLanguage: 'en',
           role: UserRole.user,
           authProvider: userData.provider,
-          profilePicture: userData.picture,
-        },
-      });
-    } else if (user.profilePicture !== userData.picture) {
-      // Update profile picture if it changed
-      user = await this.prisma.user.update({
-        where: { id: user.id },
-        data: {
           profilePicture: userData.picture,
         },
       });

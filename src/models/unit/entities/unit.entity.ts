@@ -5,7 +5,6 @@ import { Course } from 'src/models/course/entities/course.entity';
 import { Note } from 'src/models/note/entities/note.entity';
 import { UnitComment } from 'src/models/unit-comment/entities/unit-comment.entity';
 import { UnitContent } from 'src/models/unit-content/entities/unit-content.entity';
-import { UnitProgress } from 'src/models/unit-progress/entities/unit-progress.entity';
 import { IUnit } from 'src/models/unit/unit.interface';
 
 export class Unit implements IUnit {
@@ -32,12 +31,17 @@ export class Unit implements IUnit {
   })
   orderIndex: number;
   @ApiProperty({
-    type: 'string',
-  })
-  @ApiProperty({
     type: 'boolean',
   })
   isPremium: boolean;
+  @ApiProperty({
+    type: 'integer',
+    format: 'int32',
+  })
+  unitWeight: number;
+  @ApiProperty({
+    type: 'string',
+  })
   createdBy: string;
   @ApiProperty({
     type: 'string',
@@ -73,15 +77,15 @@ export class Unit implements IUnit {
   })
   comments?: UnitComment[];
   @ApiProperty({
-    type: () => UnitProgress,
-    isArray: true,
-    required: false,
-  })
-  progress?: UnitProgress[];
-  @ApiProperty({
     type: () => CourseProgress,
     isArray: true,
     required: false,
   })
   courseProgress?: CourseProgress[];
+  @ApiProperty({
+    type: () => CourseProgress,
+    isArray: true,
+    required: false,
+  })
+  nextUnits?: CourseProgress[];
 }

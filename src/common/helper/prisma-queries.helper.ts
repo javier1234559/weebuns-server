@@ -11,6 +11,10 @@ export const notDeletedQuery = {
   deletedAt: null,
 };
 
+export const notPublishedQuery = {
+  isPublished: false,
+};
+
 export const softDeleteQuery = (id: string): Prisma.UserUpdateArgs => ({
   where: { id },
   data: { deletedAt: new Date() },

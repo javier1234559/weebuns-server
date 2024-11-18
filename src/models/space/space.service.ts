@@ -4,6 +4,7 @@ import { Prisma } from '@prisma/client';
 
 import {
   notDeletedQuery,
+  notPublishedQuery,
   paginationQuery,
   searchQuery,
 } from 'src/common/helper/prisma-queries.helper';
@@ -16,10 +17,10 @@ import { FindAllSpacesDto } from 'src/models/space/dto/find-all-spaces.dto';
 import { FindOneSpaceResponseDto } from 'src/models/space/dto/find-one-space-response.dto';
 import { GetSpacesUserDto } from 'src/models/space/dto/get-space-user.dto';
 import { GetUserSpacesDto } from 'src/models/space/dto/get-user-space.dto';
+import { SpaceCoursesAllResponseDto } from 'src/models/space/dto/space-course-all-response.dto';
 import { SpaceCoursesResponseDto } from 'src/models/space/dto/space-courses-response.dto';
 import { SpacesResponse } from 'src/models/space/dto/spaces-response.dto';
 import { UpdateSpaceDto } from 'src/models/space/dto/update-space.dto';
-import { CourseRawResult } from 'src/models/space/interface/course-raw-result.interface';
 
 @Injectable()
 export class SpaceService {
@@ -204,7 +205,8 @@ export class SpaceService {
     };
   }
 
-  async getSpaceCourses(
+  async getSpaceCoursesJoined(
+    userId: string,
     spaceId: string,
     page: number,
     perPage: number,
@@ -212,65 +214,219 @@ export class SpaceService {
     const skip = (page - 1) * perPage;
 
     const [courses, total] = await Promise.all([
-      this.prisma.$queryRaw<CourseRawResult[]>`
-        SELECT
-          c.id,
-          c.title,
-          c.description,
-          c.thumbnail_url AS "thumbnailUrl",
-          c.level,
-          c.price,
-          c.total_weight AS "totalWeight",
-          c.is_published AS "isPublished",
-          c.created_at AS "createdAt",
-          u.id AS "creatorId",
-          u.username,
-          u.profile_picture AS "profilePicture",
-          sc.joined_at AS "joinedAt",
-          CASE WHEN sc.course_id IS NOT NULL THEN true ELSE false END AS "isJoined"
-        FROM courses c
-        LEFT JOIN space_courses sc ON c.id = sc.course_id AND sc.space_id = ${spaceId}
-        LEFT JOIN users u ON c.created_by = u.id
-        WHERE c.is_published = true
-        ORDER BY c.created_at DESC
-        LIMIT ${perPage} OFFSET ${skip}
-      `,
+      this.prisma.course.findMany({
+        where: {
+          spaces: {
+            some: {
+              spaceId,
+            },
+          },
+          ...notDeletedQuery,
+        },
+        include: {
+          // Creator information
+          creator: true,
+          // Course progress for current user
+          progress: {
+            where: {
+              userId,
+            },
+            include: {
+              currentUnit: true,
+              unitProgress: {
+                orderBy: {
+                  unit: {
+                    orderIndex: 'asc',
+                  },
+                },
+              },
+            },
+          },
+        },
+        skip,
+        take: perPage,
+        orderBy: {
+          createdAt: 'desc',
+        },
+      }),
+
       this.prisma.course.count({
         where: {
-          isPublished: true,
+          spaces: {
+            some: {
+              spaceId,
+            },
+          },
+          ...notDeletedQuery,
         },
       }),
     ]);
 
-    const totalPages = Math.ceil(total / perPage);
-
     return {
-      data: courses.map((course) => ({
-        id: course.id,
-        title: course.title,
-        description: course.description,
-        thumbnailUrl: course.thumbnailUrl,
-        level: course.level,
-        price: course.price,
-        totalWeight: course.totalWeight,
-        isPublished: course.isPublished,
-        createdAt: course.createdAt,
-        creator: {
-          id: course.creatorId,
-          username: course.username,
-          profilePicture: course.profilePicture,
-        },
-        is_joined: course.isJoined,
-        joined_at: course.joinedAt,
-      })),
+      data: courses,
       pagination: {
         totalItems: total,
         currentPage: page,
-        totalPages,
         itemsPerPage: perPage,
+        totalPages: Math.ceil(total / perPage),
         hasNextPage: page * perPage < total,
         hasPreviousPage: page > 1,
       },
     };
   }
+
+  async getSpaceCourses(
+    userId: string | null,
+    spaceId: string,
+    page: number,
+    perPage: number,
+  ): Promise<SpaceCoursesAllResponseDto> {
+    const skip = (page - 1) * perPage;
+
+    const [courses, total] = await Promise.all([
+      this.prisma.course.findMany({
+        where: {
+          ...notDeletedQuery,
+          ...notPublishedQuery,
+        },
+        include: {
+          // Creator information
+          creator: true,
+          // Check if course is joined
+          spaces: {
+            where: {
+              spaceId,
+            },
+            select: {
+              joinedAt: true,
+            },
+          },
+          // Course progress for current user (if exists)
+          progress: userId
+            ? {
+                where: {
+                  userId,
+                },
+                include: {
+                  currentUnit: true,
+                  unitProgress: {
+                    orderBy: {
+                      unit: {
+                        orderIndex: 'asc',
+                      },
+                    },
+                  },
+                },
+              }
+            : false,
+        },
+        skip,
+        take: perPage,
+        orderBy: {
+          createdAt: 'desc',
+        },
+      }),
+
+      this.prisma.course.count({
+        where: {
+          ...notDeletedQuery,
+        },
+      }),
+    ]);
+
+    // Transform the data to include isJoined and joinedAt
+    const transformedCourses = courses.map((course) => {
+      const spaceConnection = course.spaces[0]; // Will be undefined if not joined
+
+      return {
+        ...course,
+        isJoined: !!spaceConnection,
+        joinedAt: spaceConnection?.joinedAt || null,
+        spaces: undefined, // Remove the spaces array from response
+        progress: course.progress?.[0] || null, // First progress record or null
+      };
+    });
+
+    return {
+      data: transformedCourses,
+      pagination: {
+        totalItems: total,
+        currentPage: page,
+        itemsPerPage: perPage,
+        totalPages: Math.ceil(total / perPage),
+        hasNextPage: page * perPage < total,
+        hasPreviousPage: page > 1,
+      },
+    };
+  }
+
+  // async getSpaceCourses(
+  //   spaceId: string,
+  //   page: number,
+  //   perPage: number,
+  // ): Promise<SpaceCoursesResponseDto> {
+  //   const skip = (page - 1) * perPage;
+
+  //   const [courses, total] = await Promise.all([
+  //     this.prisma.$queryRaw<CourseRawResult[]>`
+  //       SELECT
+  //         c.id,
+  //         c.title,
+  //         c.description,
+  //         c.thumbnail_url AS "thumbnailUrl",
+  //         c.level,
+  //         c.price,
+  //         c.total_weight AS "totalWeight",
+  //         c.is_published AS "isPublished",
+  //         c.created_at AS "createdAt",
+  //         u.id AS "creatorId",
+  //         u.username,
+  //         u.profile_picture AS "profilePicture",
+  //         sc.joined_at AS "joinedAt",
+  //         CASE WHEN sc.course_id IS NOT NULL THEN true ELSE false END AS "isJoined"
+  //       FROM courses c
+  //       LEFT JOIN space_courses sc ON c.id = sc.course_id AND sc.space_id = ${spaceId}
+  //       LEFT JOIN users u ON c.created_by = u.id
+  //       WHERE c.is_published = true
+  //       ORDER BY c.created_at DESC
+  //       LIMIT ${perPage} OFFSET ${skip}
+  //     `,
+  //     this.prisma.course.count({
+  //       where: {
+  //         isPublished: true,
+  //       },
+  //     }),
+  //   ]);
+
+  //   const totalPages = Math.ceil(total / perPage);
+
+  //   return {
+  //     data: courses.map((course) => ({
+  //       id: course.id,
+  //       title: course.title,
+  //       description: course.description,
+  //       thumbnailUrl: course.thumbnailUrl,
+  //       level: course.level,
+  //       price: course.price,
+  //       totalWeight: course.totalWeight,
+  //       isPublished: course.isPublished,
+  //       createdAt: course.createdAt,
+  //       creator: {
+  //         id: course.creatorId,
+  //         username: course.username,
+  //         profilePicture: course.profilePicture,
+  //       },
+  //       is_joined: course.isJoined,
+  //       joined_at: course.joinedAt,
+  //     })),
+  //     pagination: {
+  //       totalItems: total,
+  //       currentPage: page,
+  //       totalPages,
+  //       itemsPerPage: perPage,
+  //       hasNextPage: page * perPage < total,
+  //       hasPreviousPage: page > 1,
+  //     },
+  //   };
+  // }
 }

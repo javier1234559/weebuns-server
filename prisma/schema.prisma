@@ -206,21 +206,33 @@ model Course {
 }
 
 model CourseProgress {
-  id              String    @id @default(uuid())
-  userId          String    @map("user_id")
-  courseId        String    @map("course_id")
-  currentUnitId   String?   @map("current_unit_id")
-  completedWeight Int       @default(0) @map("completed_weight")
-  lastAccessedAt  DateTime? @map("last_accessed_at")
+  id                   String    @id @default(uuid())
+  userId               String    @map("user_id")
+  courseId             String    @map("course_id")
+  currentUnitId        String?   @map("current_unit_id")
+  currentUnitContentId String?   @map("current_unit_content_id")
+  nextUnitId           String?   @map("next_unit_id")
+  nextUnitContentId    String?   @map("next_unit_content_id")
+  completedWeight      Int       @default(0) @map("completed_weight")
+  lastAccessedAt       DateTime? @map("last_accessed_at")
+
+  // Arrays for tracking completion
+  completedUnits    String[] @default([]) @map("completed_units")
+  completedContents String[] @default([]) @map("completed_contents")
 
   // Relations
-  user         User           @relation(fields: [userId], references: [id])
-  course       Course         @relation(fields: [courseId], references: [id])
-  currentUnit  Unit?          @relation(fields: [currentUnitId], references: [id])
-  unitProgress UnitProgress[]
+  user           User         @relation(fields: [userId], references: [id])
+  course         Course       @relation(fields: [courseId], references: [id])
+  currentUnit    Unit?        @relation(fields: [currentUnitId], references: [id])
+  nextUnit       Unit?        @relation("NextUnit", fields: [nextUnitId], references: [id])
+  currentContent UnitContent? @relation("CurrentContent", fields: [currentUnitContentId], references: [id])
+  nextContent    UnitContent? @relation("NextContent", fields: [nextUnitContentId], references: [id])
 
   @@unique([userId, courseId])
-  @@index([lastAccessedAt])
+  @@index([userId])
+  @@index([courseId])
+  @@index([completedUnits])
+  @@index([completedContents])
   @@map("course_progress")
 }
 
@@ -231,6 +243,7 @@ model Unit {
   description String?
   orderIndex  Int      @map("order_index")
   isPremium   Boolean  @default(false) @map("is_premium")
+  unitWeight  Int      @default(0) @map("unit_weight") // Total weight của unit
   createdBy   String   @map("created_by")
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
@@ -240,66 +253,35 @@ model Unit {
   contents       UnitContent[]
   notes          Note[]
   comments       UnitComment[]
-  progress       UnitProgress[]
   courseProgress CourseProgress[] // For currentUnit relation
+  nextUnits      CourseProgress[] @relation("NextUnit") // Added for next unit tracking
 
   @@index([courseId, orderIndex])
   @@index([createdBy])
   @@map("units")
 }
 
-model UnitProgress {
-  id               String    @id @default(uuid())
-  courseProgressId String    @map("course_progress_id")
-  unitId           String    @map("unit_id")
-  completedWeight  Int       @default(0) @map("completed_weight")
-  lastAccessedAt   DateTime? @map("last_accessed_at")
-  isCompleted      Boolean   @default(false) @map("is_completed")
-
-  // Relations
-  courseProgress  CourseProgress        @relation(fields: [courseProgressId], references: [id])
-  unit            Unit                  @relation(fields: [unitId], references: [id])
-  contentProgress UnitContentProgress[]
-
-  @@unique([courseProgressId, unitId])
-  @@map("unit_progress")
-}
-
 model UnitContent {
-  id             String   @id @default(uuid())
-  unitId         String   @map("unit_id")
-  title          String
-  contentType    String   @map("content_type")
-  content        Json
-  orderIndex     Int      @map("order_index")
-  isPremium      Boolean  @default(false) @map("is_premium")
-  isRequired     Boolean  @default(true) @map("is_required")
-  completeWeight Int      @default(1) @map("complete_weight")
-  createdAt      DateTime @default(now()) @map("created_at")
-  updatedAt      DateTime @updatedAt @map("updated_at")
+  id            String   @id @default(uuid())
+  unitId        String   @map("unit_id")
+  title         String
+  contentType   String   @map("content_type")
+  content       Json
+  orderIndex    Int      @map("order_index")
+  isPremium     Boolean  @default(false) @map("is_premium")
+  isRequired    Boolean  @default(true) @map("is_required")
+  contentWeight Int      @default(1) @map("content_weight") // Renamed for clarity
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
 
   // Relations
-  unit     Unit                  @relation(fields: [unitId], references: [id])
-  progress UnitContentProgress[]
+  unit              Unit             @relation(fields: [unitId], references: [id])
+  currentInProgress CourseProgress[] @relation("CurrentContent")
+  nextInProgress    CourseProgress[] @relation("NextContent")
 
   @@index([unitId, orderIndex])
   @@index([unitId, isPremium])
   @@map("unit_contents")
-}
-
-model UnitContentProgress {
-  id             String    @id @default(uuid())
-  unitProgressId String    @map("unit_progress_id")
-  unitContentId  String    @map("unit_content_id")
-  isCompleted    Boolean   @default(false) @map("is_completed")
-  completedAt    DateTime? @map("completed_at")
-
-  // Relations
-  unitProgress UnitProgress @relation(fields: [unitProgressId], references: [id])
-  unitContent  UnitContent  @relation(fields: [unitContentId], references: [id])
-
-  @@unique([unitProgressId, unitContentId])
-  @@map("unit_content_progress")
 }
 
 model UnitComment {

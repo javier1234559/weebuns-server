@@ -1,7 +1,7 @@
-import { CacheInterceptor } from '@nestjs/cache-manager';
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpStatus,
   Param,
@@ -9,7 +9,6 @@ import {
   Post,
   Query,
   UseGuards,
-  UseInterceptors,
 } from '@nestjs/common';
 import { ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 
@@ -28,16 +27,16 @@ import {
 import { GetCoursesRequestDto } from 'src/models/course/dto/get-courses.dto';
 import { JoinCourseRequestDto } from 'src/models/course/dto/join-course-request.dto';
 import { JoinCourseResponseDto } from 'src/models/course/dto/join-course-response.dto';
+import { UpdateCourseDto } from 'src/models/course/dto/update-course.dto';
 
 @ApiTags('Courses')
 @Controller('courses')
 @UseGuards(AuthGuard, RolesGuard)
-@UseInterceptors(CacheInterceptor)
 export class CourseController {
   constructor(private readonly courseService: CourseService) {}
 
   @Post()
-  @Roles(UserRole.USER)
+  @Roles(UserRole.USER, UserRole.ADMIN)
   @ApiResponse({
     status: HttpStatus.CREATED,
     type: CourseResponseDto,
@@ -47,7 +46,32 @@ export class CourseController {
     @Body() createCourseDto: CreateCourseDto,
   ): Promise<CourseResponseDto> {
     const userId = String(user.sub);
-    return this.courseService.createCourse(createCourseDto, userId);
+    return this.courseService.create(createCourseDto, userId);
+  }
+
+  @Patch(':id')
+  @Roles(UserRole.USER, UserRole.ADMIN)
+  @ApiParam({ name: 'id', type: String })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    type: CourseResponseDto,
+  })
+  async update(
+    @Param('id') id: string,
+    @Body() updateCourseDto: UpdateCourseDto,
+  ): Promise<CourseResponseDto> {
+    return this.courseService.update(id, updateCourseDto);
+  }
+
+  @Delete(':id')
+  @Roles(UserRole.USER, UserRole.ADMIN)
+  @ApiParam({ name: 'id', type: String })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    type: CourseResponseDto,
+  })
+  async delete(@Param('id') id: string): Promise<CourseResponseDto> {
+    return this.courseService.delete(id);
   }
 
   @Get()
@@ -59,7 +83,7 @@ export class CourseController {
   async getCourses(
     @Query() query: GetCoursesRequestDto,
   ): Promise<CourseListResponseDto> {
-    return this.courseService.getCourses(query);
+    return this.courseService.getAll(query);
   }
 
   @Get(':id')
@@ -69,11 +93,11 @@ export class CourseController {
     type: CourseResponseDto,
   })
   async getCourseById(@Param('id') id: string): Promise<CourseResponseDto> {
-    return this.courseService.getCourseById(id);
+    return this.courseService.getById(id);
   }
 
   @Get(':id/units')
-  @Roles(UserRole.USER)
+  @Roles(UserRole.USER, UserRole.ADMIN)
   @ApiResponse({
     status: HttpStatus.OK,
     type: CourseUnitResponseDto,
@@ -86,7 +110,7 @@ export class CourseController {
   }
 
   @Patch(':id/join')
-  @Roles(UserRole.USER, UserRole.ADMIN)
+  @Roles(UserRole.USER)
   @ApiParam({ name: 'id', type: String })
   @ApiResponse({
     status: HttpStatus.OK,

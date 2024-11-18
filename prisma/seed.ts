@@ -13,9 +13,7 @@ import {
   createSpaces,
   createSubscriptionPayments,
   createSubscriptions,
-  createUnitContentProgress,
   createUnitContents,
-  createUnitProgress,
   createUnits,
   createVocabularies,
   generatedIds,
@@ -26,7 +24,6 @@ import {
 
 const prisma = new PrismaClient();
 
-// Clean database
 async function cleanDatabase() {
   console.log('Cleaning database...');
   const tablenames = await prisma.$queryRaw<Array<{ tablename: string }>>`
@@ -50,24 +47,13 @@ async function cleanDatabase() {
 // Seed reference data
 async function seedReferenceData() {
   console.log('Seeding reference data...');
-  const createdRefs: Record<string, Record<string, string>> = {
-    language: {},
-    level: {},
-    target: {},
-    topic: {},
-  };
-
   for (const ref of referenceData) {
-    const created = await prisma.referenceData.create({
+    await prisma.referenceData.create({
       data: ref,
     });
-    createdRefs[ref.type][ref.code] = created.id;
   }
-
-  return createdRefs;
 }
 
-// Seed users
 async function seedUsers() {
   console.log('Seeding users...');
   for (const user of users) {
@@ -78,7 +64,6 @@ async function seedUsers() {
   }
 }
 
-// Seed subscriptions
 async function seedSubscriptions() {
   console.log('Seeding subscriptions...');
   const subscriptions = createSubscriptions(generatedIds.users);
@@ -90,7 +75,6 @@ async function seedSubscriptions() {
   }
 }
 
-// Seed subscription payments
 async function seedSubscriptionPayments() {
   console.log('Seeding subscription payments...');
   const payments = createSubscriptionPayments(generatedIds.subscriptions);
@@ -102,7 +86,6 @@ async function seedSubscriptionPayments() {
   }
 }
 
-// Seed correction credits
 async function seedCorrectionCredits() {
   console.log('Seeding correction credits...');
   const credits = createCorrectionCredits(generatedIds.users);
@@ -114,49 +97,46 @@ async function seedCorrectionCredits() {
   }
 }
 
-// Seed courses
 async function seedCourses() {
   console.log('Seeding courses...');
   const courses = createCourses(generatedIds.users);
   for (const course of courses) {
-    const createdCourse = await prisma.course.create({
+    const created = await prisma.course.create({
       data: course,
     });
-    generatedIds.courses.push(createdCourse.id);
+    generatedIds.courses.push(created.id);
   }
 }
 
-// Seed units
 async function seedUnits() {
   console.log('Seeding units...');
   const units = createUnits(generatedIds.courses, generatedIds.users);
   for (const unit of units) {
-    const createdUnit = await prisma.unit.create({
+    const created = await prisma.unit.create({
       data: unit,
     });
-    generatedIds.units.push(createdUnit.id);
+    generatedIds.units.push(created.id);
   }
 }
 
-// Seed unit contents
 async function seedUnitContents() {
   console.log('Seeding unit contents...');
-  const unitContents = createUnitContents(generatedIds.units);
-  for (const content of unitContents) {
-    const createdContent = await prisma.unitContent.create({
+  const contents = createUnitContents(generatedIds.units);
+  for (const content of contents) {
+    const created = await prisma.unitContent.create({
       data: content,
     });
-    generatedIds.unitContents.push(createdContent.id);
+    generatedIds.unitContents.push(created.id);
   }
 }
 
-// Seed course progress
 async function seedCourseProgress() {
   console.log('Seeding course progress...');
   const progress = createCourseProgress(
     generatedIds.users,
     generatedIds.courses,
     generatedIds.units,
+    generatedIds.unitContents,
   );
   for (const item of progress) {
     const created = await prisma.courseProgress.create({
@@ -166,49 +146,17 @@ async function seedCourseProgress() {
   }
 }
 
-// Seed unit progress
-async function seedUnitProgress() {
-  console.log('Seeding unit progress...');
-  const progress = createUnitProgress(
-    generatedIds.courseProgress,
-    generatedIds.units,
-  );
-  for (const item of progress) {
-    const created = await prisma.unitProgress.create({
-      data: item,
-    });
-    generatedIds.unitProgress.push(created.id);
-  }
-}
-
-// Seed unit content progress
-async function seedUnitContentProgress() {
-  console.log('Seeding unit content progress...');
-  const progress = createUnitContentProgress(
-    generatedIds.unitProgress,
-    generatedIds.unitContents,
-  );
-  for (const item of progress) {
-    const created = await prisma.unitContentProgress.create({
-      data: item,
-    });
-    generatedIds.unitContentProgress.push(created.id);
-  }
-}
-
-// Seed spaces
 async function seedSpaces() {
   console.log('Seeding spaces...');
   const spaces = createSpaces(generatedIds.users);
   for (const space of spaces) {
-    const createdSpace = await prisma.space.create({
+    const created = await prisma.space.create({
       data: space,
     });
-    generatedIds.spaces.push(createdSpace.id);
+    generatedIds.spaces.push(created.id);
   }
 }
 
-// Seed space courses
 async function seedSpaceCourses() {
   console.log('Seeding space courses...');
   const spaceCourses = createSpaceCourses(
@@ -223,30 +171,27 @@ async function seedSpaceCourses() {
   }
 }
 
-// Seed hashtags
 async function seedHashtags() {
   console.log('Seeding hashtags...');
   for (const hashtag of hashtags) {
-    const createdHashtag = await prisma.hashtag.create({
+    const created = await prisma.hashtag.create({
       data: hashtag,
     });
-    generatedIds.hashtags.push(createdHashtag.id);
+    generatedIds.hashtags.push(created.id);
   }
 }
 
-// Seed essays
 async function seedEssays() {
   console.log('Seeding essays...');
   const essays = createEssays(generatedIds.spaces, generatedIds.users);
   for (const essay of essays) {
-    const createdEssay = await prisma.essay.create({
+    const created = await prisma.essay.create({
       data: essay,
     });
-    generatedIds.essays.push(createdEssay.id);
+    generatedIds.essays.push(created.id);
   }
 }
 
-// Seed essay hashtags
 async function seedEssayHashtags() {
   console.log('Seeding essay hashtags...');
   const essayHashtags = createEssayHashtags(
@@ -261,7 +206,6 @@ async function seedEssayHashtags() {
   }
 }
 
-// Seed vocabularies
 async function seedVocabularies() {
   console.log('Seeding vocabularies...');
   const vocabularies = createVocabularies(
@@ -276,7 +220,6 @@ async function seedVocabularies() {
   }
 }
 
-// Seed notes
 async function seedNotes() {
   console.log('Seeding notes...');
   const notes = createNotes(
@@ -292,7 +235,6 @@ async function seedNotes() {
   }
 }
 
-// Seed corrections
 async function seedCorrections() {
   console.log('Seeding corrections...');
   const corrections = createCorrections(
@@ -307,10 +249,15 @@ async function seedCorrections() {
       },
     });
     generatedIds.corrections.push(created.id);
+
+    if (created.sentences) {
+      created.sentences.forEach((sentence) => {
+        generatedIds.correctionSentences.push(sentence.id);
+      });
+    }
   }
 }
 
-// Seed correction replies
 async function seedCorrectionReplies() {
   console.log('Seeding correction replies...');
   const replies = createCorrectionReplies(
@@ -325,32 +272,28 @@ async function seedCorrectionReplies() {
   }
 }
 
-// Main seeding function
 async function seedAll() {
   try {
-    // Clean the database first
     await cleanDatabase();
 
-    // Seed basic data
+    // Basic data
     await seedReferenceData();
     await seedUsers();
 
-    // Seed subscription-related data
+    // Subscription related
     await seedSubscriptions();
     await seedSubscriptionPayments();
     await seedCorrectionCredits();
 
-    // Seed course structure
+    // Course structure
     await seedCourses();
     await seedUnits();
     await seedUnitContents();
 
-    // Seed progress tracking
+    // Progress tracking
     await seedCourseProgress();
-    await seedUnitProgress();
-    await seedUnitContentProgress();
 
-    // Seed space and content
+    // Space and content
     await seedSpaces();
     await seedSpaceCourses();
     await seedHashtags();
@@ -358,10 +301,12 @@ async function seedAll() {
     await seedEssayHashtags();
     await seedVocabularies();
     await seedNotes();
+
+    // Corrections
     await seedCorrections();
     await seedCorrectionReplies();
 
-    console.log('Database has been seeded successfully');
+    console.log('Database seeded successfully');
     console.log('Generated IDs:', generatedIds);
   } catch (error) {
     console.error('Error seeding database:', error);
@@ -371,7 +316,6 @@ async function seedAll() {
   }
 }
 
-// Run the seed function
 seedAll()
   .catch((error) => {
     console.error(error);

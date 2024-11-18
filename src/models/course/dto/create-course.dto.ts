@@ -1,55 +1,50 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-import {
-  IsArray,
-  IsBoolean,
-  IsNumber,
-  IsOptional,
-  IsString,
-} from 'class-validator';
-
 export class CreateCourseDto {
-  @ApiProperty({ example: 'English Grammar Course' })
-  @IsString()
+  @ApiProperty({
+    type: 'string',
+  })
   title: string;
-
-  @ApiProperty({ example: 'Learn English grammar from basic to advanced' })
-  @IsString()
-  @IsOptional()
-  description?: string;
-
-  @ApiProperty({ example: 'https://example.com/thumbnail.jpg' })
-  @IsString()
-  @IsOptional()
-  thumbnailUrl?: string;
-
-  @ApiProperty({ example: 'ENGLISH' })
-  @IsString()
+  @ApiProperty({
+    type: 'string',
+    required: false,
+    nullable: true,
+  })
+  description?: string | null;
+  @ApiProperty({
+    type: 'string',
+    required: false,
+    nullable: true,
+  })
+  thumbnailUrl?: string | null;
+  @ApiProperty({
+    type: 'string',
+  })
   language: string;
-
-  @ApiProperty({ example: 'BEGINNER' })
-  @IsString()
+  @ApiProperty({
+    type: 'string',
+  })
   minLevel: string;
-
-  @ApiProperty({ example: 'INTERMEDIATE' })
-  @IsString()
+  @ApiProperty({
+    type: 'string',
+  })
   maxLevel: string;
-
-  @ApiProperty({ example: '100' })
-  @IsNumber()
+  @ApiProperty({
+    type: 'string',
+    isArray: true,
+  })
+  topics: string[];
+  @ApiProperty({
+    type: 'string',
+  })
+  courseType: string;
+  @ApiProperty({
+    type: 'number',
+  })
   totalWeight: number;
 
-  @ApiProperty({ example: ['ACADEMIC', 'BUSINESS'] })
-  @IsArray()
-  @IsString({ each: true })
-  topics: string[];
-
-  @ApiProperty({ example: 'COMMUNICATION' })
-  @IsString()
-  courseType: string;
-
-  @ApiProperty({ example: false })
-  @IsBoolean()
-  @IsOptional()
-  isPublished?: boolean = false;
+  @ApiProperty({
+    type: 'boolean',
+  })
+  isPublished: boolean;
 }
