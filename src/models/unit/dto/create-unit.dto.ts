@@ -29,4 +29,11 @@ export class CreateUnitDto {
     type: 'string',
   })
   courseId: string;
+
+  @ApiProperty({
+    type: 'integer',
+    format: 'int32',
+    required: false,
+  })
+  unitWeight?: number;
 }

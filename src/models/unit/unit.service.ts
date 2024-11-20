@@ -5,6 +5,7 @@ import { CreateUnitDto } from 'src/models/unit/dto/create-unit.dto';
 import { GetUnitContentsResponseDto } from 'src/models/unit/dto/get-unit-contents-response.dto';
 import { GetUnitResponseDto } from 'src/models/unit/dto/get-unit-response.dto';
 import { UnitLearnResponseDto } from 'src/models/unit/dto/unit-learn.dto';
+import { UpdateUnitDto } from 'src/models/unit/dto/update-unit.dto';
 
 @Injectable()
 export class UnitService {
@@ -20,6 +21,7 @@ export class UnitService {
         description: createUnitDto.description,
         orderIndex: createUnitDto.orderIndex,
         isPremium: createUnitDto.isPremium,
+        unitWeight: createUnitDto.unitWeight,
         courseId: createUnitDto.courseId,
         createdBy: userId,
       },
@@ -74,5 +76,31 @@ export class UnitService {
     return {
       unit,
     };
+  }
+
+  async update(
+    unitId: string,
+    updateUnitDto: UpdateUnitDto,
+  ): Promise<GetUnitResponseDto> {
+    const unit = await this.prisma.unit.update({
+      where: { id: unitId },
+      data: {
+        title: updateUnitDto.title,
+        description: updateUnitDto.description,
+        orderIndex: updateUnitDto.orderIndex,
+        isPremium: updateUnitDto.isPremium,
+        unitWeight: updateUnitDto.unitWeight,
+      },
+    });
+
+    return { unit };
+  }
+
+  async delete(unitId: string): Promise<GetUnitResponseDto> {
+    const unit = await this.prisma.unit.delete({
+      where: { id: unitId },
+    });
+
+    return { unit };
   }
 }

@@ -14,11 +14,22 @@ import { PrismaService } from 'src/common/prisma/prisma.service';
 export class ActivityInterceptor implements NestInterceptor {
   constructor(private prisma: PrismaService) {}
 
-  private readonly trackablePaths = [
+  private readonly fixedPaths = [
     '/api/essays',
     '/api/notes',
     '/api/vocabularies',
   ];
+
+  private readonly pathPatterns = [
+    /^\/api\/courses\/[^/]+\/progress$/, // Matches /api/courses/{any-id}/progress
+  ];
+
+  private isTrackablePath(path: string): boolean {
+    return (
+      this.fixedPaths.some((fixedPath) => path.startsWith(fixedPath)) ||
+      this.pathPatterns.some((pattern) => pattern.test(path))
+    );
+  }
 
   async intercept(
     context: ExecutionContext,
@@ -36,8 +47,8 @@ export class ActivityInterceptor implements NestInterceptor {
         try {
           if (
             userId &&
-            ['POST', 'PUT'].includes(request.method) &&
-            this.trackablePaths.some((path) => request.path.startsWith(path))
+            ['POST', 'PUT', 'PATCH'].includes(request.method) &&
+            this.isTrackablePath(request.path)
           ) {
             await this.trackActivity(userId);
           }
