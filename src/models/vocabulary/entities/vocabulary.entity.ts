@@ -21,8 +21,9 @@ export class Vocabulary implements IVocabulary {
   term: string;
   @ApiProperty({
     type: 'string',
+    isArray: true,
   })
-  meaning: string;
+  meaning: string[];
   @ApiProperty({
     type: 'string',
     nullable: true,

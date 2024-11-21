@@ -15,8 +15,6 @@ import { AuthGuard } from 'src/common/auth/auth.guard';
 import { Roles, RolesGuard, UserRole } from 'src/common/auth/role.guard';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { IAuthPayload } from 'src/common/interface/auth-payload.interface';
-import { CreateNoteDto } from 'src/models/note/dto/create-note.dto';
-import { CreateUpdateNoteResponseDto } from 'src/models/note/dto/note-response.dto';
 import { NoteService } from 'src/models/note/note.service';
 import { CreateUnitContentDto } from 'src/models/unit-content/dto/create-unit-content.dto';
 import { UnitContentResponseDto } from 'src/models/unit-content/dto/unit-content-response.dto';
@@ -59,17 +57,6 @@ export class UnitController {
   @ApiResponse({ status: HttpStatus.OK, type: GetUnitResponseDto })
   async getUnit(@Param('id') unitId: string): Promise<GetUnitResponseDto> {
     return this.unitService.getUnit(unitId);
-  }
-
-  @Post(':id/notes')
-  @Roles(UserRole.USER, UserRole.ADMIN)
-  @ApiResponse({ status: HttpStatus.OK, type: CreateUpdateNoteResponseDto })
-  async createOrUpdateNote(
-    @Param('id') unitId: string,
-    @CurrentUser() user: IAuthPayload,
-    @Body() createNoteDto: CreateNoteDto,
-  ): Promise<CreateUpdateNoteResponseDto> {
-    return this.noteService.createOrUpdateNote(unitId, user, createNoteDto);
   }
 
   @Get(':id/learn')

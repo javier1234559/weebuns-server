@@ -1,6 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 
+import { Prisma } from '@prisma/client';
+
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
+import { RepetitionLevel } from 'src/common/enum/common';
 import {
   notDeletedQuery,
   paginationQuery,
@@ -56,25 +59,34 @@ export class VocabularyService {
   }
 
   async findAll(query: FindAllVocabularyDto): Promise<VocabularyResponse> {
-    const { page, perPage, search } = query;
+    const { page, perPage, search, dueDate, spaceId } = query;
 
-    const queryOptions = {
-      where: {
-        ...notDeletedQuery,
-        ...searchQuery(search, ['term']),
-      },
-      include: this.includeQuery,
-      orderBy: { createdAt: 'desc' },
-      ...paginationQuery(page, perPage),
+    const where: Prisma.VocabularyWhereInput = {
+      ...notDeletedQuery,
+      ...(spaceId && { spaceId }),
+      ...searchQuery(search, ['term', 'meaning']),
+      ...(dueDate && {
+        nextReview: {
+          not: null,
+          lte: new Date(new Date().setHours(23, 59, 59, 999)),
+        },
+        repetitionLevel: {
+          lt: RepetitionLevel.MASTERED,
+        },
+      }),
     };
 
-    const [vocabulary, totalItems] = await Promise.all([
-      this.prisma.vocabulary.findMany(queryOptions),
-      this.prisma.vocabulary.count({ where: queryOptions.where }),
+    const [vocabularies, totalItems] = await Promise.all([
+      this.prisma.vocabulary.findMany({
+        where,
+        orderBy: [{ nextReview: 'asc' }, { createdAt: 'desc' }],
+        ...paginationQuery(page, perPage),
+      }),
+      this.prisma.vocabulary.count({ where }),
     ]);
 
     return {
-      data: vocabulary,
+      data: vocabularies,
       pagination: calculatePagination(totalItems, query),
     };
   }
@@ -103,7 +115,7 @@ export class VocabularyService {
     const updated = await this.prisma.vocabulary.update({
       where: { id },
       data: updateVocabularyDto,
-      include: this.includeQuery,
+      // include: this.includeQuery,
     });
 
     return { vocabulary: updated };

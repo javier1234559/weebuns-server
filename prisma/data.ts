@@ -476,7 +476,10 @@ export const createVocabularies = (spaceIds: string[], userIds: string[]) =>
   [
     {
       term: 'perseverance',
-      meaning: 'Persistence in doing something despite difficulty',
+      meaning: [
+        'the quality of continuing to try to achieve a particular aim despite difficulties',
+        'sự kiên trì',
+      ],
       exampleSentence: 'Her perseverance in studying English paid off.',
       imageUrl: 'https://example.com/vocab1.jpg',
       tags: JSON.stringify(['important', 'academic']),

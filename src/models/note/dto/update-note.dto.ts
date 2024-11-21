@@ -1,21 +1,8 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, PartialType } from '@nestjs/swagger';
 
-export class UpdateNoteDto {
-  @ApiProperty({
-    type: 'string',
-    required: false,
-  })
-  title?: string;
-  @ApiProperty({
-    type: 'string',
-    required: false,
-  })
-  content?: string;
-  @ApiProperty({
-    type: 'string',
-    format: 'date-time',
-    required: false,
-    nullable: true,
-  })
-  deletedAt?: Date | null;
+import { CreateNoteDto } from 'src/models/note/dto/create-note.dto';
+
+export class UpdateNoteDto extends PartialType(CreateNoteDto) {
+  @ApiProperty({ required: false })
+  isBookmarked?: boolean;
 }

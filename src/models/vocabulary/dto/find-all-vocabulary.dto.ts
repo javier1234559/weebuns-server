@@ -1,7 +1,7 @@
 import { Field, InputType } from '@nestjs/graphql';
-import { ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
-import { IsOptional, IsString } from 'class-validator';
+import { IsBoolean, IsOptional, IsString } from 'class-validator';
 
 import { PaginationInputDto } from 'src/common/dto/pagination.dto';
 
@@ -12,4 +12,14 @@ export class FindAllVocabularyDto extends PaginationInputDto {
   @IsOptional()
   @IsString()
   search?: string;
+
+  @ApiProperty({ required: false })
+  @IsBoolean()
+  @IsOptional()
+  dueDate?: boolean;
+
+  @ApiProperty({ required: false })
+  @IsString()
+  @IsOptional()
+  spaceId?: string;
 }

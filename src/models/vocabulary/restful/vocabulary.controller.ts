@@ -10,7 +10,7 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 import { AuthGuard } from 'src/common/auth/auth.guard';
 import { Roles, RolesGuard, UserRole } from 'src/common/auth/role.guard';
@@ -33,7 +33,6 @@ export class VocabularyController {
   @Post()
   @ApiResponse({
     status: HttpStatus.CREATED,
-    description: 'Vocabulary created successfully',
     type: FindOneVocabularyResponseDto,
   })
   async create(
@@ -44,9 +43,6 @@ export class VocabularyController {
   }
 
   @Get()
-  @ApiQuery({
-    type: FindAllVocabularyDto,
-  })
   @ApiResponse({
     status: HttpStatus.OK,
     type: FindAllVocabularyDto,
