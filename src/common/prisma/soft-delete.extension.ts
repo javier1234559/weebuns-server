@@ -1,4 +1,4 @@
-import { EssayStatus, Prisma } from '@prisma/client';
+import { ContentStatus, Prisma } from '@prisma/client';
 
 const softDeleteExtension = Prisma.defineExtension({
   name: 'softDelete',
@@ -7,14 +7,14 @@ const softDeleteExtension = Prisma.defineExtension({
       async findMany({ args, query }) {
         // Properly merge where conditions
         args.where = {
-          AND: [args.where || {}, { NOT: { status: EssayStatus.deleted } }],
+          AND: [args.where || {}, { NOT: { status: ContentStatus.deleted } }],
         };
         return query(args);
       },
 
       async findFirst({ args, query }) {
         args.where = {
-          AND: [args.where || {}, { NOT: { status: EssayStatus.deleted } }],
+          AND: [args.where || {}, { NOT: { status: ContentStatus.deleted } }],
         };
         return query(args);
       },
@@ -27,7 +27,7 @@ const softDeleteExtension = Prisma.defineExtension({
           action: 'findFirst',
           where: {
             ...where, // Keep the unique identifier
-            status: { not: EssayStatus.deleted }, // Add NOT deleted condition
+            status: { not: ContentStatus.deleted }, // Add NOT deleted condition
           },
         });
       },
@@ -35,14 +35,14 @@ const softDeleteExtension = Prisma.defineExtension({
       async delete({ args, query }) {
         return query({
           ...args,
-          data: { status: EssayStatus.deleted },
+          data: { status: ContentStatus.deleted },
         });
       },
 
       async deleteMany({ args, query }) {
         return query({
           ...args,
-          data: { status: EssayStatus.deleted },
+          data: { status: ContentStatus.deleted },
         });
       },
 
@@ -54,7 +54,7 @@ const softDeleteExtension = Prisma.defineExtension({
           data,
           where: {
             ...where, // Keep the unique identifier
-            status: { not: EssayStatus.deleted }, // Add NOT deleted condition
+            status: { not: ContentStatus.deleted }, // Add NOT deleted condition
           },
         });
       },
@@ -64,14 +64,14 @@ const softDeleteExtension = Prisma.defineExtension({
         return query({
           ...rest,
           where: {
-            AND: [where || {}, { NOT: { status: EssayStatus.deleted } }],
+            AND: [where || {}, { NOT: { status: ContentStatus.deleted } }],
           },
         });
       },
 
       async count({ args, query }) {
         args.where = {
-          AND: [args.where || {}, { NOT: { status: EssayStatus.deleted } }],
+          AND: [args.where || {}, { NOT: { status: ContentStatus.deleted } }],
         };
         return query(args);
       },

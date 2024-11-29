@@ -1,9 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-import { Unit } from '../../unit/entities/unit.entity';
-import { User } from '../../user/entities/user.entity';
+import { Lesson } from 'src/models/lesson/entities/lesson.entity';
+import { User } from 'src/models/user/entities/user.entity';
 
-export class UnitComment {
+export class LessonComment {
   @ApiProperty({
     type: 'string',
   })
@@ -11,7 +11,7 @@ export class UnitComment {
   @ApiProperty({
     type: 'string',
   })
-  unitId: string;
+  lessonId: string;
   @ApiProperty({
     type: 'string',
   })
@@ -31,10 +31,10 @@ export class UnitComment {
   })
   updatedAt: Date;
   @ApiProperty({
-    type: () => Unit,
+    type: () => Lesson,
     required: false,
   })
-  unit?: Unit;
+  lesson?: Lesson;
   @ApiProperty({
     type: () => User,
     required: false,

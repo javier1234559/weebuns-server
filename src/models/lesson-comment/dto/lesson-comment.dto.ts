@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-export class UnitCommentDto {
+export class LessonCommentDto {
   @ApiProperty({
     type: 'string',
   })

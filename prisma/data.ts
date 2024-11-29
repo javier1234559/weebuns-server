@@ -1,19 +1,18 @@
 import {
   AuthProvider,
-  EssayStatus,
+  ContentStatus,
   PaymentType,
   Prisma,
   SubscriptionType,
   UserRole,
 } from '@prisma/client';
 
-interface GeneratedIds {
+// Track generated IDs for relationships
+export interface GeneratedIds {
   users: string[];
   courses: string[];
   units: string[];
-  unitContents: string[];
-  notes: string[];
-  vocabularies: string[];
+  lessons: string[];
   spaces: string[];
   spaceCourses: string[];
   essays: string[];
@@ -22,19 +21,20 @@ interface GeneratedIds {
   corrections: string[];
   correctionSentences: string[];
   correctionReplies: string[];
+  notes: string[];
+  vocabularies: string[];
   subscriptions: string[];
   subscriptionPayments: string[];
   correctionCredits: string[];
   courseProgress: string[];
+  lessonComments: string[];
 }
 
 export const generatedIds: GeneratedIds = {
   users: [],
   courses: [],
   units: [],
-  unitContents: [],
-  notes: [],
-  vocabularies: [],
+  lessons: [],
   spaces: [],
   spaceCourses: [],
   essays: [],
@@ -43,12 +43,16 @@ export const generatedIds: GeneratedIds = {
   corrections: [],
   correctionSentences: [],
   correctionReplies: [],
+  notes: [],
+  vocabularies: [],
   subscriptions: [],
   subscriptionPayments: [],
   correctionCredits: [],
   courseProgress: [],
+  lessonComments: [],
 };
 
+// Reference Data Constants
 export const REFERENCE_TYPES = {
   LANGUAGE: 'language',
   LEVEL: 'level',
@@ -244,179 +248,301 @@ export const createCorrectionCredits = (userIds: string[]) =>
     },
   ] as Prisma.CorrectionCreditCreateInput[];
 
-export const createCourses = (userIds: string[]) =>
+export const createCourses = (teacherIds: string[]) =>
   [
     {
       title: 'English Grammar Fundamentals',
       description: 'Master the basics of English grammar',
-      thumbnailUrl:
-        'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTbgFlVtm-qZLJ9J4RJ149JHki8MAlylS1CY0ltDaMoLlFgofm3RstlPPeoXE7C7XrAgNA&usqp=CAU',
-      language: 'ENGLISH',
-      minLevel: 'BEGINNER',
-      maxLevel: 'INTERMEDIATE',
-      topics: ['ACADEMIC', 'DAILY_LIFE'],
+      thumbnailUrl: 'https://example.com/courses/grammar-basics.jpg',
+      language: REFERENCE.LANGUAGES.ENGLISH,
+      minLevel: REFERENCE.LEVELS.BEGINNER,
+      maxLevel: REFERENCE.LEVELS.INTERMEDIATE,
+      topics: [REFERENCE.TOPICS.ACADEMIC, REFERENCE.TOPICS.DAILY_LIFE],
+      totalWeight: 24,
       courseType: 'GRAMMAR',
       isPremium: false,
-      totalWeight: 100,
-      isPublished: true,
+      status: ContentStatus.published,
       creator: {
-        connect: { id: userIds[1] },
-      },
-    },
-    {
-      title: 'IELTS Advanced Preparation',
-      description: 'Comprehensive IELTS course for high scores',
-      thumbnailUrl:
-        'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTbgFlVtm-qZLJ9J4RJ149JHki8MAlylS1CY0ltDaMoLlFgofm3RstlPPeoXE7C7XrAgNA&usqp=CAU',
-      language: 'ENGLISH',
-      minLevel: 'INTERMEDIATE',
-      maxLevel: 'ADVANCED',
-      topics: ['ACADEMIC', 'BUSINESS'],
-      courseType: 'IELTS',
-      totalWeight: 200,
-      isPremium: false,
-      isPublished: true,
-      creator: {
-        connect: { id: userIds[1] },
+        connect: { id: teacherIds[0] },
       },
     },
   ] as Prisma.CourseCreateInput[];
 
-export const createUnits = (courseIds: string[], userIds: string[]) =>
-  [
-    {
-      title: 'Present Tenses',
-      description: 'Learn all about present tenses in English',
-      orderIndex: 1,
-      isPremium: false,
-      unitWeight: 20,
-      createdBy: userIds[1],
-      course: {
-        connect: { id: courseIds[0] },
-      },
+export const createUnits = (
+  courseIds: string[],
+  teacherIds: string[],
+): Prisma.UnitCreateInput[] => [
+  {
+    title: 'Present Tense Mastery',
+    orderIndex: 1,
+    isPremium: false,
+    course: {
+      connect: { id: courseIds[0] },
     },
-    {
-      title: 'Past Tenses',
-      description: 'Learn all about past tenses in English',
-      orderIndex: 2,
-      isPremium: true,
-      unitWeight: 30,
-      createdBy: userIds[1],
-      course: {
-        connect: { id: courseIds[0] },
-      },
+    creator: {
+      connect: { id: teacherIds[0] },
     },
-    {
-      title: 'Part 1',
-      description: 'Learn about solving task 1 IELTS writing',
-      orderIndex: 1,
-      isPremium: false,
-      unitWeight: 30,
-      createdBy: userIds[1],
-      course: {
-        connect: { id: courseIds[0] },
-      },
+  },
+  {
+    title: 'Past Tense Mastery',
+    orderIndex: 2,
+    isPremium: false,
+    course: {
+      connect: { id: courseIds[0] },
     },
-  ] as Prisma.UnitCreateInput[];
+    creator: {
+      connect: { id: teacherIds[0] },
+    },
+  },
+];
 
-export const createUnitContents = (unitIds: string[]) =>
-  [
-    {
-      title: 'Present Simple Introduction',
-      contentType: 'theory',
-      content: {
-        type: 'text',
-        body: 'Introduction to Present Simple tense...',
-      },
-      orderIndex: 1,
-      isPremium: false,
-      isRequired: true,
-      contentWeight: 5,
-      unit: {
-        connect: { id: unitIds[0] },
-      },
+export const createLessons = (
+  unitIds: string[],
+  teacherIds: string[],
+): Prisma.LessonCreateInput[] => [
+  {
+    title: 'Present Simple - Introduction',
+    summary: 'Learn the basics of Present Simple tense',
+    content: {
+      sections: [
+        {
+          type: 'text',
+          content:
+            'The present simple tense is used to describe habits, unchanging situations, general truths, and fixed arrangements.',
+        },
+        {
+          type: 'example',
+          content: [
+            'I play tennis every Sunday.',
+            'The Earth revolves around the Sun.',
+            'The train leaves at 8:00 AM every morning.',
+          ],
+        },
+        {
+          type: 'exercise',
+          questions: [
+            {
+              type: 'multiple-choice',
+              question: 'Which sentence uses Present Simple correctly?',
+              options: [
+                'He play football.',
+                'He plays football.',
+                'He playing football.',
+              ],
+              correctAnswer: 1,
+            },
+          ],
+        },
+      ],
     },
-    {
-      title: 'Present Simple Practice',
-      contentType: 'exercise',
-      content: {
-        type: 'quiz',
-        questions: [
-          {
-            question: 'What is the correct form?',
-            options: ['he go', 'he goes', 'he going'],
-            answer: 1,
-          },
-        ],
-      },
-      orderIndex: 2,
-      isPremium: false,
-      isRequired: true,
-      contentWeight: 10,
-      unit: {
-        connect: { id: unitIds[0] },
-      },
+    orderIndex: 1,
+    isPremium: false,
+    isRequired: true,
+    lessonWeight: 4,
+    status: ContentStatus.published,
+    unit: {
+      connect: { id: unitIds[0] },
     },
-    {
-      title: 'Writing Task 1 Introduction',
-      contentType: 'exercise',
-      content: {
-        type: 'quiz',
-        questions: [
-          {
-            question: 'What is the correct form?',
-            options: ['he go', 'he goes', 'he going'],
-            answer: 1,
-          },
-        ],
-      },
-      orderIndex: 2,
-      isPremium: false,
-      isRequired: true,
-      contentWeight: 10,
-      unit: {
-        connect: { id: unitIds[0] },
-      },
+    creator: {
+      connect: { id: teacherIds[0] },
     },
-  ] as Prisma.UnitContentCreateInput[];
+  },
+  {
+    title: 'Present Continuous - Introduction',
+    summary: 'Learn the basics of Present Continuous tense',
+    content: {
+      sections: [
+        {
+          type: 'text',
+          content:
+            'The present continuous tense is used to describe temporary or changing situations, and to talk about actions that are happening at the moment of speaking.',
+        },
+        {
+          type: 'example',
+          content: [
+            'I am studying for a master degree.',
+            'The company is building a new factory.',
+            'They are planning a trip to Japan.',
+          ],
+        },
+        {
+          type: 'exercise',
+          questions: [
+            {
+              type: 'multiple-choice',
+              question: 'Which sentence uses Present Continuous correctly?',
+              options: [
+                'I am play football.',
+                'I am playing football.',
+                'I playing football.',
+              ],
+              correctAnswer: 1,
+            },
+          ],
+        },
+      ],
+    },
+    orderIndex: 2,
+    isPremium: false,
+    isRequired: true,
+    lessonWeight: 6,
+    status: ContentStatus.published,
+    unit: {
+      connect: { id: unitIds[0] },
+    },
+    creator: {
+      connect: { id: teacherIds[0] },
+    },
+  },
+  {
+    title: 'Past Simple - Introduction',
+    summary: 'Learn the basics of Past Simple tense',
+    content: {
+      sections: [
+        {
+          type: 'text',
+          content:
+            'The past simple tense is used to describe completed actions in the past.',
+        },
+        {
+          type: 'example',
+          content: [
+            'I went to the gym yesterday.',
+            'The company was founded in 2010.',
+            'They visited Japan last year.',
+          ],
+        },
+        {
+          type: 'exercise',
+          questions: [
+            {
+              type: 'multiple-choice',
+              question: 'Which sentence uses Past Simple correctly?',
+              options: [
+                'I went to the gym tomorrow.',
+                'I went to the gym yesterday.',
+                'I go to the gym yesterday.',
+              ],
+              correctAnswer: 1,
+            },
+          ],
+        },
+      ],
+    },
+    orderIndex: 1,
+    isPremium: false,
+    isRequired: true,
+    lessonWeight: 4,
+    status: ContentStatus.published,
+    unit: {
+      connect: { id: unitIds[1] },
+    },
+    creator: {
+      connect: { id: teacherIds[0] },
+    },
+  },
+  {
+    title: 'Past Continuous - Introduction',
+    summary: 'Learn the basics of Past Continuous tense',
+    content: {
+      sections: [
+        {
+          type: 'text',
+          content:
+            'The past continuous tense is used to describe actions that were in progress at a specific point in the past.',
+        },
+        {
+          type: 'example',
+          content: [
+            'I was studying for a master degree at 8pm last night.',
+            'The company was building a new factory in 2010.',
+            'They were planning a trip to Japan last year.',
+          ],
+        },
+        {
+          type: 'exercise',
+          questions: [
+            {
+              type: 'multiple-choice',
+              question: 'Which sentence uses Past Continuous correctly?',
+              options: [
+                'I was play football at 8pm last night.',
+                'I was playing football at 8pm last night.',
+                'I playing football at 8pm last night.',
+              ],
+              correctAnswer: 1,
+            },
+          ],
+        },
+      ],
+    },
+    orderIndex: 2,
+    isPremium: false,
+    isRequired: true,
+    lessonWeight: 6,
+    status: ContentStatus.published,
+    unit: {
+      connect: { id: unitIds[1] },
+    },
+    creator: {
+      connect: { id: teacherIds[0] },
+    },
+  },
+];
+
+export const createLessonComments = (
+  lessonIds: string[],
+  userIds: string[],
+) => [
+  {
+    content:
+      'This lesson was very helpful in understanding present simple tense.',
+    lesson: {
+      connect: { id: lessonIds[0] },
+    },
+    creator: {
+      connect: { id: userIds[0] },
+    },
+  },
+];
 
 export const createCourseProgress = (
   userIds: string[],
   courseIds: string[],
   unitIds: string[],
-  unitContentIds: string[],
-) =>
-  [
-    {
-      user: {
-        connect: { id: userIds[0] },
-      },
-      course: {
-        connect: { id: courseIds[0] },
-      },
-      currentUnit: {
-        connect: { id: unitIds[0] },
-      },
-      currentContent: {
-        connect: { id: unitContentIds[0] },
-      },
-      completedWeight: 0,
-      completedUnits: [],
-      completedContents: [],
-      lastAccessedAt: new Date(),
+  lessonIds: string[], // Changed from unitContentIds
+) => [
+  {
+    user: {
+      connect: { id: userIds[0] },
     },
-  ] as Prisma.CourseProgressCreateInput[];
+    course: {
+      connect: { id: courseIds[0] },
+    },
+    currentUnit: {
+      connect: { id: unitIds[0] },
+    },
+    currentLesson: {
+      // Changed from currentContent
+      connect: { id: lessonIds[0] },
+    },
+    completedWeight: 0,
+    completedUnits: [],
+    completedLessons: [], // Changed from completedContents
+    lastAccessedAt: new Date(),
+  },
+];
 
 export const createSpaces = (userIds: string[]) =>
   [
     {
-      name: 'English Writing Practice',
-      description: 'Space for practicing English writing',
-      language: 'ENGLISH',
-      target: 'COMMUNICATION',
-      currentLevel: 'BEGINNER',
-      topics: ['ACADEMIC', 'BUSINESS'],
-      targetLevel: 'INTERMEDIATE',
+      name: 'IELTS Preparation Journey',
+      description: 'My personal space for IELTS preparation',
+      language: REFERENCE.LANGUAGES.ENGLISH,
+      target: REFERENCE.TARGETS.IELTS,
+      currentLevel: REFERENCE.LEVELS.INTERMEDIATE,
+      targetLevel: REFERENCE.LEVELS.ADVANCED,
+      topics: [REFERENCE.TOPICS.ACADEMIC, REFERENCE.TOPICS.BUSINESS],
       creator: {
         connect: { id: userIds[0] },
       },
@@ -442,8 +568,8 @@ export const createEssays = (spaceIds: string[], userIds: string[]) =>
       summary: 'A personal reflection on learning English',
       content:
         'I have been learning English for three years. It has been an amazing journey with many challenges and rewards.',
-      status: EssayStatus.public,
-      language: 'ENGLISH',
+      status: ContentStatus.published,
+      language: REFERENCE.LANGUAGES.ENGLISH,
       upvoteCount: 0,
       space: {
         connect: { id: spaceIds[0] },
@@ -455,8 +581,9 @@ export const createEssays = (spaceIds: string[], userIds: string[]) =>
   ] as Prisma.EssayCreateInput[];
 
 export const hashtags: Prisma.HashtagCreateInput[] = [
-  { name: 'learning', usageCount: 0 },
-  { name: 'english', usageCount: 0 },
+  { name: 'technology', usageCount: 0 },
+  { name: 'education', usageCount: 0 },
+  { name: 'ielts', usageCount: 0 },
   { name: 'grammar', usageCount: 0 },
 ];
 
@@ -482,7 +609,7 @@ export const createVocabularies = (spaceIds: string[], userIds: string[]) =>
       ],
       exampleSentence: 'Her perseverance in studying English paid off.',
       imageUrl: 'https://example.com/vocab1.jpg',
-      tags: JSON.stringify(['important', 'academic']),
+      tags: ['important', 'academic'],
       repetitionLevel: 0,
       nextReview: new Date(),
       space: {
@@ -495,29 +622,29 @@ export const createVocabularies = (spaceIds: string[], userIds: string[]) =>
   ] as Prisma.VocabularyCreateInput[];
 
 export const createNotes = (
-  unitIds: string[],
+  lessonIds: string[],
   spaceIds: string[],
   userIds: string[],
-) =>
-  [
-    {
-      title: 'Present Tense Rules',
-      content: 'Important rules about present tense usage...',
-      tags: JSON.stringify(['grammar', 'important']),
-      isBookmarked: true,
-      unit: {
-        connect: { id: unitIds[0] },
-      },
-      space: spaceIds[0]
-        ? {
-            connect: { id: spaceIds[0] },
-          }
-        : undefined,
-      creator: {
-        connect: { id: userIds[0] },
-      },
+): Prisma.NoteCreateInput[] => [
+  {
+    title: 'Key Grammar Points - Present Simple',
+    content: `1. Use for habits and routines
+  2. Use for general truths
+  3. Third person singular adds -s
+  4. Common time expressions: always, usually, often, sometimes, never`,
+    tags: ['grammar', 'present-simple'],
+    isBookmarked: true,
+    lesson: {
+      connect: { id: lessonIds[0] },
     },
-  ] as Prisma.NoteCreateInput[];
+    space: {
+      connect: { id: spaceIds[0] },
+    },
+    creator: {
+      connect: { id: userIds[0] },
+    },
+  },
+];
 
 export const createCorrections = (essayIds: string[], userIds: string[]) =>
   [

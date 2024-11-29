@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 
-import { Prisma } from '@prisma/client';
+import { ContentStatus, Prisma } from '@prisma/client';
 
 import {
   isPublishedQuery,
@@ -281,14 +281,13 @@ export class SpaceService {
       maxLevel,
       topics,
       courseType,
+      status,
     } = query;
     const skip = (page - 1) * perPage;
 
-    console.log(query);
-
     const whereClause: Prisma.CourseWhereInput = {
-      ...notDeletedQuery,
-      ...isPublishedQuery,
+      deletedAt: null,
+      ...(status ? { status } : { ...isPublishedQuery }),
       ...(search && {
         OR: [
           { title: { contains: search, mode: 'insensitive' } },
@@ -311,21 +310,11 @@ export class SpaceService {
             where: { spaceId },
             select: { joinedAt: true },
           },
-          progress: userId
-            ? {
-                where: { userId },
-                select: {
-                  id: true,
-                  currentUnitId: true,
-                  currentUnitContentId: true,
-                  completedWeight: true,
-                  completedUnits: true,
-                  completedContents: true,
-                  lastAccessedAt: true,
-                  currentUnit: true,
-                },
-              }
-            : false,
+          ...(userId && {
+            progress: {
+              where: { userId },
+            },
+          }),
         },
         skip,
         take: perPage,
@@ -334,12 +323,14 @@ export class SpaceService {
       this.prisma.course.count({ where: whereClause }),
     ]);
 
+    // Transform keeping both status and isPublished
     const transformedCourses = courses.map((course) => ({
       ...course,
-      isJoined: !!course.spaces[0],
+      isJoined: course.spaces.length > 0,
       joinedAt: course.spaces[0]?.joinedAt || null,
       spaces: undefined,
-      progress: course.progress?.[0] || null,
+      progress: userId ? course.progress?.[0] || null : null,
+      isPublished: course.status === ContentStatus.published,
     }));
 
     return {

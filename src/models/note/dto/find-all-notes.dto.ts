@@ -18,10 +18,16 @@ export class FindAllNotesDto extends PaginationInputDto {
   @Transform(({ value }) => (Array.isArray(value) ? value : JSON.parse(value)))
   tags?: string[];
 
-  @ApiProperty({ required: false })
+  @ApiProperty({ required: false, type: Boolean })
   @IsBoolean()
   @IsOptional()
-  @Transform(({ value }) => value === 'true')
+  @Transform(({ obj, key }) => {
+    // Handle string values from query params
+    const value = obj[key];
+    if (value === 'true' || value === true) return true;
+    if (value === 'false' || value === false) return false;
+    return undefined;
+  })
   isBookmarked?: boolean;
 
   @ApiProperty({ required: false })

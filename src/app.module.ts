@@ -18,10 +18,10 @@ import { CorrectionModule } from 'src/models/correction/corrrection.module';
 import { CourseModule } from 'src/models/course/course.module';
 import { EssayModule } from 'src/models/essay/essay.module';
 import { HashTagModule } from 'src/models/hashtag/hashtag.module';
+import { LessonModule } from 'src/models/lesson/lesson.module';
 import { NoteModule } from 'src/models/note/note.module';
 import { SpaceModule } from 'src/models/space/space.module';
 import { StatsModule } from 'src/models/stats/stats.module';
-import { UnitContentModule } from 'src/models/unit-content/unit-content.module';
 import { UnitModule } from 'src/models/unit/unit.module';
 import { UserModule } from 'src/models/user/user.module';
 import { VocabularyModule } from 'src/models/vocabulary/vocabulary.module';
@@ -46,7 +46,7 @@ import { VocabularyModule } from 'src/models/vocabulary/vocabulary.module';
     StatsModule,
     CourseModule,
     UnitModule,
-    UnitContentModule,
+    LessonModule,
     NoteModule,
     AiModule,
   ],

@@ -10,10 +10,10 @@ import { Correction } from 'src/models/correction/entities/correction.entity';
 import { CourseProgress } from 'src/models/course-progress/entities/course-progress.entity';
 import { Course } from 'src/models/course/entities/course.entity';
 import { Essay } from 'src/models/essay/entities/essay.entity';
+import { LessonComment } from 'src/models/lesson-comment/entities/lesson-comment.entity';
 import { Note } from 'src/models/note/entities/note.entity';
 import { Space } from 'src/models/space/entities/space.entity';
 import { Subscription } from 'src/models/subscription/entities/subscription.entity';
-import { UnitComment } from 'src/models/unit-comment/entities/unit-comment.entity';
 import { Vocabulary } from 'src/models/vocabulary/entities/vocabulary.entity';
 
 import { IUser } from '../user.interface';
@@ -190,11 +190,11 @@ export class User implements IUser {
   correctionReplies?: CorrectionReply[];
 
   @ApiProperty({
-    type: () => [UnitComment],
-    nullable: true,
-    description: 'Comments made on course units',
+    type: () => LessonComment,
+    isArray: true,
+    required: false,
   })
-  unitComments?: UnitComment[];
+  lessonComments?: LessonComment[];
 
   @ApiProperty({
     type: () => [Subscription],

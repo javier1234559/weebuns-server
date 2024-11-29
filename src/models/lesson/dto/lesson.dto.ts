@@ -1,75 +1,106 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-import { Prisma } from '@prisma/client';
+import { ContentStatus, Prisma } from '@prisma/client';
 
-import { CourseProgress } from 'src/models/course-progress/entities/course-progress.entity';
-import { IUnitContent } from 'src/models/unit-content/unit-content.interface';
-import { Unit } from 'src/models/unit/entities/unit.entity';
-
-export class UnitContent implements IUnitContent {
+export class LessonDto {
   @ApiProperty({
     type: 'string',
   })
   id: string;
+
   @ApiProperty({
     type: 'string',
   })
   unitId: string;
+
   @ApiProperty({
     type: 'string',
   })
   title: string;
+
   @ApiProperty({
     type: 'string',
+    nullable: true,
   })
-  contentType: string;
+  summary: string | null;
+
   @ApiProperty({
     type: () => Object,
   })
   content: Prisma.JsonValue;
+
   @ApiProperty({
     type: 'integer',
     format: 'int32',
   })
   orderIndex: number;
+
   @ApiProperty({
     type: 'boolean',
   })
   isPremium: boolean;
+
   @ApiProperty({
     type: 'boolean',
   })
   isRequired: boolean;
+
   @ApiProperty({
-    type: 'integer',
-    format: 'int32',
+    enum: ContentStatus,
   })
-  contentWeight: number;
+  status: ContentStatus;
+
+  @ApiProperty({
+    type: 'string',
+  })
+  createdBy: string;
+
   @ApiProperty({
     type: 'string',
     format: 'date-time',
   })
   createdAt: Date;
+
   @ApiProperty({
     type: 'string',
     format: 'date-time',
   })
   updatedAt: Date;
+
+  // Relations - these will be populated when needed
   @ApiProperty({
-    type: () => Unit,
+    type: 'object',
     required: false,
   })
-  unit?: Unit;
+  unit?: any;
+
   @ApiProperty({
-    type: () => CourseProgress,
-    isArray: true,
+    type: 'object',
     required: false,
   })
-  currentInProgress?: CourseProgress[];
+  creator?: any;
+
   @ApiProperty({
-    type: () => CourseProgress,
-    isArray: true,
+    type: 'array',
     required: false,
   })
-  nextInProgress?: CourseProgress[];
+  notes?: any[];
+
+  @ApiProperty({
+    type: 'array',
+    required: false,
+  })
+  comments?: any[];
+
+  @ApiProperty({
+    type: 'array',
+    required: false,
+  })
+  currentInProgress?: any[];
+
+  @ApiProperty({
+    type: 'array',
+    required: false,
+  })
+  nextInProgress?: any[];
 }

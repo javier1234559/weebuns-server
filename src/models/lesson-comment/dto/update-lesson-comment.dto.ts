@@ -1,8 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-export class CreateUnitCommentDto {
+export class UpdateLessonCommentDto {
   @ApiProperty({
     type: 'string',
+    required: false,
   })
-  content: string;
+  content?: string;
 }

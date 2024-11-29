@@ -1,5 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 
+import { ContentStatus } from '@prisma/client';
+
 import {
   notDeletedQuery,
   paginationQuery,
@@ -7,6 +9,7 @@ import {
 } from 'src/common/helper/prisma-queries.helper';
 import { PrismaService } from 'src/common/prisma/prisma.service';
 import { calculatePagination } from 'src/common/utils/pagination';
+import { CheckJoinedCourseResponseDto } from 'src/models/course/dto/check-join-course.dto';
 import { CourseLearnResponseDto } from 'src/models/course/dto/course-learn-response.dto';
 import {
   CourseProgressResponseDto,
@@ -42,10 +45,9 @@ export class CourseService {
         topics: createCourseDto.topics,
         courseType: createCourseDto.courseType,
         totalWeight: createCourseDto.totalWeight,
-        isPublished: createCourseDto.isPublished,
-        creator: {
-          connect: { id: userId },
-        },
+        status: createCourseDto.status || ContentStatus.draft,
+        isPremium: createCourseDto.isPremium || false,
+        createdBy: userId,
       },
       include: {
         creator: true,
@@ -69,12 +71,16 @@ export class CourseService {
 
     const updated = await this.prisma.course.update({
       where: { id },
-      data: updateCourseDto,
+      data: {
+        ...updateCourseDto,
+        status: updateCourseDto.status || undefined,
+        isPremium: updateCourseDto.isPremium || undefined,
+      },
       include: {
         creator: true,
         units: {
           include: {
-            contents: true,
+            lessons: true,
           },
           orderBy: {
             orderIndex: 'asc',
@@ -152,7 +158,7 @@ export class CourseService {
         creator: true,
         units: {
           include: {
-            contents: true,
+            lessons: true,
           },
           orderBy: {
             orderIndex: 'asc',
@@ -208,7 +214,7 @@ export class CourseService {
       orderBy: { orderIndex: 'asc' },
       select: {
         id: true,
-        contents: {
+        lessons: {
           orderBy: { orderIndex: 'asc' },
           take: 1,
           select: { id: true },
@@ -263,10 +269,10 @@ export class CourseService {
             userId,
             courseId,
             currentUnitId: firstUnit.id,
-            currentUnitContentId: firstUnit.contents[0]?.id,
+            currentLessonId: firstUnit.lessons[0]?.id,
             completedWeight: 0,
             completedUnits: [],
-            completedContents: [],
+            completedLessons: [],
             lastAccessedAt: new Date(),
           },
         });
@@ -289,7 +295,7 @@ export class CourseService {
     const course = await this.prisma.course.findFirst({
       where: {
         id: courseId,
-        isPublished: true,
+        status: ContentStatus.published,
         ...notDeletedQuery,
       },
       include: {
@@ -307,6 +313,46 @@ export class CourseService {
 
     return {
       course,
+    };
+  }
+
+  async checkJoinedCourse(
+    courseId: string,
+    spaceId: string,
+  ): Promise<CheckJoinedCourseResponseDto> {
+    const spaceCourse = await this.prisma.spaceCourse.findUnique({
+      where: {
+        spaceId_courseId: {
+          spaceId,
+          courseId,
+        },
+      },
+      include: {
+        course: {
+          include: {
+            progress: {
+              where: {
+                courseId,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!spaceCourse) {
+      return {
+        check: false,
+        progress: null,
+      };
+    }
+
+    // Get course progress if exists
+    const progress = spaceCourse.course.progress[0] || null;
+
+    return {
+      check: true,
+      progress,
     };
   }
 
@@ -331,7 +377,7 @@ export class CourseService {
           courseId,
           completedWeight: 0,
           completedUnits: [],
-          completedContents: [],
+          completedLessons: [],
           lastAccessedAt: new Date(),
         },
       });

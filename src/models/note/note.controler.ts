@@ -63,6 +63,19 @@ export class NoteController {
     return this.noteService.findAll(query);
   }
 
+  @Get(':id')
+  @ApiParam({
+    name: 'id',
+    type: String,
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    type: FindOneNoteResponseDto,
+  })
+  async findOne(@Param('id') id: string): Promise<FindOneNoteResponseDto> {
+    return this.noteService.findOne(id);
+  }
+
   @Patch(':id')
   @ApiParam({
     name: 'id',

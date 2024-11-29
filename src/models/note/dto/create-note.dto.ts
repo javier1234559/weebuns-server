@@ -18,7 +18,7 @@ export class CreateNoteDto {
   @ApiProperty({ type: 'string' })
   @IsString()
   @IsNotEmpty()
-  unitId: string;
+  lessonId: string;
 
   @ApiProperty({ type: 'string' })
   @IsString()

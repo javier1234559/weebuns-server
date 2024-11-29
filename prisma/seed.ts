@@ -8,12 +8,13 @@ import {
   createCourses,
   createEssayHashtags,
   createEssays,
+  createLessonComments,
+  createLessons,
   createNotes,
   createSpaceCourses,
   createSpaces,
   createSubscriptionPayments,
   createSubscriptions,
-  createUnitContents,
   createUnits,
   createVocabularies,
   generatedIds,
@@ -44,22 +45,18 @@ async function cleanDatabase() {
   }
 }
 
-// Seed reference data
+// Seed functions
 async function seedReferenceData() {
   console.log('Seeding reference data...');
   for (const ref of referenceData) {
-    await prisma.referenceData.create({
-      data: ref,
-    });
+    await prisma.referenceData.create({ data: ref });
   }
 }
 
 async function seedUsers() {
   console.log('Seeding users...');
   for (const user of users) {
-    const createdUser = await prisma.user.create({
-      data: user,
-    });
+    const createdUser = await prisma.user.create({ data: user });
     generatedIds.users.push(createdUser.id);
   }
 }
@@ -68,9 +65,7 @@ async function seedSubscriptions() {
   console.log('Seeding subscriptions...');
   const subscriptions = createSubscriptions(generatedIds.users);
   for (const subscription of subscriptions) {
-    const created = await prisma.subscription.create({
-      data: subscription,
-    });
+    const created = await prisma.subscription.create({ data: subscription });
     generatedIds.subscriptions.push(created.id);
   }
 }
@@ -79,9 +74,7 @@ async function seedSubscriptionPayments() {
   console.log('Seeding subscription payments...');
   const payments = createSubscriptionPayments(generatedIds.subscriptions);
   for (const payment of payments) {
-    const created = await prisma.subscriptionPayment.create({
-      data: payment,
-    });
+    const created = await prisma.subscriptionPayment.create({ data: payment });
     generatedIds.subscriptionPayments.push(created.id);
   }
 }
@@ -90,9 +83,7 @@ async function seedCorrectionCredits() {
   console.log('Seeding correction credits...');
   const credits = createCorrectionCredits(generatedIds.users);
   for (const credit of credits) {
-    const created = await prisma.correctionCredit.create({
-      data: credit,
-    });
+    const created = await prisma.correctionCredit.create({ data: credit });
     generatedIds.correctionCredits.push(created.id);
   }
 }
@@ -101,9 +92,7 @@ async function seedCourses() {
   console.log('Seeding courses...');
   const courses = createCourses(generatedIds.users);
   for (const course of courses) {
-    const created = await prisma.course.create({
-      data: course,
-    });
+    const created = await prisma.course.create({ data: course });
     generatedIds.courses.push(created.id);
   }
 }
@@ -112,21 +101,29 @@ async function seedUnits() {
   console.log('Seeding units...');
   const units = createUnits(generatedIds.courses, generatedIds.users);
   for (const unit of units) {
-    const created = await prisma.unit.create({
-      data: unit,
-    });
+    const created = await prisma.unit.create({ data: unit });
     generatedIds.units.push(created.id);
   }
 }
 
-async function seedUnitContents() {
-  console.log('Seeding unit contents...');
-  const contents = createUnitContents(generatedIds.units);
-  for (const content of contents) {
-    const created = await prisma.unitContent.create({
-      data: content,
-    });
-    generatedIds.unitContents.push(created.id);
+async function seedLessons() {
+  console.log('Seeding lessons...');
+  const lessons = createLessons(generatedIds.units, generatedIds.users);
+  for (const lesson of lessons) {
+    const created = await prisma.lesson.create({ data: lesson });
+    generatedIds.lessons.push(created.id);
+  }
+}
+
+async function seedLessonComments() {
+  console.log('Seeding lesson comments...');
+  const comments = createLessonComments(
+    generatedIds.lessons,
+    generatedIds.users,
+  );
+  for (const comment of comments) {
+    const created = await prisma.lessonComment.create({ data: comment });
+    generatedIds.lessonComments.push(created.id);
   }
 }
 
@@ -136,12 +133,10 @@ async function seedCourseProgress() {
     generatedIds.users,
     generatedIds.courses,
     generatedIds.units,
-    generatedIds.unitContents,
+    generatedIds.lessons,
   );
   for (const item of progress) {
-    const created = await prisma.courseProgress.create({
-      data: item,
-    });
+    const created = await prisma.courseProgress.create({ data: item });
     generatedIds.courseProgress.push(created.id);
   }
 }
@@ -150,9 +145,7 @@ async function seedSpaces() {
   console.log('Seeding spaces...');
   const spaces = createSpaces(generatedIds.users);
   for (const space of spaces) {
-    const created = await prisma.space.create({
-      data: space,
-    });
+    const created = await prisma.space.create({ data: space });
     generatedIds.spaces.push(created.id);
   }
 }
@@ -164,9 +157,7 @@ async function seedSpaceCourses() {
     generatedIds.courses,
   );
   for (const spaceCourse of spaceCourses) {
-    const created = await prisma.spaceCourse.create({
-      data: spaceCourse,
-    });
+    const created = await prisma.spaceCourse.create({ data: spaceCourse });
     generatedIds.spaceCourses.push(created.id);
   }
 }
@@ -174,9 +165,7 @@ async function seedSpaceCourses() {
 async function seedHashtags() {
   console.log('Seeding hashtags...');
   for (const hashtag of hashtags) {
-    const created = await prisma.hashtag.create({
-      data: hashtag,
-    });
+    const created = await prisma.hashtag.create({ data: hashtag });
     generatedIds.hashtags.push(created.id);
   }
 }
@@ -185,9 +174,7 @@ async function seedEssays() {
   console.log('Seeding essays...');
   const essays = createEssays(generatedIds.spaces, generatedIds.users);
   for (const essay of essays) {
-    const created = await prisma.essay.create({
-      data: essay,
-    });
+    const created = await prisma.essay.create({ data: essay });
     generatedIds.essays.push(created.id);
   }
 }
@@ -199,9 +186,7 @@ async function seedEssayHashtags() {
     generatedIds.hashtags,
   );
   for (const hashtagLink of essayHashtags) {
-    const created = await prisma.essayHashtag.create({
-      data: hashtagLink,
-    });
+    const created = await prisma.essayHashtag.create({ data: hashtagLink });
     generatedIds.essayHashtags.push(created.id);
   }
 }
@@ -213,9 +198,7 @@ async function seedVocabularies() {
     generatedIds.users,
   );
   for (const vocabulary of vocabularies) {
-    const created = await prisma.vocabulary.create({
-      data: vocabulary,
-    });
+    const created = await prisma.vocabulary.create({ data: vocabulary });
     generatedIds.vocabularies.push(created.id);
   }
 }
@@ -223,14 +206,12 @@ async function seedVocabularies() {
 async function seedNotes() {
   console.log('Seeding notes...');
   const notes = createNotes(
-    generatedIds.units,
+    generatedIds.lessons,
     generatedIds.spaces,
     generatedIds.users,
   );
   for (const note of notes) {
-    const created = await prisma.note.create({
-      data: note,
-    });
+    const created = await prisma.note.create({ data: note });
     generatedIds.notes.push(created.id);
   }
 }
@@ -265,9 +246,7 @@ async function seedCorrectionReplies() {
     generatedIds.users,
   );
   for (const reply of replies) {
-    const created = await prisma.correctionReply.create({
-      data: reply,
-    });
+    const created = await prisma.correctionReply.create({ data: reply });
     generatedIds.correctionReplies.push(created.id);
   }
 }
@@ -288,7 +267,8 @@ async function seedAll() {
     // Course structure
     await seedCourses();
     await seedUnits();
-    await seedUnitContents();
+    await seedLessons();
+    await seedLessonComments();
 
     // Progress tracking
     await seedCourseProgress();
@@ -316,6 +296,7 @@ async function seedAll() {
   }
 }
 
+// Execute seeding
 seedAll()
   .catch((error) => {
     console.error(error);

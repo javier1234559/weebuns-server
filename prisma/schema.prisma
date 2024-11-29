@@ -52,9 +52,9 @@ enum UserRole {
   teacher
 }
 
-enum EssayStatus {
+enum ContentStatus {
   draft
-  public
+  published
   private
   deleted
 }
@@ -115,13 +115,15 @@ model User {
   // Relations
   spaces            Space[]
   courses           Course[]
+  units             Unit[]
+  lessons           Lesson[]
   courseProgress    CourseProgress[]
   notes             Note[]
   vocabularies      Vocabulary[]
   essays            Essay[]
   corrections       Correction[]
   correctionReplies CorrectionReply[]
-  unitComments      UnitComment[]
+  lessonComments    LessonComment[]
   subscriptions     Subscription[]
   correctionCredits CorrectionCredit[]
 
@@ -176,23 +178,22 @@ model CorrectionCredit {
 }
 
 model Course {
-  id           String    @id @default(uuid())
+  id           String        @id @default(uuid())
   title        String
   description  String?
-  thumbnailUrl String?   @map("thumbnail_url")
-  language     String    @map("language")
-  minLevel     String    @map("min_level")
-  maxLevel     String    @map("max_level")
-  topics       String[]  @map("topics")
-  courseType   String    @map("course_type")
-  // price        Decimal?
-  isPremium    Boolean   @default(false) @map("is_premium")
-  totalWeight  Int       @default(0) @map("total_weight")
-  isPublished  Boolean   @default(false) @map("is_published")
-  createdBy    String    @map("created_by")
-  createdAt    DateTime  @default(now()) @map("created_at")
-  updatedAt    DateTime  @updatedAt @map("updated_at")
-  deletedAt    DateTime? @map("deleted_at")
+  thumbnailUrl String?       @map("thumbnail_url")
+  language     String        @map("language")
+  minLevel     String        @map("min_level")
+  maxLevel     String        @map("max_level")
+  topics       String[]      @map("topics")
+  courseType   String        @map("course_type")
+  isPremium    Boolean       @default(false) @map("is_premium")
+  totalWeight  Int?          @default(0) @map("total_weight")
+  status       ContentStatus @default(draft)
+  createdBy    String        @map("created_by")
+  createdAt    DateTime      @default(now()) @map("created_at")
+  updatedAt    DateTime      @updatedAt @map("updated_at")
+  deletedAt    DateTime?     @map("deleted_at")
 
   // Relations
   creator  User             @relation(fields: [createdBy], references: [id])
@@ -200,106 +201,105 @@ model Course {
   progress CourseProgress[]
   spaces   SpaceCourse[]
 
-  @@index([isPublished, language, minLevel, maxLevel])
-  @@index([deletedAt, isPublished])
+  @@index([status, language, minLevel, maxLevel])
+  @@index([deletedAt])
   @@index([createdBy])
   @@map("courses")
 }
 
 model CourseProgress {
-  id                   String    @id @default(uuid())
-  userId               String    @map("user_id")
-  courseId             String    @map("course_id")
-  currentUnitId        String?   @map("current_unit_id")
-  currentUnitContentId String?   @map("current_unit_content_id")
-  nextUnitId           String?   @map("next_unit_id")
-  nextUnitContentId    String?   @map("next_unit_content_id")
-  completedWeight      Int       @default(0) @map("completed_weight")
-  lastAccessedAt       DateTime? @map("last_accessed_at")
+  id              String    @id @default(uuid())
+  userId          String    @map("user_id")
+  courseId        String    @map("course_id")
+  currentUnitId   String?   @map("current_unit_id")
+  currentLessonId String?   @map("current_lesson_id")
+  nextUnitId      String?   @map("next_unit_id")
+  nextLessonId    String?   @map("next_lesson_id")
+  lastAccessedAt  DateTime? @map("last_accessed_at")
+  completedWeight Int       @default(0) @map("completed_weight")
 
-  // Arrays for tracking completion
-  completedUnits    String[] @default([]) @map("completed_units")
-  completedContents String[] @default([]) @map("completed_contents")
+  completedUnits   String[] @default([]) @map("completed_units")
+  completedLessons String[] @default([]) @map("completed_lessons")
 
   // Relations
-  user           User         @relation(fields: [userId], references: [id])
-  course         Course       @relation(fields: [courseId], references: [id])
-  currentUnit    Unit?        @relation(fields: [currentUnitId], references: [id])
-  nextUnit       Unit?        @relation("NextUnit", fields: [nextUnitId], references: [id])
-  currentContent UnitContent? @relation("CurrentContent", fields: [currentUnitContentId], references: [id])
-  nextContent    UnitContent? @relation("NextContent", fields: [nextUnitContentId], references: [id])
+  user          User    @relation(fields: [userId], references: [id])
+  course        Course  @relation(fields: [courseId], references: [id])
+  currentUnit   Unit?   @relation("CurrentUnit", fields: [currentUnitId], references: [id])
+  nextUnit      Unit?   @relation("NextUnit", fields: [nextUnitId], references: [id])
+  currentLesson Lesson? @relation("CurrentLesson", fields: [currentLessonId], references: [id])
+  nextLesson    Lesson? @relation("NextLesson", fields: [nextLessonId], references: [id])
 
   @@unique([userId, courseId])
   @@index([userId])
   @@index([courseId])
-  @@index([completedUnits])
-  @@index([completedContents])
   @@map("course_progress")
 }
 
 model Unit {
-  id          String   @id @default(uuid())
-  courseId    String   @map("course_id")
-  title       String
-  description String?
-  orderIndex  Int      @map("order_index")
-  isPremium   Boolean  @default(false) @map("is_premium")
-  unitWeight  Int      @default(0) @map("unit_weight") // Total weight của unit
-  createdBy   String   @map("created_by")
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
+  id         String   @id @default(uuid())
+  courseId   String   @map("course_id")
+  title      String
+  orderIndex Int      @map("order_index")
+  isPremium  Boolean  @default(false) @map("is_premium")
+  createdBy  String   @map("created_by")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
 
   // Relations
   course         Course           @relation(fields: [courseId], references: [id])
-  contents       UnitContent[]
-  notes          Note[]
-  comments       UnitComment[]
-  courseProgress CourseProgress[] // For currentUnit relation
-  nextUnits      CourseProgress[] @relation("NextUnit") // Added for next unit tracking
+  creator        User             @relation(fields: [createdBy], references: [id])
+  lessons        Lesson[]
+  courseProgress CourseProgress[] @relation("CurrentUnit")
+  nextUnits      CourseProgress[] @relation("NextUnit")
 
   @@index([courseId, orderIndex])
   @@index([createdBy])
   @@map("units")
 }
 
-model UnitContent {
-  id            String   @id @default(uuid())
-  unitId        String   @map("unit_id")
-  title         String
-  contentType   String   @map("content_type")
-  content       Json
-  orderIndex    Int      @map("order_index")
-  isPremium     Boolean  @default(false) @map("is_premium")
-  isRequired    Boolean  @default(true) @map("is_required")
-  contentWeight Int      @default(1) @map("content_weight") // Renamed for clarity
-  createdAt     DateTime @default(now()) @map("created_at")
-  updatedAt     DateTime @updatedAt @map("updated_at")
+model Lesson {
+  id           String        @id @default(uuid())
+  unitId       String        @map("unit_id")
+  title        String
+  summary      String?
+  content      Json
+  orderIndex   Int           @map("order_index")
+  isPremium    Boolean       @default(false) @map("is_premium")
+  isRequired   Boolean       @default(true) @map("is_required")
+  status       ContentStatus @default(draft)
+  createdBy    String        @map("created_by")
+  createdAt    DateTime      @default(now()) @map("created_at")
+  updatedAt    DateTime      @updatedAt @map("updated_at")
+  lessonWeight Int           @default(0) @map("lesson_weight")
 
   // Relations
   unit              Unit             @relation(fields: [unitId], references: [id])
-  currentInProgress CourseProgress[] @relation("CurrentContent")
-  nextInProgress    CourseProgress[] @relation("NextContent")
+  creator           User             @relation(fields: [createdBy], references: [id])
+  notes             Note[]
+  comments          LessonComment[]
+  currentInProgress CourseProgress[] @relation("CurrentLesson")
+  nextInProgress    CourseProgress[] @relation("NextLesson")
 
   @@index([unitId, orderIndex])
   @@index([unitId, isPremium])
-  @@map("unit_contents")
+  @@map("lessons")
 }
 
-model UnitComment {
+model LessonComment {
   id        String   @id @default(uuid())
-  unitId    String   @map("unit_id")
+  lessonId  String   @map("lesson_id")
   createdBy String   @map("created_by")
   content   String
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
   // Relations
-  unit    Unit @relation(fields: [unitId], references: [id])
-  creator User @relation(fields: [createdBy], references: [id])
+  lesson  Lesson @relation(fields: [lessonId], references: [id])
+  creator User   @relation(fields: [createdBy], references: [id])
 
-  @@index([unitId])
+  @@index([lessonId])
   @@index([createdBy])
-  @@map("unit_comments")
+  @@map("lesson_comments")
 }
 
 // Space Management
@@ -349,10 +349,10 @@ model SpaceCourse {
 model Note {
   id           String    @id @default(uuid())
   spaceId      String?   @map("space_id")
-  unitId       String    @map("unit_id")
+  lessonId     String    @map("lesson_id")
   title        String
   content      String
-  tags         Json      @default("[]")
+  tags         String[]  @default([])
   isBookmarked Boolean   @default(false) @map("is_bookmarked")
   createdBy    String    @map("created_by")
   createdAt    DateTime  @default(now()) @map("created_at")
@@ -360,14 +360,13 @@ model Note {
   deletedAt    DateTime? @map("deleted_at")
 
   // Relations
-  unit    Unit   @relation(fields: [unitId], references: [id])
+  lesson  Lesson @relation(fields: [lessonId], references: [id])
   creator User   @relation(fields: [createdBy], references: [id])
   space   Space? @relation(fields: [spaceId], references: [id])
 
-  @@index([spaceId])
-  @@index([unitId])
+  @@index([lessonId])
   @@index([createdBy])
-  @@index([isBookmarked])
+  @@index([spaceId])
   @@map("notes")
 }
 
@@ -380,7 +379,7 @@ model Vocabulary {
   imageUrl        String?   @map("image_url")
   referenceLink   String?   @map("reference_link")
   referenceName   String?   @map("reference_name")
-  tags            Json      @default("[]")
+  tags            String[]  @default([])
   repetitionLevel Int       @default(0) @map("repetition_level")
   nextReview      DateTime? @map("next_review")
   createdBy       String    @map("created_by")
@@ -400,19 +399,19 @@ model Vocabulary {
 }
 
 model Essay {
-  id          String      @id @default(uuid())
-  spaceId     String      @map("space_id")
+  id          String        @id @default(uuid())
+  spaceId     String        @map("space_id")
   title       String
-  upvoteCount Int         @default(0) @map("upvote_count")
+  upvoteCount Int           @default(0) @map("upvote_count")
   summary     String?
   content     String
-  coverUrl    String?     @map("cover_url")
-  status      EssayStatus
-  language    String      @map("language") // reference to language code
-  createdBy   String      @map("created_by")
-  createdAt   DateTime    @default(now()) @map("created_at")
-  updatedAt   DateTime    @updatedAt @map("updated_at")
-  deletedAt   DateTime?   @map("deleted_at")
+  coverUrl    String?       @map("cover_url")
+  status      ContentStatus
+  language    String        @map("language") // reference to language code
+  createdBy   String        @map("created_by")
+  createdAt   DateTime      @default(now()) @map("created_at")
+  updatedAt   DateTime      @updatedAt @map("updated_at")
+  deletedAt   DateTime?     @map("deleted_at")
 
   // Relations
   space       Space          @relation(fields: [spaceId], references: [id])

@@ -59,12 +59,14 @@ export class VocabularyService {
   }
 
   async findAll(query: FindAllVocabularyDto): Promise<VocabularyResponse> {
-    const { page, perPage, search, dueDate, spaceId } = query;
+    const { page, perPage, search, dueDate, spaceId, tags } = query;
+
+    console.log(search);
 
     const where: Prisma.VocabularyWhereInput = {
       ...notDeletedQuery,
       ...(spaceId && { spaceId }),
-      ...searchQuery(search, ['term', 'meaning']),
+      ...searchQuery(search, ['term']),
       ...(dueDate && {
         nextReview: {
           not: null,
@@ -72,6 +74,11 @@ export class VocabularyService {
         },
         repetitionLevel: {
           lt: RepetitionLevel.MASTERED,
+        },
+      }),
+      ...(tags?.length && {
+        tags: {
+          hasSome: tags.map((tag) => tag.toLowerCase()),
         },
       }),
     };

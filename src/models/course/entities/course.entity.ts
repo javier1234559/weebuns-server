@@ -1,5 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 
+import { ContentStatus } from '@prisma/client';
+
 import { CourseProgress } from 'src/models/course-progress/entities/course-progress.entity';
 import { ICourse } from 'src/models/course/course.interface';
 import { SpaceCourse } from 'src/models/space-course/entities/space-course.entity';
@@ -8,7 +10,13 @@ import { User } from 'src/models/user/entities/user.entity';
 
 export class Course implements ICourse {
   @ApiProperty({
+    type: 'number',
+    default: 0,
+  })
+  totalWeight: number;
+  @ApiProperty({
     type: 'string',
+    default: () => 'uuid()',
   })
   id: string;
   @ApiProperty({
@@ -47,18 +55,16 @@ export class Course implements ICourse {
   })
   courseType: string;
   @ApiProperty({
-    type: 'integer',
-    format: 'int32',
-  })
-  totalWeight: number;
-  @ApiProperty({
     type: 'boolean',
+    default: false,
   })
   isPremium: boolean;
   @ApiProperty({
-    type: 'boolean',
+    type: 'string',
+    enum: ContentStatus,
+    default: ContentStatus.draft,
   })
-  isPublished: boolean;
+  status: ContentStatus;
   @ApiProperty({
     type: 'string',
   })
@@ -66,6 +72,7 @@ export class Course implements ICourse {
   @ApiProperty({
     type: 'string',
     format: 'date-time',
+    default: () => 'now()',
   })
   createdAt: Date;
   @ApiProperty({

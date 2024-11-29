@@ -1,39 +1,32 @@
 import { ApiProperty } from '@nestjs/swagger';
 
+import { IsBoolean, IsNumber, IsOptional, IsString } from 'class-validator';
+
 export class CreateUnitDto {
   @ApiProperty({
     type: 'string',
-    required: false,
   })
-  title?: string;
-  @ApiProperty({
-    type: 'string',
-    required: false,
-    nullable: true,
-  })
-  description?: string | null;
+  @IsString()
+  title: string;
+
   @ApiProperty({
     type: 'integer',
     format: 'int32',
-    required: false,
   })
-  orderIndex?: number;
+  @IsNumber()
+  orderIndex: number;
 
   @ApiProperty({
     type: 'boolean',
-    required: false,
+    default: false,
   })
+  @IsBoolean()
+  @IsOptional()
   isPremium?: boolean;
 
   @ApiProperty({
     type: 'string',
   })
+  @IsString()
   courseId: string;
-
-  @ApiProperty({
-    type: 'integer',
-    format: 'int32',
-    required: false,
-  })
-  unitWeight?: number;
 }

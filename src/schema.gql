@@ -123,26 +123,26 @@ type Essay {
   id: ID!
   spaceId: String!
   title: String!
+  upvoteCount: Float!
   summary: String
   content: String!
-  upvoteCount: Float!
   coverUrl: String
-  status: EssayStatus!
+  status: ContentStatus!
   language: String!
   createdBy: String!
   createdAt: DateTime!
   updatedAt: DateTime!
-  deletedAt: DateTime!
+  deletedAt: DateTime
   space: Space
   author: User
   corrections: [Correction!]
   hashtags: [EssayHashtag!]
 }
 
-"""The status of an essay"""
-enum EssayStatus {
+"""Status of the content"""
+enum ContentStatus {
   draft
-  public
+  published
   private
   deleted
 }

@@ -15,13 +15,13 @@ import { AuthGuard } from 'src/common/auth/auth.guard';
 import { Roles, RolesGuard, UserRole } from 'src/common/auth/role.guard';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { IAuthPayload } from 'src/common/interface/auth-payload.interface';
+import { CreateLessonDto } from 'src/models/lesson/dto/create-lesson.dto';
+import { LessonResponseDto } from 'src/models/lesson/dto/lesson-response.dto';
+import { UpdateLessonDto } from 'src/models/lesson/dto/update-lesson.dto';
+import { LessonService } from 'src/models/lesson/lesson.service';
+import { FindOneNoteResponseDto } from 'src/models/note/dto/find-one-note-response.dto';
 import { NoteService } from 'src/models/note/note.service';
-import { CreateUnitContentDto } from 'src/models/unit-content/dto/create-unit-content.dto';
-import { UnitContentResponseDto } from 'src/models/unit-content/dto/unit-content-response.dto';
-import { UpdateUnitContentDto } from 'src/models/unit-content/dto/update-unit-content.dto';
-import { UnitContentService } from 'src/models/unit-content/unit-content.service';
 import { CreateUnitDto } from 'src/models/unit/dto/create-unit.dto';
-import { GetUnitContentsResponseDto } from 'src/models/unit/dto/get-unit-contents-response.dto';
 import { GetUnitResponseDto } from 'src/models/unit/dto/get-unit-response.dto';
 import { UnitLearnResponseDto } from 'src/models/unit/dto/unit-learn.dto';
 import { UpdateUnitDto } from 'src/models/unit/dto/update-unit.dto';
@@ -34,7 +34,7 @@ export class UnitController {
   constructor(
     private readonly unitService: UnitService,
     private readonly noteService: NoteService,
-    private readonly unitContentService: UnitContentService,
+    private readonly lessonService: LessonService,
   ) {}
 
   @Post()
@@ -90,61 +90,56 @@ export class UnitController {
     return this.unitService.update(unitId, updateUnitDto);
   }
 
-  @Get(':id/unit-contents')
+  @Get(':id/lessons/:lessonId/note')
   @Roles(UserRole.USER, UserRole.ADMIN)
-  @ApiParam({
-    name: 'id',
-    type: String,
-  })
-  @ApiResponse({ status: HttpStatus.OK, type: [GetUnitContentsResponseDto] })
-  async getUnitContents(
+  @ApiResponse({ status: HttpStatus.OK, type: FindOneNoteResponseDto })
+  async getLessonNote(
     @Param('id') unitId: string,
-  ): Promise<GetUnitContentsResponseDto> {
-    return this.unitService.getUnitContents(unitId);
+    @Param('lessonId') lessonId: string,
+  ): Promise<FindOneNoteResponseDto> {
+    return this.noteService.findOneByLessonId(lessonId);
   }
 
-  @Get(':id/unit-contents/:unitContentId')
+  @Get(':id/lessons/:lessonId')
   @Roles(UserRole.USER, UserRole.ADMIN)
-  @ApiResponse({ status: HttpStatus.OK, type: UnitContentResponseDto })
-  async getUnitContent(
+  @ApiResponse({ status: HttpStatus.OK, type: LessonResponseDto })
+  async getLesson(
     @Param('id') unitId: string,
-    @Param('unitContentId') contentId: string,
-  ): Promise<UnitContentResponseDto> {
-    return this.unitContentService.findOne(unitId, contentId);
+    @Param('lessonId') lessonId: string,
+  ): Promise<LessonResponseDto> {
+    return this.lessonService.findOne(unitId, lessonId);
   }
 
-  @Post(':id/unit-contents')
+  @Post(':id/lessons')
   @Roles(UserRole.ADMIN)
-  @ApiResponse({ status: HttpStatus.CREATED, type: UnitContentResponseDto })
-  async createUnitContent(
+  @ApiResponse({ status: HttpStatus.CREATED, type: LessonResponseDto })
+  async createLesson(
     @Param('id') unitId: string,
-    @Body() createUnitContentDto: CreateUnitContentDto,
-  ): Promise<UnitContentResponseDto> {
-    return this.unitContentService.create(unitId, createUnitContentDto);
+    @CurrentUser() user: IAuthPayload,
+    @Body() createLessonDto: CreateLessonDto,
+  ): Promise<LessonResponseDto> {
+    const userId = String(user.sub);
+    return this.lessonService.create(unitId, createLessonDto, userId);
   }
 
-  @Patch(':id/unit-contents/:unitContentId')
+  @Patch(':id/lessons/:lessonId')
   @Roles(UserRole.ADMIN)
-  @ApiResponse({ status: HttpStatus.OK, type: UnitContentResponseDto })
-  async updateUnitContent(
+  @ApiResponse({ status: HttpStatus.OK, type: LessonResponseDto })
+  async updateLesson(
     @Param('id') unitId: string,
-    @Param('unitContentId') contentId: string,
-    @Body() updateUnitContentDto: UpdateUnitContentDto,
-  ): Promise<UnitContentResponseDto> {
-    return this.unitContentService.update(
-      unitId,
-      contentId,
-      updateUnitContentDto,
-    );
+    @Param('lessonId') lessonId: string,
+    @Body() updateLessonDto: UpdateLessonDto,
+  ): Promise<LessonResponseDto> {
+    return this.lessonService.update(unitId, lessonId, updateLessonDto);
   }
 
-  @Delete(':id/unit-contents/:unitContentId')
+  @Delete(':id/lessons/:lessonId')
   @Roles(UserRole.ADMIN)
   @ApiResponse({ status: HttpStatus.NO_CONTENT })
-  async deleteUnitContent(
+  async deleteLesson(
     @Param('id') unitId: string,
-    @Param('unitContentId') contentId: string,
-  ): Promise<UnitContentResponseDto> {
-    return this.unitContentService.delete(unitId, contentId);
+    @Param('lessonId') lessonId: string,
+  ): Promise<LessonResponseDto> {
+    return this.lessonService.delete(unitId, lessonId);
   }
 }

@@ -1,7 +1,13 @@
 import { ApiProperty } from '@nestjs/swagger';
 
 import { Transform } from 'class-transformer';
-import { IsArray, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import {
+  IsArray,
+  IsIn,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 
 export class CreateVocabularyDto {
   @ApiProperty({ type: 'string' })
@@ -54,8 +60,17 @@ export class CreateVocabularyDto {
   @Transform(({ value }) => (Array.isArray(value) ? value : JSON.parse(value)))
   tags: string[];
 
-  @ApiProperty({ type: 'number', required: false, nullable: true })
+  @ApiProperty({
+    type: 'number',
+    required: false,
+    nullable: true,
+    example: 1,
+    description: 'Repetition level from 0 to 6',
+  })
   @IsOptional()
-  @Transform(({ value }) => (value ? parseInt(value, 5) : null))
-  repetitionLevel: number;
+  @IsIn([0, 1, 2, 3, 4, 5, 6], {
+    message: 'repetitionLevel must be between 0 and 6',
+  })
+  @Transform(({ value }) => (value !== undefined ? parseInt(value, 10) : null))
+  repetitionLevel?: number;
 }

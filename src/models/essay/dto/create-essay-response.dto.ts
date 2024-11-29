@@ -1,7 +1,7 @@
 import { ObjectType } from '@nestjs/graphql';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 
-import { EssayStatus } from '@prisma/client';
+import { ContentStatus } from '@prisma/client';
 import { IsOptional } from 'class-validator';
 
 import { ExistEntities } from 'src/common/decorators/exist-entities.decorator';
@@ -53,9 +53,9 @@ export class CreateEssayResponseDto {
   cover_url?: string;
 
   @ApiPropertyOptional({
-    example: EssayStatus.public,
+    example: ContentStatus.published,
   })
-  status?: EssayStatus;
+  status?: ContentStatus;
 
   @ApiPropertyOptional({
     example: 'en',

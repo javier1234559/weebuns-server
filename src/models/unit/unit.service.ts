@@ -2,7 +2,6 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 
 import { PrismaService } from 'src/common/prisma/prisma.service';
 import { CreateUnitDto } from 'src/models/unit/dto/create-unit.dto';
-import { GetUnitContentsResponseDto } from 'src/models/unit/dto/get-unit-contents-response.dto';
 import { GetUnitResponseDto } from 'src/models/unit/dto/get-unit-response.dto';
 import { UnitLearnResponseDto } from 'src/models/unit/dto/unit-learn.dto';
 import { UpdateUnitDto } from 'src/models/unit/dto/update-unit.dto';
@@ -18,10 +17,8 @@ export class UnitService {
     const unit = await this.prisma.unit.create({
       data: {
         title: createUnitDto.title,
-        description: createUnitDto.description,
         orderIndex: createUnitDto.orderIndex,
-        isPremium: createUnitDto.isPremium,
-        unitWeight: createUnitDto.unitWeight,
+        isPremium: createUnitDto.isPremium ?? false,
         courseId: createUnitDto.courseId,
         createdBy: userId,
       },
@@ -35,6 +32,13 @@ export class UnitService {
   async getUnit(unitId: string): Promise<GetUnitResponseDto> {
     const unit = await this.prisma.unit.findUnique({
       where: { id: unitId },
+      include: {
+        lessons: {
+          orderBy: {
+            orderIndex: 'asc',
+          },
+        },
+      },
     });
 
     if (!unit) {
@@ -46,22 +50,13 @@ export class UnitService {
     };
   }
 
-  async getUnitContents(unitId: string): Promise<GetUnitContentsResponseDto> {
-    const contents = await this.prisma.unitContent.findMany({
-      where: { unitId },
-      orderBy: { orderIndex: 'asc' },
-    });
-
-    return { unitContents: contents };
-  }
-
   async getUnitForLearning(unitId: string): Promise<UnitLearnResponseDto> {
     const unit = await this.prisma.unit.findUnique({
       where: {
         id: unitId,
       },
       include: {
-        contents: {
+        lessons: {
           orderBy: {
             orderIndex: 'asc',
           },
@@ -86,10 +81,15 @@ export class UnitService {
       where: { id: unitId },
       data: {
         title: updateUnitDto.title,
-        description: updateUnitDto.description,
         orderIndex: updateUnitDto.orderIndex,
         isPremium: updateUnitDto.isPremium,
-        unitWeight: updateUnitDto.unitWeight,
+      },
+      include: {
+        lessons: {
+          orderBy: {
+            orderIndex: 'asc',
+          },
+        },
       },
     });
 

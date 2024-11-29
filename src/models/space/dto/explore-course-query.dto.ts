@@ -1,5 +1,6 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 
+import { ContentStatus } from '@prisma/client';
 import { Transform } from 'class-transformer';
 import { IsArray, IsInt, IsOptional, IsString, Min } from 'class-validator';
 
@@ -48,4 +49,11 @@ export class ExploreCoursesQueryDto {
   @IsString()
   @ApiPropertyOptional()
   courseType?: string;
+
+  @IsOptional()
+  @IsString()
+  @ApiPropertyOptional({
+    enum: ContentStatus,
+  })
+  status?: ContentStatus;
 }

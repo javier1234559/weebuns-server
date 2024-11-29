@@ -1,6 +1,6 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 
-import { EssayStatus } from '@prisma/client';
+import { ContentStatus } from '@prisma/client';
 import { IsOptional } from 'class-validator';
 
 export class UpdateEssayDto {
@@ -37,11 +37,11 @@ export class UpdateEssayDto {
   cover_url?: string;
 
   @ApiPropertyOptional({
-    enum: EssayStatus,
-    example: EssayStatus.public,
-    enumName: 'EssayStatus',
+    enum: ContentStatus,
+    example: ContentStatus.published,
+    enumName: 'ContentStatus',
   })
-  status?: EssayStatus;
+  status?: ContentStatus;
 
   @ApiPropertyOptional({
     example: 'en',

@@ -45,7 +45,7 @@ export class VocabularyController {
   @Get()
   @ApiResponse({
     status: HttpStatus.OK,
-    type: FindAllVocabularyDto,
+    type: VocabularyResponse,
   })
   async findAll(
     @Query() findAllVocabulariesDto: FindAllVocabularyDto,

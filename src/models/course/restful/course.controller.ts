@@ -17,6 +17,7 @@ import { Roles, RolesGuard, UserRole } from 'src/common/auth/role.guard';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { IAuthPayload } from 'src/common/interface/auth-payload.interface';
 import { CourseService } from 'src/models/course/course.service';
+import { CheckJoinedCourseResponseDto } from 'src/models/course/dto/check-join-course.dto';
 import { CourseLearnResponseDto } from 'src/models/course/dto/course-learn-response.dto';
 import {
   CourseProgressResponseDto,
@@ -80,7 +81,7 @@ export class CourseController {
   }
 
   @Get()
-  @Roles(UserRole.ADMIN)
+  @Roles(UserRole.USER, UserRole.ADMIN)
   @ApiResponse({
     status: HttpStatus.OK,
     type: CourseListResponseDto,
@@ -92,7 +93,7 @@ export class CourseController {
   }
 
   @Get(':id')
-  @Roles(UserRole.USER)
+  @Roles(UserRole.USER, UserRole.ADMIN)
   @ApiResponse({
     status: HttpStatus.OK,
     type: CourseResponseDto,
@@ -144,6 +145,19 @@ export class CourseController {
     @Param('id') courseId: string,
   ): Promise<CourseLearnResponseDto> {
     return this.courseService.getLearnCourse(courseId);
+  }
+
+  @Get(':id/check-join/:spaceId')
+  @Roles(UserRole.USER)
+  @ApiResponse({
+    status: HttpStatus.OK,
+    type: CheckJoinedCourseResponseDto,
+  })
+  async checkJoin(
+    @Param('id') courseId: string,
+    @Param('spaceId') spaceId: string,
+  ): Promise<CheckJoinedCourseResponseDto> {
+    return this.courseService.checkJoinedCourse(courseId, spaceId);
   }
 
   @Get(':id/progress')

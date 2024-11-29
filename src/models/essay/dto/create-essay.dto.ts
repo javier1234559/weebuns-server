@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
-import { EssayStatus } from '@prisma/client';
+import { ContentStatus } from '@prisma/client';
 import { IsArray, IsString } from 'class-validator';
 
 import { ExistEntity } from 'src/common/decorators/exist-entity.decorator';
@@ -30,11 +30,11 @@ export class CreateEssayDto {
   cover_url?: string;
 
   @ApiProperty({
-    enum: EssayStatus,
-    example: EssayStatus.public,
-    enumName: 'EssayStatus',
+    enum: ContentStatus,
+    example: ContentStatus.published,
+    enumName: 'ContentStatus',
   })
-  status: EssayStatus;
+  status: ContentStatus;
 
   @ApiProperty({
     example: 'en',

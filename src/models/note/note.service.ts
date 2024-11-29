@@ -22,26 +22,22 @@ export class NoteService {
 
   private readonly includeQuery = {
     space: true,
-    unit: true,
+    lesson: true,
   } as const;
 
   async createOrUpdate(
     dto: CreateNoteDto,
     currentUser: IAuthPayload,
   ): Promise<FindOneNoteResponseDto> {
-    const space = await this.prisma.space.findFirst({
-      where: { id: dto.spaceId, ...notDeletedQuery },
+    const lesson = await this.prisma.lesson.findFirst({
+      where: { id: dto.lessonId },
     });
-    if (!space) throw new NotFoundException(`Space ${dto.spaceId} not found`);
-
-    const unit = await this.prisma.unit.findFirst({
-      where: { id: dto.unitId },
-    });
-    if (!unit) throw new NotFoundException(`Unit ${dto.unitId} not found`);
+    if (!lesson)
+      throw new NotFoundException(`Lesson ${dto.lessonId} not found`);
 
     const existingNote = await this.prisma.note.findFirst({
       where: {
-        unitId: dto.unitId,
+        lessonId: dto.lessonId,
         createdBy: String(currentUser.sub),
         ...notDeletedQuery,
       },
@@ -77,10 +73,11 @@ export class NoteService {
     });
     if (!space) throw new NotFoundException(`Space ${dto.spaceId} not found`);
 
-    const unit = await this.prisma.unit.findFirst({
-      where: { id: dto.unitId },
+    const lesson = await this.prisma.lesson.findFirst({
+      where: { id: dto.lessonId },
     });
-    if (!unit) throw new NotFoundException(`Unit ${dto.unitId} not found`);
+    if (!lesson)
+      throw new NotFoundException(`Lesson ${dto.lessonId} not found`);
 
     const note = await this.prisma.note.create({
       data: {
@@ -103,7 +100,7 @@ export class NoteService {
       ...(isBookmarked !== undefined && { isBookmarked }),
       ...(tags?.length && {
         tags: {
-          array_contains: tags,
+          hasSome: tags.map((tag) => tag.toLowerCase()),
         },
       }),
     };
@@ -111,7 +108,7 @@ export class NoteService {
     const [notes, totalItems] = await Promise.all([
       this.prisma.note.findMany({
         where,
-        orderBy: { createdAt: 'desc' },
+        orderBy: [{ isBookmarked: 'desc' }, { createdAt: 'desc' }],
         include: this.includeQuery,
         ...paginationQuery(page, perPage),
       }),
@@ -122,6 +119,25 @@ export class NoteService {
       data: notes,
       pagination: calculatePagination(totalItems, query),
     };
+  }
+
+  async findOne(id: string): Promise<FindOneNoteResponseDto> {
+    const note = await this.prisma.note.findFirst({
+      where: { id, ...notDeletedQuery },
+      include: this.includeQuery,
+    });
+    if (!note) throw new NotFoundException(`Note ${id} not found`);
+
+    return { note };
+  }
+
+  async findOneByLessonId(lessonId: string): Promise<FindOneNoteResponseDto> {
+    const note = await this.prisma.note.findFirst({
+      where: { lessonId, ...notDeletedQuery },
+      include: this.includeQuery,
+    });
+
+    return { note };
   }
 
   async update(

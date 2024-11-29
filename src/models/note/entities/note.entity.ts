@@ -1,12 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-import { Prisma } from '@prisma/client';
+import { INote } from 'src/models/note/note.interface';
 
 import { Unit } from '../../../models/unit/entities/unit.entity';
 import { Space } from '../../space/entities/space.entity';
 import { User } from '../../user/entities/user.entity';
 
-export class Note {
+export class Note implements INote {
   @ApiProperty({
     type: 'string',
   })
@@ -19,7 +19,7 @@ export class Note {
   @ApiProperty({
     type: 'string',
   })
-  unitId: string;
+  lessonId: string;
   @ApiProperty({
     type: 'string',
   })
@@ -30,9 +30,9 @@ export class Note {
   content: string;
   @ApiProperty({
     example: ['grammar', 'important', 'review', 'vocabulary'],
-    type: () => Object,
+    type: () => [String],
   })
-  tags: Prisma.JsonValue;
+  tags: string[];
   @ApiProperty({
     type: 'boolean',
   })

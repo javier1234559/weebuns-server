@@ -1,11 +1,18 @@
 import { ApiProperty } from '@nestjs/swagger';
 
+import { ICourseProgress } from 'src/models/course-progress/course-progress.interface';
+
 import { Course } from '../../course/entities/course.entity';
-import { UnitContent } from '../../unit-content/entities/unit-content.entity';
+import { Lesson } from '../../lesson/entities/lesson.entity';
 import { Unit } from '../../unit/entities/unit.entity';
 import { User } from '../../user/entities/user.entity';
 
-export class CourseProgress {
+export class CourseProgress implements ICourseProgress {
+  @ApiProperty({
+    type: 'integer',
+    format: 'int32',
+  })
+  completedWeight: number;
   @ApiProperty({
     type: 'string',
   })
@@ -27,7 +34,7 @@ export class CourseProgress {
     type: 'string',
     nullable: true,
   })
-  currentUnitContentId: string | null;
+  currentLessonId: string | null;
   @ApiProperty({
     type: 'string',
     nullable: true,
@@ -37,12 +44,7 @@ export class CourseProgress {
     type: 'string',
     nullable: true,
   })
-  nextUnitContentId: string | null;
-  @ApiProperty({
-    type: 'integer',
-    format: 'int32',
-  })
-  completedWeight: number;
+  nextLessonId: string | null;
   @ApiProperty({
     type: 'string',
     format: 'date-time',
@@ -58,7 +60,7 @@ export class CourseProgress {
     type: 'string',
     isArray: true,
   })
-  completedContents: string[];
+  completedLessons: string[];
   @ApiProperty({
     type: () => User,
     required: false,
@@ -82,15 +84,15 @@ export class CourseProgress {
   })
   nextUnit?: Unit | null;
   @ApiProperty({
-    type: () => UnitContent,
+    type: () => Lesson,
     required: false,
     nullable: true,
   })
-  currentContent?: UnitContent | null;
+  currentLesson?: Lesson | null;
   @ApiProperty({
-    type: () => UnitContent,
+    type: () => Lesson,
     required: false,
     nullable: true,
   })
-  nextContent?: UnitContent | null;
+  nextLesson?: Lesson | null;
 }

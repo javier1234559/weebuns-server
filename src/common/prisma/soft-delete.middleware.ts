@@ -1,4 +1,4 @@
-import { EssayStatus, Prisma, PrismaClient } from '@prisma/client';
+import { ContentStatus, Prisma, PrismaClient } from '@prisma/client';
 
 export const createSoftDeleteMiddleware = (prisma: PrismaClient) => {
   return async (params: Prisma.MiddlewareParams, next: any) => {
@@ -15,7 +15,7 @@ export const createSoftDeleteMiddleware = (prisma: PrismaClient) => {
             ...params.args,
             where: {
               ...params.args.where,
-              NOT: { status: EssayStatus.deleted },
+              NOT: { status: ContentStatus.deleted },
             },
           },
         });
@@ -26,7 +26,7 @@ export const createSoftDeleteMiddleware = (prisma: PrismaClient) => {
             ...params.args,
             where: {
               ...params.args?.where,
-              NOT: { status: EssayStatus.deleted },
+              NOT: { status: ContentStatus.deleted },
             },
           };
         }
@@ -37,7 +37,7 @@ export const createSoftDeleteMiddleware = (prisma: PrismaClient) => {
         const exist = await prisma.essay.findFirst({
           where: {
             id: params.args.where.id,
-            NOT: { status: EssayStatus.deleted },
+            NOT: { status: ContentStatus.deleted },
           },
         });
 
@@ -59,7 +59,7 @@ export const createSoftDeleteMiddleware = (prisma: PrismaClient) => {
           action: 'update',
           args: {
             ...params.args,
-            data: { status: EssayStatus.deleted },
+            data: { status: ContentStatus.deleted },
           },
         });
 
@@ -69,7 +69,7 @@ export const createSoftDeleteMiddleware = (prisma: PrismaClient) => {
           action: 'updateMany',
           args: {
             where: params.args?.where,
-            data: { status: EssayStatus.deleted },
+            data: { status: ContentStatus.deleted },
           },
         });
     }

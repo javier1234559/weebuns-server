@@ -1,7 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-import { Prisma } from '@prisma/client';
-
 import { Space } from 'src/models/space/entities/space.entity';
 import { User } from 'src/models/user/entities/user.entity';
 import { IVocabulary } from 'src/models/vocabulary/vocabulary.interface';
@@ -45,10 +43,10 @@ export class Vocabulary implements IVocabulary {
   })
   referenceName: string | null;
   @ApiProperty({
-    example: ['business', 'common', 'idiom', 'phrasal-verb'],
-    type: () => Object,
+    type: 'string',
+    isArray: true,
   })
-  tags: Prisma.JsonValue;
+  tags: string[];
   @ApiProperty({
     type: 'integer',
     format: 'int32',
