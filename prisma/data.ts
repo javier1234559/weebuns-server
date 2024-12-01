@@ -625,6 +625,8 @@ export const createNotes = (
   lessonIds: string[],
   spaceIds: string[],
   userIds: string[],
+  courseIds: string[],
+  unitIds: string[],
 ): Prisma.NoteCreateInput[] => [
   {
     title: 'Key Grammar Points - Present Simple',
@@ -636,6 +638,12 @@ export const createNotes = (
     isBookmarked: true,
     lesson: {
       connect: { id: lessonIds[0] },
+    },
+    unit: {
+      connect: { id: unitIds[0] },
+    },
+    course: {
+      connect: { id: courseIds[0] },
     },
     space: {
       connect: { id: spaceIds[0] },

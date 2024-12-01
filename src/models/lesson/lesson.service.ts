@@ -37,7 +37,24 @@ export class LessonService {
     };
   }
 
-  async findOne(unitId: string, lessonId: string): Promise<LessonResponseDto> {
+  async findOne(id: string): Promise<LessonResponseDto> {
+    const lesson = await this.prisma.lesson.findFirst({
+      where: {
+        id,
+      },
+    });
+
+    if (!lesson) {
+      throw new NotFoundException(`Lesson ${id} not found`);
+    }
+
+    return { lesson };
+  }
+
+  async findOneAndCheck(
+    unitId: string,
+    lessonId: string,
+  ): Promise<LessonResponseDto> {
     const lesson = await this.prisma.lesson.findFirst({
       where: {
         id: lessonId,
@@ -122,5 +139,28 @@ export class LessonService {
     });
 
     return { lesson: deleted };
+  }
+
+  async lessonLearn(
+    unitId: string,
+    lessonId: string,
+  ): Promise<LessonResponseDto> {
+    const lesson = await this.prisma.lesson.findFirst({
+      where: {
+        id: lessonId,
+        unitId,
+      },
+      include: {
+        creator: true,
+      },
+    });
+
+    if (!lesson) {
+      throw new NotFoundException(
+        `Lesson ${lessonId} not found in unit ${unitId}`,
+      );
+    }
+
+    return { lesson };
   }
 }

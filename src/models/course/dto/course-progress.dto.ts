@@ -14,13 +14,13 @@ export class UpdateCourseProgressDto {
   currentUnitId?: string;
 
   @ApiProperty({ required: false })
-  currentUnitContentId?: string;
+  currentLessonId?: string;
 
   @ApiProperty({ required: false })
   nextUnitId?: string;
 
   @ApiProperty({ required: false })
-  nextUnitContentId?: string;
+  nextLessonId?: string;
 
   @ApiProperty({ required: false })
   completedWeight?: number;
@@ -29,5 +29,5 @@ export class UpdateCourseProgressDto {
   completedUnits?: string[];
 
   @ApiProperty({ required: false, type: [String] })
-  completedContents?: string[];
+  completedLessons?: string[];
 }

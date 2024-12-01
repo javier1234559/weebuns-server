@@ -35,7 +35,7 @@ import { JoinCourseRequestDto } from 'src/models/course/dto/join-course-request.
 import { JoinCourseResponseDto } from 'src/models/course/dto/join-course-response.dto';
 import { UpdateCourseDto } from 'src/models/course/dto/update-course.dto';
 
-@ApiTags('Courses')
+@ApiTags('courses')
 @Controller('courses')
 @UseGuards(AuthGuard, RolesGuard)
 export class CourseController {

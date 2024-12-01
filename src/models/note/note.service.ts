@@ -20,9 +20,33 @@ import { UpdateNoteDto } from 'src/models/note/dto/update-note.dto';
 export class NoteService {
   constructor(private readonly prisma: PrismaService) {}
 
-  private readonly includeQuery = {
-    space: true,
-    lesson: true,
+  private readonly selectQuery = {
+    id: true,
+    spaceId: true,
+    lessonId: true,
+    courseId: true,
+    unitId: true,
+    title: true,
+    content: true,
+    tags: true,
+    isBookmarked: true,
+    createdAt: true,
+    lesson: {
+      select: {
+        id: true,
+        unitId: true,
+        title: true,
+        summary: true,
+        orderIndex: true,
+        isPremium: true,
+        isRequired: true,
+        status: true,
+        createdBy: true,
+        createdAt: true,
+        updatedAt: true,
+        lessonWeight: true,
+      },
+    },
   } as const;
 
   async createOrUpdate(
@@ -50,7 +74,6 @@ export class NoteService {
             ...dto,
             tags: dto.tags as any,
           },
-          include: this.includeQuery,
         })
       : await this.prisma.note.create({
           data: {
@@ -58,7 +81,6 @@ export class NoteService {
             tags: dto.tags as any,
             createdBy: String(currentUser.sub),
           },
-          include: this.includeQuery,
         });
 
     return { note };
@@ -109,7 +131,7 @@ export class NoteService {
       this.prisma.note.findMany({
         where,
         orderBy: [{ isBookmarked: 'desc' }, { createdAt: 'desc' }],
-        include: this.includeQuery,
+        select: this.selectQuery,
         ...paginationQuery(page, perPage),
       }),
       this.prisma.note.count({ where }),
@@ -124,7 +146,6 @@ export class NoteService {
   async findOne(id: string): Promise<FindOneNoteResponseDto> {
     const note = await this.prisma.note.findFirst({
       where: { id, ...notDeletedQuery },
-      include: this.includeQuery,
     });
     if (!note) throw new NotFoundException(`Note ${id} not found`);
 
@@ -134,7 +155,6 @@ export class NoteService {
   async findOneByLessonId(lessonId: string): Promise<FindOneNoteResponseDto> {
     const note = await this.prisma.note.findFirst({
       where: { lessonId, ...notDeletedQuery },
-      include: this.includeQuery,
     });
 
     return { note };

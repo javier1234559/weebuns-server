@@ -1,8 +1,10 @@
 import { ApiProperty } from '@nestjs/swagger';
 
+import { Course } from 'src/models/course/entities/course.entity';
+import { Lesson } from 'src/models/lesson/entities/lesson.entity';
 import { INote } from 'src/models/note/note.interface';
+import { Unit } from 'src/models/unit/entities/unit.entity';
 
-import { Unit } from '../../../models/unit/entities/unit.entity';
 import { Space } from '../../space/entities/space.entity';
 import { User } from '../../user/entities/user.entity';
 
@@ -22,6 +24,16 @@ export class Note implements INote {
   lessonId: string;
   @ApiProperty({
     type: 'string',
+    nullable: true,
+  })
+  courseId: string | null;
+  @ApiProperty({
+    type: 'string',
+    nullable: true,
+  })
+  unitId: string | null;
+  @ApiProperty({
+    type: 'string',
   })
   title: string;
   @ApiProperty({
@@ -29,8 +41,8 @@ export class Note implements INote {
   })
   content: string;
   @ApiProperty({
-    example: ['grammar', 'important', 'review', 'vocabulary'],
-    type: () => [String],
+    type: 'string',
+    isArray: true,
   })
   tags: string[];
   @ApiProperty({
@@ -58,10 +70,10 @@ export class Note implements INote {
   })
   deletedAt: Date | null;
   @ApiProperty({
-    type: () => Unit,
+    type: () => Lesson,
     required: false,
   })
-  unit?: Unit;
+  lesson?: Lesson;
   @ApiProperty({
     type: () => User,
     required: false,
@@ -73,4 +85,16 @@ export class Note implements INote {
     nullable: true,
   })
   space?: Space | null;
+  @ApiProperty({
+    type: () => Course,
+    required: false,
+    nullable: true,
+  })
+  Course?: Course | null;
+  @ApiProperty({
+    type: () => Unit,
+    required: false,
+    nullable: true,
+  })
+  Unit?: Unit | null;
 }

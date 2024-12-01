@@ -7,7 +7,7 @@ import {
   PaginationOutputDto,
 } from 'src/common/dto/pagination.dto';
 import { Course } from 'src/models/course/entities/course.entity';
-import { Unit } from 'src/models/unit/entities/unit.entity';
+import { LessonWithoutContent } from 'src/models/lesson/dto/lesson-without-content.dto';
 
 export class GetCourseUnitsRequestDto extends PaginationInputDto {
   @ApiPropertyOptional()
@@ -24,9 +24,47 @@ export class CourseListResponseDto {
   pagination: PaginationOutputDto;
 }
 
+// export class CourseUnitResponseDto {
+//   @ApiProperty({ type: [Unit] })
+//   data: Unit[];
+
+//   @ApiProperty({ type: PaginationOutputDto })
+//   pagination: PaginationOutputDto;
+// }
+
+export class UnitWithLessonsDto {
+  @ApiProperty()
+  id: string;
+
+  @ApiProperty()
+  courseId: string;
+
+  @ApiProperty()
+  title: string;
+
+  @ApiProperty()
+  orderIndex: number;
+
+  @ApiProperty()
+  isPremium: boolean;
+
+  @ApiProperty()
+  createdBy: string;
+
+  @ApiProperty()
+  createdAt: Date;
+
+  @ApiProperty()
+  updatedAt: Date;
+
+  @ApiProperty({ type: [LessonWithoutContent] })
+  lessons: LessonWithoutContent[];
+}
+
+// Update the response DTO
 export class CourseUnitResponseDto {
-  @ApiProperty({ type: [Unit] })
-  data: Unit[];
+  @ApiProperty({ type: [UnitWithLessonsDto] })
+  data: UnitWithLessonsDto[];
 
   @ApiProperty({ type: PaginationOutputDto })
   pagination: PaginationOutputDto;

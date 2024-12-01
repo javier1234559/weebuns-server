@@ -209,6 +209,8 @@ async function seedNotes() {
     generatedIds.lessons,
     generatedIds.spaces,
     generatedIds.users,
+    generatedIds.courses,
+    generatedIds.units,
   );
   for (const note of notes) {
     const created = await prisma.note.create({ data: note });

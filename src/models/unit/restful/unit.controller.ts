@@ -7,6 +7,7 @@ import {
   Param,
   Patch,
   Post,
+  Put,
   UseGuards,
 } from '@nestjs/common';
 import { ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
@@ -21,13 +22,17 @@ import { UpdateLessonDto } from 'src/models/lesson/dto/update-lesson.dto';
 import { LessonService } from 'src/models/lesson/lesson.service';
 import { FindOneNoteResponseDto } from 'src/models/note/dto/find-one-note-response.dto';
 import { NoteService } from 'src/models/note/note.service';
+import {
+  BulkUpdateUnitsDto,
+  BulkUpdateUnitsResponseDto,
+} from 'src/models/unit/dto/bulk-update-units.dto';
 import { CreateUnitDto } from 'src/models/unit/dto/create-unit.dto';
 import { GetUnitResponseDto } from 'src/models/unit/dto/get-unit-response.dto';
 import { UnitLearnResponseDto } from 'src/models/unit/dto/unit-learn.dto';
 import { UpdateUnitDto } from 'src/models/unit/dto/update-unit.dto';
 import { UnitService } from 'src/models/unit/unit.service';
 
-@ApiTags('Units')
+@ApiTags('units')
 @Controller('units')
 @UseGuards(AuthGuard, RolesGuard)
 export class UnitController {
@@ -73,11 +78,34 @@ export class UnitController {
     return this.unitService.getUnitForLearning(unitId);
   }
 
+  @Get(':id/lessons/:lessonId/learn')
+  @Roles(UserRole.USER)
+  @ApiResponse({ status: HttpStatus.OK, type: LessonResponseDto })
+  async learnLesson(
+    @Param('id') id: string,
+    @Param('lessonId') lessonId: string,
+  ) {
+    return this.lessonService.lessonLearn(id, lessonId);
+  }
+
   @Delete(':id')
   @Roles(UserRole.USER, UserRole.ADMIN)
   @ApiResponse({ status: HttpStatus.NO_CONTENT })
   async deleteUnit(@Param('id') unitId: string): Promise<GetUnitResponseDto> {
     return this.unitService.delete(unitId);
+  }
+
+  @Put('bulk-update')
+  @Roles(UserRole.ADMIN)
+  @ApiResponse({
+    status: HttpStatus.OK,
+    type: [BulkUpdateUnitsResponseDto],
+    description: 'Bulk update units including reordering',
+  })
+  async bulkUpdateUnits(
+    @Body() bulkUpdateDto: BulkUpdateUnitsDto,
+  ): Promise<BulkUpdateUnitsResponseDto> {
+    return this.unitService.bulkUpdate(bulkUpdateDto);
   }
 
   @Patch(':id')
@@ -107,7 +135,7 @@ export class UnitController {
     @Param('id') unitId: string,
     @Param('lessonId') lessonId: string,
   ): Promise<LessonResponseDto> {
-    return this.lessonService.findOne(unitId, lessonId);
+    return this.lessonService.findOneAndCheck(unitId, lessonId);
   }
 
   @Post(':id/lessons')

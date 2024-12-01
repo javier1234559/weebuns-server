@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 
-import { ContentStatus } from '@prisma/client';
+import { ContentStatus, Prisma } from '@prisma/client';
 
 import {
   notDeletedQuery,
@@ -182,13 +182,34 @@ export class CourseService {
   ): Promise<CourseUnitResponseDto> {
     const { search, page, perPage } = query;
 
-    const queryOptions = {
+    const queryOptions: Prisma.UnitFindManyArgs = {
       where: {
         courseId,
         ...searchQuery(search, ['title', 'description']),
       },
       orderBy: {
-        orderIndex: 'asc',
+        orderIndex: 'asc' as const,
+      },
+      include: {
+        lessons: {
+          orderBy: {
+            orderIndex: 'asc' as const,
+          },
+          select: {
+            id: true,
+            title: true,
+            summary: true,
+            orderIndex: true,
+            isPremium: true,
+            isRequired: true,
+            status: true,
+            createdBy: true,
+            createdAt: true,
+            updatedAt: true,
+            lessonWeight: true,
+            unitId: true,
+          },
+        },
       },
       ...paginationQuery(page, perPage),
     };
@@ -198,8 +219,10 @@ export class CourseService {
       this.prisma.unit.count({ where: queryOptions.where }),
     ]);
 
+    console.log(units);
+
     return {
-      data: units,
+      data: units as any,
       pagination: calculatePagination(totalItems, query),
     };
   }
@@ -292,16 +315,34 @@ export class CourseService {
   }
 
   async getLearnCourse(courseId: string): Promise<CourseLearnResponseDto> {
-    const course = await this.prisma.course.findFirst({
+    const course = await this.prisma.course.findUnique({
       where: {
         id: courseId,
-        status: ContentStatus.published,
-        ...notDeletedQuery,
       },
       include: {
         units: {
           orderBy: {
             orderIndex: 'asc',
+          },
+          select: {
+            id: true,
+            title: true,
+            orderIndex: true,
+            isPremium: true,
+            lessons: {
+              orderBy: {
+                orderIndex: 'asc',
+              },
+              select: {
+                id: true,
+                title: true,
+                orderIndex: true,
+                isPremium: true,
+                isRequired: true,
+                status: true,
+                lessonWeight: true,
+              },
+            },
           },
         },
       },
