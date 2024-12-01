@@ -1,0 +1,1 @@
+{"version":3,"file":"space-course.dto.js","sourceRoot":"","sources":["../../../../../src/models/space-course/dto/space-course.dto.ts"],"names":[],"mappings":";;;;;;;;;;;;AAAA,6CAA8C;AAE9C,MAAa,cAAc;CAU1B;AAVD,wCAUC;AANC;IAHC,IAAA,qBAAW,EAAC;QACX,IAAI,EAAE,QAAQ;KACf,CAAC;;0CACS;AAKX;IAJC,IAAA,qBAAW,EAAC;QACX,IAAI,EAAE,QAAQ;QACd,MAAM,EAAE,WAAW;KACpB,CAAC;8BACQ,IAAI;gDAAC"}
