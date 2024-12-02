@@ -20,6 +20,12 @@ export class CreateNoteDto {
   @IsNotEmpty()
   lessonId: string;
 
+  @ApiProperty({ type: 'string', nullable: true })
+  courseId?: string;
+
+  @ApiProperty({ type: 'string', nullable: true })
+  unitId?: string;
+
   @ApiProperty({ type: 'string' })
   @IsString()
   @IsNotEmpty()

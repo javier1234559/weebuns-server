@@ -14,6 +14,11 @@ import { ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from 'src/common/auth/auth.guard';
 import { Roles, RolesGuard, UserRole } from 'src/common/auth/role.guard';
 import { CacheKeyDto } from 'src/common/decorators/cache-key.decorator';
+import {
+  TextToSpeechDto,
+  TextToSpeechResponseDto,
+} from 'src/models/ai/dto/text-to-speech.dto';
+import { TtsService } from 'src/models/ai/tts.service';
 
 import { AiService } from './ai.service';
 import { CheckGrammarResponseDto } from './dto/check-grammar-response.dto';
@@ -28,7 +33,10 @@ import { TranslateDto } from './dto/translate.dto';
 @UseGuards(AuthGuard, RolesGuard)
 @UseInterceptors(CacheInterceptor)
 export class AiController {
-  constructor(private readonly aiService: AiService) {}
+  constructor(
+    private readonly aiService: AiService,
+    private readonly ttsService: TtsService,
+  ) {}
 
   @Post('translate')
   @Roles(UserRole.USER)
@@ -69,5 +77,35 @@ export class AiController {
     @Query() dto: RecommendTopicsDto,
   ): Promise<RecommendTopicsResponseDto> {
     return this.aiService.recommendTopics(dto);
+  }
+
+  @Get('tts/test')
+  @Roles(UserRole.ADMIN)
+  @ApiResponse({
+    status: HttpStatus.OK,
+  })
+  async textToSpeechTest(): Promise<any> {
+    return this.ttsService.test();
+  }
+
+  @Post('tts/convert')
+  @Roles(UserRole.ADMIN)
+  @ApiResponse({
+    status: HttpStatus.OK,
+    type: TextToSpeechResponseDto,
+  })
+  async textToSpeech(
+    @Body() dto: TextToSpeechDto,
+  ): Promise<TextToSpeechResponseDto> {
+    return this.ttsService.textToSpeech(dto);
+  }
+
+  @Get('tts/all')
+  @Roles(UserRole.ADMIN)
+  @ApiResponse({
+    status: HttpStatus.OK,
+  })
+  async textToSpeechAll(): Promise<any> {
+    return this.ttsService.getAll();
   }
 }

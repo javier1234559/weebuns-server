@@ -50,6 +50,7 @@
     "class-validator": "^0.14.1",
     "cookie-parser": "^1.4.7",
     "dotenv": "^16.4.5",
+    "elevenlabs": "^0.18.1",
     "graphql": "^16.9.0",
     "graphql-type-json": "^0.3.2",
     "groq-sdk": "^0.7.0",

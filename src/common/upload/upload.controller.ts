@@ -51,7 +51,7 @@ export class UploadController {
         validators: [
           new MaxFileSizeValidator({ maxSize: 5 * 1024 * 1024 }), // 5MB
           new FileTypeValidator({
-            fileType: /(jpg|jpeg|png|gif|pdf|doc|docx)$/,
+            fileType: /^(image|audio|application\/pdf)\/.+$/,
           }),
         ],
       }),
@@ -101,7 +101,7 @@ export class UploadController {
         validators: [
           new MaxFileSizeValidator({ maxSize: 5 * 1024 * 1024 }),
           new FileTypeValidator({
-            fileType: /(jpg|jpeg|png|gif|pdf|doc|docx)$/,
+            fileType: /^(image|audio|application\/pdf)\/.+$/,
           }),
         ],
       }),
@@ -137,7 +137,7 @@ export class UploadController {
         validators: [
           new MaxFileSizeValidator({ maxSize: 100 * 1024 * 1024 }), // 100MB
           new FileTypeValidator({
-            fileType: /(mp4|MP4)$/,
+            fileType: /^(image|audio|application\/pdf)\/.+$/,
           }),
         ],
       }),

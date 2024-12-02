@@ -1,0 +1,27 @@
+name: Deploy to VPS
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Deploy to VPS
+      uses: appleboy/ssh-action@v0.1.10
+      with:
+        host: ${{ secrets.HOST }}   
+        username: ${{ secrets.NAME }}         
+        password: ${{ secrets.PASSWORD }}
+        script: |
+          cd /home/projects/weebuns-server
+          git pull origin main
+          npm install
+          npm run build
+          pm2 restart weebuns-api

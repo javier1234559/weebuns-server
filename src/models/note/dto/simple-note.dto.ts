@@ -14,6 +14,12 @@ export class SimplifiedNoteDto {
   lessonId: string;
 
   @ApiProperty({ type: 'string' })
+  courseId: string;
+
+  @ApiProperty({ type: 'string' })
+  unitId: string;
+
+  @ApiProperty({ type: 'string' })
   content: string;
 
   @ApiProperty({ type: 'string' })

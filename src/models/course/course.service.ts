@@ -219,19 +219,112 @@ export class CourseService {
       this.prisma.unit.count({ where: queryOptions.where }),
     ]);
 
-    console.log(units);
-
     return {
       data: units as any,
       pagination: calculatePagination(totalItems, query),
     };
   }
 
+  // async joinCourse(
+  //   userId: string,
+  //   courseId: string,
+  //   spaceId: string,
+  // ): Promise<JoinCourseResponseDto> {
+  //   const firstUnit = await this.prisma.unit.findFirst({
+  //     where: { courseId },
+  //     orderBy: { orderIndex: 'asc' },
+  //     select: {
+  //       id: true,
+  //       lessons: {
+  //         orderBy: { orderIndex: 'asc' },
+  //         take: 1,
+  //         select: { id: true },
+  //       },
+  //     },
+  //   });
+
+  //   if (!firstUnit) {
+  //     throw new NotFoundException(
+  //       `Course with ID ${courseId} not found or has no units`,
+  //     );
+  //   }
+
+  //   const existingProgress = await this.prisma.courseProgress.findUnique({
+  //     where: {
+  //       userId_courseId: { userId, courseId },
+  //     },
+  //   });
+
+  //   console.log(existingProgress);
+
+  //   const existingJoin = await this.prisma.spaceCourse.findUnique({
+  //     where: {
+  //       spaceId_courseId: { spaceId, courseId },
+  //     },
+  //   });
+
+  //   if (existingJoin) {
+  //     await this.prisma.spaceCourse.delete({
+  //       where: {
+  //         spaceId_courseId: { spaceId, courseId },
+  //       },
+  //     });
+
+  //     return {
+  //       message: 'Successfully left the course',
+  //       joinedAt: existingJoin.joinedAt,
+  //       progress: existingProgress,
+  //     };
+  //   }
+
+  //   const result = await this.prisma.$transaction(async (tx) => {
+  //     const spaceCourse = await tx.spaceCourse.create({
+  //       data: {
+  //         spaceId,
+  //         courseId,
+  //         joinedAt: new Date(),
+  //       },
+  //     });
+
+  //     let courseProgress = existingProgress;
+
+  //     if (!existingProgress) {
+  //       console.log('Creating new progress');
+  //       console.log(JSON.stringify(firstUnit, null, 2));
+
+  //       courseProgress = await tx.courseProgress.create({
+  //         data: {
+  //           userId,
+  //           courseId,
+  //           currentUnitId: firstUnit.id,
+  //           currentLessonId: firstUnit.lessons[0]?.id,
+  //           completedWeight: 0,
+  //           completedUnits: [],
+  //           completedLessons: [],
+  //           lastAccessedAt: new Date(),
+  //         },
+  //       });
+  //     }
+
+  //     return {
+  //       spaceCourse,
+  //       courseProgress,
+  //     };
+  //   });
+
+  //   return {
+  //     message: 'Successfully joined the course',
+  //     joinedAt: result.spaceCourse.joinedAt,
+  //     progress: result.courseProgress,
+  //   };
+  // }
+
   async joinCourse(
     userId: string,
     courseId: string,
     spaceId: string,
   ): Promise<JoinCourseResponseDto> {
+    // First check if course exists and has units
     const firstUnit = await this.prisma.unit.findFirst({
       where: { courseId },
       orderBy: { orderIndex: 'asc' },
@@ -246,36 +339,45 @@ export class CourseService {
     });
 
     if (!firstUnit) {
-      throw new NotFoundException(`Course with ID ${courseId} not found`);
+      throw new NotFoundException(
+        `Course with ID ${courseId} not found or has no units`,
+      );
     }
 
-    const existingProgress = await this.prisma.courseProgress.findUnique({
-      where: {
-        userId_courseId: { userId, courseId },
-      },
-    });
-
-    const existingJoin = await this.prisma.spaceCourse.findUnique({
-      where: {
-        spaceId_courseId: { spaceId, courseId },
-      },
-    });
-
-    if (existingJoin) {
-      await this.prisma.spaceCourse.delete({
+    // Move all operations into a single transaction
+    return await this.prisma.$transaction(async (tx) => {
+      const existingJoin = await tx.spaceCourse.findUnique({
         where: {
           spaceId_courseId: { spaceId, courseId },
         },
       });
 
-      return {
-        message: 'Successfully left the course',
-        joinedAt: existingJoin.joinedAt,
-        progress: existingProgress,
-      };
-    }
+      if (!existingJoin) {
+        console.log('Not joining course yet');
+      }
 
-    const result = await this.prisma.$transaction(async (tx) => {
+      if (existingJoin) {
+        await tx.spaceCourse.delete({
+          where: {
+            spaceId_courseId: { spaceId, courseId },
+          },
+        });
+
+        const progress = await tx.courseProgress.findUnique({
+          where: {
+            userId_courseId: { userId, courseId },
+          },
+        });
+
+        return {
+          message: 'Successfully left the course',
+          joinedAt: existingJoin.joinedAt,
+          progress: progress,
+        };
+      }
+
+      // Handle joining course
+      // Create space-course relationship
       const spaceCourse = await tx.spaceCourse.create({
         data: {
           spaceId,
@@ -284,34 +386,47 @@ export class CourseService {
         },
       });
 
-      let courseProgress = existingProgress;
+      const allProgress = await tx.courseProgress.findMany({
+        where: {
+          userId,
+        },
+      });
 
-      if (!existingProgress) {
-        courseProgress = await tx.courseProgress.create({
-          data: {
-            userId,
-            courseId,
-            currentUnitId: firstUnit.id,
-            currentLessonId: firstUnit.lessons[0]?.id,
-            completedWeight: 0,
-            completedUnits: [],
-            completedLessons: [],
-            lastAccessedAt: new Date(),
-          },
-        });
-      }
+      console.log('All progress:', allProgress);
+      // Check for existing progress within transaction
+      const courseProgress = await tx.courseProgress.findUnique({
+        where: {
+          userId_courseId: { userId, courseId },
+        },
+      });
+
+      console.log('Course progress:', courseProgress);
+
+      // Create new progress if doesn't exist
+      // if (!courseProgress) {
+      //   console.log('Creating new progress');
+      //   console.log(JSON.stringify(firstUnit, null, 2));
+
+      //   courseProgress = await tx.courseProgress.create({
+      //     data: {
+      //       userId,
+      //       courseId,
+      //       currentUnitId: firstUnit.id,
+      //       currentLessonId: firstUnit.lessons[0]?.id,
+      //       completedWeight: 0,
+      //       completedUnits: [],
+      //       completedLessons: [],
+      //       lastAccessedAt: new Date(),
+      //     },
+      //   });
+      // }
 
       return {
-        spaceCourse,
-        courseProgress,
+        message: 'Successfully joined the course',
+        joinedAt: spaceCourse.joinedAt,
+        progress: courseProgress,
       };
     });
-
-    return {
-      message: 'Successfully joined the course',
-      joinedAt: result.spaceCourse.joinedAt,
-      progress: result.courseProgress,
-    };
   }
 
   async getLearnCourse(courseId: string): Promise<CourseLearnResponseDto> {
@@ -411,11 +526,27 @@ export class CourseService {
     });
 
     if (!progress) {
-      // Create initial progress structure
+      // Get first unit and lesson if creating new progress
+      const firstUnit = await this.prisma.unit.findFirst({
+        where: { courseId },
+        orderBy: { orderIndex: 'asc' },
+        select: {
+          id: true,
+          lessons: {
+            orderBy: { orderIndex: 'asc' },
+            take: 1,
+            select: { id: true },
+          },
+        },
+      });
+
+      // Create initial progress structure with all required fields
       const initialProgress = await this.prisma.courseProgress.create({
         data: {
           userId,
           courseId,
+          currentUnitId: firstUnit?.id || null,
+          currentLessonId: firstUnit?.lessons[0]?.id || null,
           completedWeight: 0,
           completedUnits: [],
           completedLessons: [],

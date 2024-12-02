@@ -1,1 +1,0 @@
-{"version":3,"file":"update-course-progress.dto.js","sourceRoot":"","sources":["../../../../../src/generated-dto/course-progress/dto/update-course-progress.dto.ts"],"names":[],"mappings":";;;;;;;;;;;;AAAA,6CAA8C;AAE9C,MAAa,uBAAuB;CAQnC;AARD,0DAQC;AADC;IANC,IAAA,qBAAW,EAAC;QACX,IAAI,EAAE,QAAQ;QACd,MAAM,EAAE,WAAW;QACnB,QAAQ,EAAE,KAAK;QACf,QAAQ,EAAE,IAAI;KACf,CAAC;8BACe,IAAI;+DAAQ"}
