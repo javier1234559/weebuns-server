@@ -217,17 +217,21 @@ export const createSubscriptionPayments = (subscriptionIds: string[]) =>
   [
     {
       amount: new Prisma.Decimal(29.99),
-      paymentType: PaymentType.STRIPE,
+      paymentType: PaymentType.momo,
       paymentDate: new Date(),
       status: 'SUCCESS',
+      transactionId: '123456789',
+      currency: 'DOLLAR',
       subscription: {
         connect: { id: subscriptionIds[0] },
       },
     },
     {
       amount: new Prisma.Decimal(99.99),
-      paymentType: PaymentType.STRIPE,
+      paymentType: PaymentType.zalopay,
       paymentDate: new Date(),
+      transactionId: '123456788',
+      currency: 'DOLLAR',
       status: 'SUCCESS',
       subscription: {
         connect: { id: subscriptionIds[1] },
@@ -240,7 +244,7 @@ export const createCorrectionCredits = (userIds: string[]) =>
     {
       amount: 10,
       price: new Prisma.Decimal(19.99),
-      paymentType: PaymentType.STRIPE,
+      paymentType: PaymentType.momo,
       expireDate: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000),
       user: {
         connect: { id: userIds[0] },
@@ -608,16 +612,43 @@ export const createVocabularies = (spaceIds: string[], userIds: string[]) =>
         'sự kiên trì',
       ],
       exampleSentence: 'Her perseverance in studying English paid off.',
-      imageUrl: 'https://example.com/vocab1.jpg',
+      imageUrl: 'https://example.com/images/perseverance.jpg',
       tags: ['important', 'academic'],
       repetitionLevel: 0,
       nextReview: new Date(),
-      space: {
-        connect: { id: spaceIds[0] },
-      },
-      creator: {
-        connect: { id: userIds[0] },
-      },
+      space: { connect: { id: spaceIds[0] } },
+      creator: { connect: { id: userIds[0] } },
+    },
+    {
+      term: 'eloquent',
+      meaning: [
+        'fluent or persuasive in speaking or writing',
+        'hùng biện, lưu loát',
+      ],
+      exampleSentence: 'She gave an eloquent speech at the conference.',
+      imageUrl:
+        'https://media.istockphoto.com/id/1995180343/vector/distinguished-orator-delivering-an-eloquent-speech-at-a-podium-a-poised-character-in-a.jpg?s=612x612&w=0&k=20&c=mHENlN8gfsVOnFc_UoogeODTG7Hamwa6J5cymfQtHRc=',
+      tags: ['communication', 'academic'],
+      repetitionLevel: 0,
+      nextReview: new Date(),
+      space: { connect: { id: spaceIds[0] } },
+      creator: { connect: { id: userIds[0] } },
+    },
+    {
+      term: 'diligent',
+      meaning: [
+        `having or showing care and conscientiousness in one's work or duties`,
+        'chăm chỉ, cần cù',
+      ],
+      exampleSentence:
+        'His diligent study habits resulted in excellent grades.',
+      imageUrl:
+        'https://www.shutterstock.com/image-vector/vector-illustration-material-business-woman-600nw-1958515078.jpg',
+      tags: ['important', 'work'],
+      repetitionLevel: 0,
+      nextReview: new Date(),
+      space: { connect: { id: spaceIds[0] } },
+      creator: { connect: { id: userIds[0] } },
     },
   ] as Prisma.VocabularyCreateInput[];
 

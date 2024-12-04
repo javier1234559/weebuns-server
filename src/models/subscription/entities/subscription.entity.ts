@@ -4,6 +4,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { PaymentType, SubscriptionType } from '@prisma/client';
 
 import { SubscriptionPayment } from 'src/models/subscription-payment/entities/subscription-payment.entity';
+import { ISubscription } from 'src/models/subscription/subscription.interface';
 
 import { User } from '../../user/entities/user.entity';
 
@@ -17,7 +18,7 @@ registerEnumType(SubscriptionType, {
   description: 'SubscriptionType supported',
 });
 
-export class Subscription {
+export class Subscription implements ISubscription {
   @ApiProperty({
     type: 'string',
   })

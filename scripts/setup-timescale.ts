@@ -5,9 +5,9 @@ const prisma = new PrismaClient();
 async function setupTimescaleDB() {
   try {
     // Enable TimescaleDB
-    // await prisma.$executeRaw`
-    //   CREATE EXTENSION IF NOT EXISTS timescaledb;
-    // `;
+    await prisma.$executeRaw`
+      CREATE EXTENSION IF NOT EXISTS timescaledb;
+    `;
 
     // // Create table
     await prisma.$executeRaw`

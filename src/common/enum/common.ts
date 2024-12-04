@@ -37,3 +37,17 @@ export enum RepetitionLevel {
   LEVEL_5 = 5, // Review after 30 days
   MASTERED = 6, // Review after 90 days
 }
+
+export enum SubscriptionStatus {
+  PENDING = 'PENDING',
+  ACTIVE = 'ACTIVE',
+  EXPIRED = 'EXPIRED',
+  CANCELLED = 'CANCELLED',
+  PAYMENT_FAILED = 'PAYMENT_FAILED',
+}
+
+export enum PaymentStatus {
+  PENDING = 'PENDING',
+  SUCCESS = 'SUCCESS',
+  FAILED = 'FAILED',
+}

@@ -72,9 +72,9 @@ enum SubscriptionType {
 }
 
 enum PaymentType {
-  STRIPE
-  MOMO
-  ZALOPAY
+  stripe
+  momo
+  zalopay
 }
 
 // Reference Data
@@ -154,8 +154,10 @@ model SubscriptionPayment {
   paymentType    PaymentType @map("payment_type")
   paymentDate    DateTime    @map("payment_date")
   status         String // SUCCESS, PENDING, FAILED
+  transactionId  String?     @map("transaction_id") // Add this
+  currency       String      @default("VND") // Add this
 
-  // Relations
+  // Relations  
   subscription Subscription @relation(fields: [subscriptionId], references: [id])
 
   @@map("subscription_payments")

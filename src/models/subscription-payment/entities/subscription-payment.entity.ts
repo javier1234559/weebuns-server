@@ -4,7 +4,7 @@ import { PaymentType, Prisma } from '@prisma/client';
 
 import { Subscription } from '../../subscription/entities/subscription.entity';
 
-export class SubscriptionPayment {
+export class SubscriptionPayment implements SubscriptionPayment {
   @ApiProperty({
     type: 'string',
   })
