@@ -41,37 +41,66 @@ export class PaymentService {
     dto: CreatePaymentDto,
     currentUser: IAuthPayload,
   ): Promise<CreatePaymentResponseDto> {
-    // const transactionId = `${provider}_${Date.now()}`;
     const transID = Math.floor(Math.random() * 1000000);
     const transactionId = `${moment().format('YYMMDD')}_${transID}`;
     const userId = String(currentUser.sub);
 
-    // Create pending subscription and payment
     try {
       await this.prisma.$transaction(async (tx) => {
-        // Create subscription
-        const subscription = await tx.subscription.create({
-          data: {
-            userId: userId,
-            type: dto.planType,
-            startDate: new Date(),
-            endDate: this.calculateEndDate(dto.planType),
-            status: SubscriptionStatus.PENDING,
-          },
+        // Check for existing subscription
+        const existingSubscription = await tx.subscription.findFirst({
+          where: { userId },
         });
 
-        // Create payment record
-        await tx.subscriptionPayment.create({
-          data: {
-            subscriptionId: subscription.id,
-            amount: dto.amount,
-            paymentType: provider,
-            paymentDate: new Date(),
-            status: PaymentStatus.PENDING,
-            transactionId,
-            currency: dto.currency || 'VND',
-          },
-        });
+        if (existingSubscription) {
+          // Update existing subscription
+          await tx.subscription.update({
+            where: { id: existingSubscription.id },
+            data: {
+              type: dto.planType,
+              startDate: new Date(),
+              endDate: this.calculateEndDate(dto.planType),
+              status: SubscriptionStatus.PENDING,
+            },
+          });
+
+          // Create new payment record for existing subscription
+          await tx.subscriptionPayment.create({
+            data: {
+              subscriptionId: existingSubscription.id,
+              amount: dto.amount,
+              paymentType: provider,
+              paymentDate: new Date(),
+              status: PaymentStatus.PENDING,
+              transactionId,
+              currency: dto.currency || 'VND',
+            },
+          });
+        } else {
+          // Create new subscription if none exists
+          const subscription = await tx.subscription.create({
+            data: {
+              userId: userId,
+              type: dto.planType,
+              startDate: new Date(),
+              endDate: this.calculateEndDate(dto.planType),
+              status: SubscriptionStatus.PENDING,
+            },
+          });
+
+          // Create payment record for new subscription
+          await tx.subscriptionPayment.create({
+            data: {
+              subscriptionId: subscription.id,
+              amount: dto.amount,
+              paymentType: provider,
+              paymentDate: new Date(),
+              status: PaymentStatus.PENDING,
+              transactionId,
+              currency: dto.currency || 'VND',
+            },
+          });
+        }
       });
 
       // Generate payment URL based on provider
@@ -84,7 +113,7 @@ export class PaymentService {
       return { paymentUrl, transactionId };
     } catch (error) {
       console.error(error);
-      throw new InternalServerErrorException('Failed to create payment ');
+      throw new InternalServerErrorException('Failed to create payment');
     }
   }
 

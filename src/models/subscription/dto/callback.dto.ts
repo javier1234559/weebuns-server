@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, getSchemaPath } from '@nestjs/swagger';
 
 export class MomoCallbackDto {
   @ApiProperty()
@@ -36,3 +36,10 @@ export class ZaloCallbackDto {
 }
 
 export type PaymentCallbackDto = MomoCallbackDto | ZaloCallbackDto;
+
+export const PaymentCallbackDtoSwagger = {
+  oneOf: [
+    { $ref: getSchemaPath(MomoCallbackDto) },
+    { $ref: getSchemaPath(ZaloCallbackDto) },
+  ],
+};

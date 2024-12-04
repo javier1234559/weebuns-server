@@ -35,6 +35,7 @@ import { VocabularyModule } from 'src/models/vocabulary/vocabulary.module';
       driver: ApolloDriver,
       autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
       playground: false,
+      introspection: true,
       plugins: [ApolloServerPluginLandingPageLocalDefault()],
     }),
     UserModule,
