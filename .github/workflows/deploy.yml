@@ -20,8 +20,9 @@ jobs:
         username: ${{ secrets.NAME }}         
         password: ${{ secrets.PASSWORD }}
         script: |
-          cd /home/projects/weebuns-server
-          git pull origin main
-          npm install --legacy-peer-deps
-          npm run build
-          pm2 restart weebuns-api
+           cd /home/projects/weebuns-server
+           git fetch origin
+           git reset --hard origin/main 
+           npm install --legacy-peer-deps
+           npm run build
+           pm2 restart weebuns-api
