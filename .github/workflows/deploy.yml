@@ -22,6 +22,6 @@ jobs:
         script: |
           cd /home/projects/weebuns-server
           git pull origin main
-          npm install
+          npm install --legacy-peer-deps
           npm run build
           pm2 restart weebuns-api
