@@ -48,9 +48,11 @@ export class VocabularyController {
     type: VocabularyResponse,
   })
   async findAll(
+    @CurrentUser() currentUser: IAuthPayload,
     @Query() findAllVocabulariesDto: FindAllVocabularyDto,
   ): Promise<VocabularyResponse> {
-    return this.vocabularyService.findAll(findAllVocabulariesDto);
+    const userId = String(currentUser.sub);
+    return this.vocabularyService.findAll(userId, findAllVocabulariesDto);
   }
 
   @Get(':id')

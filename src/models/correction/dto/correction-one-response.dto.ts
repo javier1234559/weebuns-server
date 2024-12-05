@@ -26,7 +26,7 @@ export class CorrectionResponseOneDto {
 
   @Field({ nullable: true })
   @ApiProperty({ example: 'Overall comment', nullable: true })
-  overall_comment?: string;
+  overallComment?: string;
 
   @Field({ nullable: true })
   @ApiProperty({ example: 4, nullable: true })

@@ -27,7 +27,7 @@ export class CreateCorrectionDto {
   @ApiProperty({ example: 'Overall comment', nullable: true })
   @IsString()
   @IsOptional()
-  overall_comment?: string;
+  overallComment?: string;
 
   @Field({ nullable: true })
   @ApiProperty({ example: 4, nullable: true })

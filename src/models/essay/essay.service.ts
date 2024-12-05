@@ -43,11 +43,12 @@ export class EssayService {
     query: FindAllEssaysDto,
     user: IAuthPayload,
   ): Promise<EssaysResponse> {
-    const { page, perPage, search, status } = query;
+    const { page, perPage, search, status, spaceId } = query;
 
     const queryOptions = {
       where: {
         createdBy: String(user.sub),
+        ...(spaceId && { spaceId }),
         ...notDeletedQuery,
         ...searchQuery(search, ['title', 'summary']),
         ...(status && { status }),

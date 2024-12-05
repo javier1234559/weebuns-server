@@ -255,15 +255,16 @@ export const createCorrectionCredits = (userIds: string[]) =>
 export const createCourses = (teacherIds: string[]) =>
   [
     {
-      title: 'English Grammar Fundamentals',
-      description: 'Master the basics of English grammar',
-      thumbnailUrl: 'https://example.com/courses/grammar-basics.jpg',
+      title: 'English for Daily Communication',
+      description:
+        'Khóa học tiếng Anh giao tiếp thực tế, giúp bạn tự tin nói chuyện trong các tình huống hàng ngày',
+      thumbnailUrl:
+        'https://foundr.com/wp-content/uploads/2021/09/Best-online-course-platforms.png',
       language: REFERENCE.LANGUAGES.ENGLISH,
       minLevel: REFERENCE.LEVELS.BEGINNER,
       maxLevel: REFERENCE.LEVELS.INTERMEDIATE,
-      topics: [REFERENCE.TOPICS.ACADEMIC, REFERENCE.TOPICS.DAILY_LIFE],
-      totalWeight: 24,
-      courseType: 'GRAMMAR',
+      topics: [REFERENCE.TOPICS.DAILY_LIFE, REFERENCE.TOPICS.OTHER],
+      courseType: REFERENCE.TARGETS.COMMUNICATION,
       isPremium: false,
       status: ContentStatus.published,
       creator: {
@@ -277,7 +278,7 @@ export const createUnits = (
   teacherIds: string[],
 ): Prisma.UnitCreateInput[] => [
   {
-    title: 'Present Tense Mastery',
+    title: 'Unit 1: Introductions and Greetings',
     orderIndex: 1,
     isPremium: false,
     course: {
@@ -288,9 +289,20 @@ export const createUnits = (
     },
   },
   {
-    title: 'Past Tense Mastery',
+    title: 'Unit 2: Ordering Food and Drinks',
     orderIndex: 2,
     isPremium: false,
+    course: {
+      connect: { id: courseIds[0] },
+    },
+    creator: {
+      connect: { id: teacherIds[0] },
+    },
+  },
+  {
+    title: 'Unit 3: Shopping and Numbers',
+    orderIndex: 3,
+    isPremium: true,
     course: {
       connect: { id: courseIds[0] },
     },
@@ -305,45 +317,80 @@ export const createLessons = (
   teacherIds: string[],
 ): Prisma.LessonCreateInput[] => [
   {
-    title: 'Present Simple - Introduction',
-    summary: 'Learn the basics of Present Simple tense',
+    title: 'Basic Greetings and Introductions',
+    summary: 'Learn common greetings and how to introduce yourself in English',
     content: {
-      sections: [
+      blocks: [
         {
+          id: 'block-greetings-vocab',
           type: 'text',
-          content:
-            'The present simple tense is used to describe habits, unchanging situations, general truths, and fixed arrangements.',
+          order: 0,
+          content: {
+            html: `
+              <h4>Common Greetings and Introductions</h4>
+              <ul>
+                <li><strong>Hello/Hi</strong>: Xin chào</li>
+                <li><strong>Good morning</strong>: Chào buổi sáng</li>
+                <li><strong>Good afternoon</strong>: Chào buổi chiều</li>
+                <li><strong>Good evening</strong>: Chào buổi tối</li>
+                <li><strong>Nice to meet you</strong>: Rất vui được gặp bạn</li>
+                <li><strong>My name is...</strong>: Tên tôi là...</li>
+                <li><strong>I'm from...</strong>: Tôi đến từ...</li>
+                <li><strong>What's your name?</strong>: Bạn tên là gì?</li>
+                <li><strong>How are you?</strong>: Bạn khỏe không?</li>
+                <li><strong>I'm fine, thank you</strong>: Tôi khỏe, cảm ơn bạn</li>
+              </ul>
+            `,
+          },
         },
         {
-          type: 'example',
-          content: [
-            'I play tennis every Sunday.',
-            'The Earth revolves around the Sun.',
-            'The train leaves at 8:00 AM every morning.',
-          ],
+          id: 'block-greetings-dictation',
+          type: 'dictation',
+          order: 1,
+          content: {
+            text: `<p>Hi, my name is Sarah. I'm from Australia. Nice to meet you! How are you today? I'm fine, thank you. I'm a student at the local university. What about you?</p>`,
+            audioUrl: 'https://example.com/audio/basic-introductions.mp3',
+          },
         },
         {
-          type: 'exercise',
-          questions: [
-            {
-              type: 'multiple-choice',
-              question: 'Which sentence uses Present Simple correctly?',
-              options: [
-                'He play football.',
-                'He plays football.',
-                'He playing football.',
-              ],
-              correctAnswer: 1,
-            },
-          ],
+          id: 'block-greetings-quiz',
+          type: 'quiz',
+          order: 2,
+          content: {
+            title: 'Greetings Practice',
+            questions: [
+              {
+                id: 'q-greetings-1',
+                question: "What's the appropriate response to 'How are you?'",
+                options: [
+                  {
+                    id: 'opt-greetings-1',
+                    text: 'Nice to meet you',
+                    isCorrect: false,
+                  },
+                  {
+                    id: 'opt-greetings-2',
+                    text: "I'm fine, thank you",
+                    isCorrect: true,
+                  },
+                ],
+                explanation:
+                  "When someone asks 'How are you?', the most common response is 'I'm fine, thank you'",
+              },
+            ],
+          },
         },
       ],
+      metadata: {
+        lastUpdated: new Date().toISOString(),
+        updatedById: teacherIds[0],
+      },
     },
     orderIndex: 1,
     isPremium: false,
     isRequired: true,
-    lessonWeight: 4,
     status: ContentStatus.published,
+    lessonWeight: 10,
     unit: {
       connect: { id: unitIds[0] },
     },
@@ -352,45 +399,79 @@ export const createLessons = (
     },
   },
   {
-    title: 'Present Continuous - Introduction',
-    summary: 'Learn the basics of Present Continuous tense',
+    title: 'Making Friends and Small Talk',
+    summary: 'Learn how to make friends and carry on basic conversations',
     content: {
-      sections: [
+      blocks: [
         {
+          id: 'block-friends-vocab',
           type: 'text',
-          content:
-            'The present continuous tense is used to describe temporary or changing situations, and to talk about actions that are happening at the moment of speaking.',
+          order: 0,
+          content: {
+            html: `
+              <h4>Making Friends Vocabulary</h4>
+              <ul>
+                <li><strong>What do you like to do?</strong>: Bạn thích làm gì?</li>
+                <li><strong>Do you want to hang out?</strong>: Bạn có muốn đi chơi không?</li>
+                <li><strong>Let's grab a coffee</strong>: Đi uống cà phê nhé</li>
+                <li><strong>What are your hobbies?</strong>: Sở thích của bạn là gì?</li>
+                <li><strong>We have a lot in common</strong>: Chúng ta có nhiều điểm chung</li>
+                <li><strong>Would you like to join us?</strong>: Bạn có muốn tham gia cùng không?</li>
+                <li><strong>That sounds fun!</strong>: Nghe vui đấy!</li>
+                <li><strong>Maybe another time</strong>: Để lần khác nhé</li>
+              </ul>
+            `,
+          },
         },
         {
-          type: 'example',
-          content: [
-            'I am studying for a master degree.',
-            'The company is building a new factory.',
-            'They are planning a trip to Japan.',
-          ],
+          id: 'block-friends-dictation',
+          type: 'dictation',
+          order: 1,
+          content: {
+            text: `<p>Hey, would you like to grab a coffee after class? I know a great place nearby. We can talk about our hobbies and get to know each other better. That sounds fun! What time should we meet?</p>`,
+            audioUrl: 'https://example.com/audio/making-friends.mp3',
+          },
         },
         {
-          type: 'exercise',
-          questions: [
-            {
-              type: 'multiple-choice',
-              question: 'Which sentence uses Present Continuous correctly?',
-              options: [
-                'I am play football.',
-                'I am playing football.',
-                'I playing football.',
-              ],
-              correctAnswer: 1,
-            },
-          ],
+          id: 'block-friends-quiz',
+          type: 'quiz',
+          order: 2,
+          content: {
+            title: 'Making Friends Practice',
+            questions: [
+              {
+                id: 'q-friends-1',
+                question:
+                  'How do you politely invite someone to join an activity?',
+                options: [
+                  {
+                    id: 'opt-friends-1',
+                    text: 'You must come with us',
+                    isCorrect: false,
+                  },
+                  {
+                    id: 'opt-friends-2',
+                    text: 'Would you like to join us?',
+                    isCorrect: true,
+                  },
+                ],
+                explanation:
+                  "Using 'Would you like...' is a polite way to invite someone",
+              },
+            ],
+          },
         },
       ],
+      metadata: {
+        lastUpdated: new Date().toISOString(),
+        updatedById: teacherIds[0],
+      },
     },
     orderIndex: 2,
     isPremium: false,
     isRequired: true,
-    lessonWeight: 6,
     status: ContentStatus.published,
+    lessonWeight: 10,
     unit: {
       connect: { id: unitIds[0] },
     },
@@ -399,45 +480,78 @@ export const createLessons = (
     },
   },
   {
-    title: 'Past Simple - Introduction',
-    summary: 'Learn the basics of Past Simple tense',
+    title: 'At the Restaurant',
+    summary: 'Learn how to order food and drinks at restaurants',
     content: {
-      sections: [
+      blocks: [
         {
+          id: 'block-restaurant-vocab',
           type: 'text',
-          content:
-            'The past simple tense is used to describe completed actions in the past.',
+          order: 0,
+          content: {
+            html: `
+              <h4>Restaurant Vocabulary</h4>
+              <ul>
+                <li><strong>Can I see the menu?</strong>: Cho tôi xem thực đơn được không?</li>
+                <li><strong>I would like to order...</strong>: Tôi muốn gọi món...</li>
+                <li><strong>How spicy is it?</strong>: Món này cay không?</li>
+                <li><strong>The bill, please</strong>: Làm ơn tính tiền</li>
+                <li><strong>I'm vegetarian</strong>: Tôi ăn chay</li>
+                <li><strong>Is this dish gluten-free?</strong>: Món này có gluten không?</li>
+                <li><strong>Can I have the check?</strong>: Cho tôi hóa đơn</li>
+                <li><strong>Do you accept credit cards?</strong>: Có thanh toán bằng thẻ được không?</li>
+              </ul>
+            `,
+          },
         },
         {
-          type: 'example',
-          content: [
-            'I went to the gym yesterday.',
-            'The company was founded in 2010.',
-            'They visited Japan last year.',
-          ],
+          id: 'block-restaurant-dictation',
+          type: 'dictation',
+          order: 1,
+          content: {
+            text: `<p>Waiter: Hi, welcome to our restaurant! What would you like to order? Customer: Can I see the menu, please? I'd like to try your special dish. Also, is it very spicy? Waiter: No, but we can make it spicy if you'd like.</p>`,
+            audioUrl: 'https://example.com/audio/restaurant-order.mp3',
+          },
         },
         {
-          type: 'exercise',
-          questions: [
-            {
-              type: 'multiple-choice',
-              question: 'Which sentence uses Past Simple correctly?',
-              options: [
-                'I went to the gym tomorrow.',
-                'I went to the gym yesterday.',
-                'I go to the gym yesterday.',
-              ],
-              correctAnswer: 1,
-            },
-          ],
+          id: 'block-restaurant-quiz',
+          type: 'quiz',
+          order: 2,
+          content: {
+            title: 'Restaurant Practice',
+            questions: [
+              {
+                id: 'q-restaurant-1',
+                question: 'How do you politely ask for the bill?',
+                options: [
+                  {
+                    id: 'opt-restaurant-1',
+                    text: 'Money please',
+                    isCorrect: false,
+                  },
+                  {
+                    id: 'opt-restaurant-2',
+                    text: 'Can I have the check, please?',
+                    isCorrect: true,
+                  },
+                ],
+                explanation:
+                  "Using 'Can I have the check, please?' is the polite way to ask for the bill in a restaurant",
+              },
+            ],
+          },
         },
       ],
+      metadata: {
+        lastUpdated: new Date().toISOString(),
+        updatedById: teacherIds[0],
+      },
     },
     orderIndex: 1,
     isPremium: false,
     isRequired: true,
-    lessonWeight: 4,
     status: ContentStatus.published,
+    lessonWeight: 10,
     unit: {
       connect: { id: unitIds[1] },
     },
@@ -446,47 +560,80 @@ export const createLessons = (
     },
   },
   {
-    title: 'Past Continuous - Introduction',
-    summary: 'Learn the basics of Past Continuous tense',
+    title: 'Basic Shopping Conversations',
+    summary: 'Learn how to shop and discuss prices in English',
     content: {
-      sections: [
+      blocks: [
         {
+          id: 'block-shopping-vocab',
           type: 'text',
-          content:
-            'The past continuous tense is used to describe actions that were in progress at a specific point in the past.',
+          order: 0,
+          content: {
+            html: `
+              <h4>Shopping Vocabulary</h4>
+              <ul>
+                <li><strong>How much is this?</strong>: Cái này giá bao nhiêu?</li>
+                <li><strong>Do you have this in...?</strong>: Bạn có cái này màu/size...?</li>
+                <li><strong>It's too expensive</strong>: Nó đắt quá</li>
+                <li><strong>Can I try it on?</strong>: Tôi có thể thử không?</li>
+                <li><strong>Is it on sale?</strong>: Nó có đang giảm giá không?</li>
+                <li><strong>Do you accept returns?</strong>: Có được đổi trả không?</li>
+                <li><strong>I'll take it</strong>: Tôi sẽ lấy cái này</li>
+                <li><strong>Cash or card?</strong>: Tiền mặt hay thẻ?</li>
+              </ul>
+            `,
+          },
         },
         {
-          type: 'example',
-          content: [
-            'I was studying for a master degree at 8pm last night.',
-            'The company was building a new factory in 2010.',
-            'They were planning a trip to Japan last year.',
-          ],
+          id: 'block-shopping-dictation',
+          type: 'dictation',
+          order: 1,
+          content: {
+            text: `<p>Customer: Excuse me, how much is this shirt? Staff: It's $25, but it's on sale today. You can get 20% off. Customer: Great! Do you have it in medium size? Staff: Let me check for you.</p>`,
+            audioUrl: 'https://example.com/audio/shopping.mp3',
+          },
         },
         {
-          type: 'exercise',
-          questions: [
-            {
-              type: 'multiple-choice',
-              question: 'Which sentence uses Past Continuous correctly?',
-              options: [
-                'I was play football at 8pm last night.',
-                'I was playing football at 8pm last night.',
-                'I playing football at 8pm last night.',
-              ],
-              correctAnswer: 1,
-            },
-          ],
+          id: 'block-shopping-quiz',
+          type: 'quiz',
+          order: 2,
+          content: {
+            title: 'Shopping Practice',
+            questions: [
+              {
+                id: 'q-shopping-1',
+                question: 'How do you ask about the price of something?',
+                options: [
+                  {
+                    id: 'opt-shopping-1',
+                    text: 'What is the cost?',
+                    isCorrect: false,
+                  },
+                  {
+                    id: 'opt-shopping-2',
+                    text: 'How much is this?',
+                    isCorrect: true,
+                  },
+                ],
+                explanation:
+                  "'How much is this?' is the most common and natural way to ask about price",
+              },
+            ],
+          },
         },
       ],
+      metadata: {
+        lastUpdated: new Date().toISOString(),
+        updatedById: teacherIds[0],
+      },
     },
-    orderIndex: 2,
-    isPremium: false,
+    orderIndex: 1,
+    isPremium: true,
     isRequired: true,
-    lessonWeight: 6,
     status: ContentStatus.published,
+    lessonWeight: 10,
     unit: {
-      connect: { id: unitIds[1] },
+      connect: { id: unitIds[2] },
     },
     creator: {
       connect: { id: teacherIds[0] },
@@ -499,8 +646,7 @@ export const createLessonComments = (
   userIds: string[],
 ) => [
   {
-    content:
-      'This lesson was very helpful in understanding present simple tense.',
+    content: 'This lesson is very helpful!',
     lesson: {
       connect: { id: lessonIds[0] },
     },
@@ -612,7 +758,8 @@ export const createVocabularies = (spaceIds: string[], userIds: string[]) =>
         'sự kiên trì',
       ],
       exampleSentence: 'Her perseverance in studying English paid off.',
-      imageUrl: 'https://example.com/images/perseverance.jpg',
+      imageUrl:
+        'https://thumbs.dreamstime.com/b/perseverance-symbol-sisyphus-symbol-as-determined-snail-pushing-boulder-up-grass-mountain-as-metaphor-persistence-60384355.jpg',
       tags: ['important', 'academic'],
       repetitionLevel: 0,
       nextReview: new Date(),

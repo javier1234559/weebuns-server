@@ -21,4 +21,8 @@ export class FindAllEssaysDto extends PaginationInputDto {
   @IsOptional()
   @IsEnum(ContentStatus)
   status?: ContentStatus;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  spaceId?: string;
 }

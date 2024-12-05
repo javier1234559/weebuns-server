@@ -14,6 +14,7 @@ import { Response } from 'express';
 
 import { IAuthPayload } from 'src/common/interface/auth-payload.interface';
 import { PrismaService } from 'src/common/prisma/prisma.service';
+import { LanguageUtil } from 'src/common/utils/language';
 import config, {
   MAX_ACCESS_TOKEN_AGE,
   MAX_REFRESH_TOKEN_AGE,
@@ -107,6 +108,7 @@ export class AuthService {
       throw new ConflictException('Username or email already exists');
     }
 
+    const mappedLanguage = LanguageUtil.mapISOToLanguageCode(nativeLanguage);
     try {
       const hashedPassword = await bcrypt.hash(password, 10);
       const newUser = await this.prisma.user.create({
@@ -116,7 +118,7 @@ export class AuthService {
           passwordHash: hashedPassword,
           firstName: firstName,
           lastName: lastName,
-          nativeLanguage: nativeLanguage,
+          nativeLanguage: mappedLanguage,
           role: UserRole.user,
           authProvider: AuthProvider.local,
         },
@@ -239,6 +241,8 @@ export class AuthService {
       where: { email: userData.email },
     });
 
+    const mappedLanguage = LanguageUtil.mapISOToLanguageCode('vi');
+
     if (!user) {
       // Create new user
       user = await this.prisma.user.create({
@@ -247,7 +251,7 @@ export class AuthService {
           username: userData.name,
           firstName: userData.firstName,
           lastName: userData.lastName,
-          nativeLanguage: 'en',
+          nativeLanguage: mappedLanguage,
           role: UserRole.user,
           authProvider: userData.provider,
           profilePicture: userData.picture,

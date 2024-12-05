@@ -59,8 +59,12 @@ export class NoteController {
     status: HttpStatus.OK,
     type: NotesResponse,
   })
-  async findAll(@Query() query: FindAllNotesDto): Promise<NotesResponse> {
-    return this.noteService.findAll(query);
+  async findAll(
+    @CurrentUser() currentUser: IAuthPayload,
+    @Query() query: FindAllNotesDto,
+  ): Promise<NotesResponse> {
+    const userId = String(currentUser.sub);
+    return this.noteService.findAll(userId, query);
   }
 
   @Get(':id')

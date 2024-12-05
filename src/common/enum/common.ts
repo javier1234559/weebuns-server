@@ -3,6 +3,14 @@ export enum LanguageCode {
   VIETNAMESE = 'VIETNAMESE',
 }
 
+export const ISO_TO_LANGUAGE_CODE: Record<string, LanguageCode> = {
+  en: LanguageCode.ENGLISH,
+  'en-US': LanguageCode.ENGLISH,
+  'en-GB': LanguageCode.ENGLISH,
+  vi: LanguageCode.VIETNAMESE,
+  'vi-VN': LanguageCode.VIETNAMESE,
+} as const;
+
 export enum LevelCode {
   BEGINNER = 'BEGINNER',
   ELEMENTARY = 'ELEMENTARY',

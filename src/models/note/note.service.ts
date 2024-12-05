@@ -112,10 +112,14 @@ export class NoteService {
     return { note };
   }
 
-  async findAll(query: FindAllNotesDto): Promise<NotesResponse> {
+  async findAll(
+    userId: string,
+    query: FindAllNotesDto,
+  ): Promise<NotesResponse> {
     const { page, perPage, search, tags, isBookmarked, spaceId } = query;
 
     const where: Prisma.NoteWhereInput = {
+      createdBy: userId,
       ...notDeletedQuery,
       ...(spaceId && { spaceId }),
       ...searchQuery(search, ['title', 'content']),
@@ -152,9 +156,16 @@ export class NoteService {
     return { note };
   }
 
-  async findOneByLessonId(lessonId: string): Promise<FindOneNoteResponseDto> {
+  async findOneByLessonId(
+    userId: string,
+    lessonId: string,
+  ): Promise<FindOneNoteResponseDto> {
     const note = await this.prisma.note.findFirst({
-      where: { lessonId, ...notDeletedQuery },
+      where: {
+        lessonId,
+        createdBy: userId,
+        ...notDeletedQuery,
+      },
     });
 
     return { note };

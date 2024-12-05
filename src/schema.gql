@@ -199,7 +199,7 @@ type CorrectionResponseOneDto {
   id: ID!
   essayId: String!
   createdBy: String!
-  overall_comment: String
+  overallComment: String
   rating: Float
   createdAt: DateTime!
   updatedAt: DateTime!
@@ -244,7 +244,7 @@ type Mutation {
 
 input CreateCorrectionDto {
   essay_id: String!
-  overall_comment: String
+  overallComment: String
   rating: Float
   sentences: [CreateCorrectionSentenceDto!]!
 }
@@ -260,7 +260,7 @@ input CreateCorrectionSentenceDto {
 
 input UpdateCorrectionDto {
   id: String!
-  overall_comment: String
+  overallComment: String
   rating: Float
   sentences: [UpdateCorrectionSentenceDto!]!
 }

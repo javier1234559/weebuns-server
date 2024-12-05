@@ -85,6 +85,8 @@ export class CorrectionService {
       this.prisma.correction.count({ where: queryOptions.where }),
     ]);
 
+    console.log(corrections);
+
     return {
       data: corrections,
       ...(page &&
@@ -120,7 +122,7 @@ export class CorrectionService {
       data: {
         essayId: createCorrectionDto.essay_id, // Use direct field instead of connect
         createdBy: userId, // Use direct field instead of connect
-        overallComment: createCorrectionDto.overall_comment,
+        overallComment: createCorrectionDto.overallComment,
         rating: createCorrectionDto.rating,
         sentences: {
           create: createCorrectionDto.sentences.map((sentence) => ({
@@ -150,7 +152,7 @@ export class CorrectionService {
     return tx.correction.update({
       where: { id: updateCorrectionDto.id },
       data: {
-        overallComment: updateCorrectionDto.overall_comment,
+        overallComment: updateCorrectionDto.overallComment,
         rating: updateCorrectionDto.rating,
       },
       include: this.includeQuery,

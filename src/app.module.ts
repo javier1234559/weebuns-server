@@ -22,6 +22,7 @@ import { LessonModule } from 'src/models/lesson/lesson.module';
 import { NoteModule } from 'src/models/note/note.module';
 import { SpaceModule } from 'src/models/space/space.module';
 import { StatsModule } from 'src/models/stats/stats.module';
+import { SubscriptionPaymentModule } from 'src/models/subscription-payment/subscription-payment.module';
 import { SubscriptionModule } from 'src/models/subscription/subscription.module';
 import { UnitModule } from 'src/models/unit/unit.module';
 import { UserModule } from 'src/models/user/user.module';
@@ -52,6 +53,7 @@ import { VocabularyModule } from 'src/models/vocabulary/vocabulary.module';
     NoteModule,
     AiModule,
     SubscriptionModule,
+    SubscriptionPaymentModule,
   ],
   providers: [
     {

@@ -262,9 +262,9 @@ async function seedAll() {
     await seedUsers();
 
     // Subscription related
-    await seedSubscriptions();
-    await seedSubscriptionPayments();
-    await seedCorrectionCredits();
+    // await seedSubscriptions();
+    // await seedSubscriptionPayments();
+    // await seedCorrectionCredits();
 
     // Course structure
     await seedCourses();

@@ -123,9 +123,11 @@ export class UnitController {
   @ApiResponse({ status: HttpStatus.OK, type: FindOneNoteResponseDto })
   async getLessonNote(
     @Param('id') unitId: string,
+    @CurrentUser() user: IAuthPayload,
     @Param('lessonId') lessonId: string,
   ): Promise<FindOneNoteResponseDto> {
-    return this.noteService.findOneByLessonId(lessonId);
+    const userId = String(user.sub);
+    return this.noteService.findOneByLessonId(userId, lessonId);
   }
 
   @Get(':id/lessons/:lessonId')

@@ -58,12 +58,16 @@ export class VocabularyService {
     return { vocabulary };
   }
 
-  async findAll(query: FindAllVocabularyDto): Promise<VocabularyResponse> {
+  async findAll(
+    userId: string,
+    query: FindAllVocabularyDto,
+  ): Promise<VocabularyResponse> {
     const { page, perPage, search, dueDate, spaceId, tags } = query;
 
     console.log(search);
 
     const where: Prisma.VocabularyWhereInput = {
+      createdBy: userId,
       ...notDeletedQuery,
       ...(spaceId && { spaceId }),
       ...searchQuery(search, ['term']),
