@@ -13,7 +13,8 @@ import {
 import { ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 import { AuthGuard } from 'src/common/auth/auth.guard';
-import { Roles, RolesGuard, UserRole } from 'src/common/auth/role.guard';
+import { RolesGuard } from 'src/common/auth/role.guard';
+import { Roles, UserRole } from 'src/common/decorators/role.decorator';
 
 import { CreateSubscriptionPaymentDto } from './dto/create-subscription-payment.dto';
 import { FindAllSubscriptionPaymentDto } from './dto/find-all-subscription-payment.dto';

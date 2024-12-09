@@ -4,8 +4,9 @@ import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { Prisma } from '@prisma/client';
 
 import { AuthGuard } from 'src/common/auth/auth.guard';
-import { Roles, RolesGuard, UserRole } from 'src/common/auth/role.guard';
+import { RolesGuard } from 'src/common/auth/role.guard';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
+import { Roles, UserRole } from 'src/common/decorators/role.decorator';
 import { TransactionClient } from 'src/common/decorators/transaction-client.decorator';
 import { UseTransaction } from 'src/common/interceptor/transaction.interceptor';
 import { IAuthPayload } from 'src/common/interface/auth-payload.interface';

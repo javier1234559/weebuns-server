@@ -12,8 +12,9 @@ import {
 import { ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 import { AuthGuard } from 'src/common/auth/auth.guard';
-import { Roles, RolesGuard, UserRole } from 'src/common/auth/role.guard';
+import { RolesGuard } from 'src/common/auth/role.guard';
 import { CacheKeyDto } from 'src/common/decorators/cache-key.decorator';
+import { Roles, UserRole } from 'src/common/decorators/role.decorator';
 import {
   TextToSpeechDto,
   TextToSpeechResponseDto,

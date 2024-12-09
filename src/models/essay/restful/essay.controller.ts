@@ -17,8 +17,10 @@ import { ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Prisma } from '@prisma/client';
 
 import { AuthGuard } from 'src/common/auth/auth.guard';
-import { Roles, RolesGuard, UserRole } from 'src/common/auth/role.guard';
+import { RolesGuard } from 'src/common/auth/role.guard';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
+import { Public } from 'src/common/decorators/public.decorator';
+import { Roles, UserRole } from 'src/common/decorators/role.decorator';
 import { TransactionClient } from 'src/common/decorators/transaction-client.decorator';
 import { UseTransaction } from 'src/common/interceptor/transaction.interceptor';
 import { IAuthPayload } from 'src/common/interface/auth-payload.interface';
@@ -41,7 +43,7 @@ export class EssayController {
   constructor(private readonly essayService: EssayService) {}
 
   @Get()
-  @Roles(UserRole.USER, UserRole.ADMIN)
+  @Public()
   @CacheTTL(300) // 5 minutes
   @ApiResponse({ status: HttpStatus.OK, type: EssaysResponse })
   async findAll(@Query() query: FindAllEssaysDto): Promise<EssaysResponse> {

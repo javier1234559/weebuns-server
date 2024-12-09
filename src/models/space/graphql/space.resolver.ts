@@ -2,7 +2,8 @@ import { UseGuards } from '@nestjs/common';
 import { Args, Query, Resolver } from '@nestjs/graphql';
 
 import { AuthGuard } from 'src/common/auth/auth.guard';
-import { Roles, RolesGuard, UserRole } from 'src/common/auth/role.guard';
+import { RolesGuard } from 'src/common/auth/role.guard';
+import { Roles, UserRole } from 'src/common/decorators/role.decorator';
 import { GetUserSpacesDto } from 'src/models/space/dto/get-user-space.dto';
 import { SpacesResponse } from 'src/models/space/dto/spaces-response.dto';
 

@@ -4,11 +4,13 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
+import { Reflector } from '@nestjs/core';
 import { GqlExecutionContext } from '@nestjs/graphql';
 import { JwtService } from '@nestjs/jwt';
 
 import { Request } from 'express';
 
+import { IS_PUBLIC_KEY } from 'src/common/decorators/public.decorator';
 import { IAuthPayload } from 'src/common/interface/auth-payload.interface';
 import { PrismaService } from 'src/common/prisma/prisma.service';
 
@@ -17,6 +19,7 @@ export class AuthGuard implements CanActivate {
   constructor(
     private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
+    private readonly reflector: Reflector,
   ) {}
 
   private extractTokenFromHeader(request: Request): string | undefined {
@@ -29,6 +32,16 @@ export class AuthGuard implements CanActivate {
   }
 
   async canActivate(context: ExecutionContext) {
+    // Check if route is marked as public
+    const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
+      context.getHandler(),
+      context.getClass(),
+    ]);
+
+    if (isPublic) {
+      return true;
+    }
+
     const ctx = GqlExecutionContext.create(context);
     const { req } = ctx.getContext();
 

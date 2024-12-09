@@ -10,7 +10,8 @@ import {
 import { ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 import { AuthGuard } from 'src/common/auth/auth.guard';
-import { Roles, RolesGuard, UserRole } from 'src/common/auth/role.guard';
+import { RolesGuard } from 'src/common/auth/role.guard';
+import { Roles, UserRole } from 'src/common/decorators/role.decorator';
 import { DeleteHashtagResponseDto } from 'src/models/hashtag/dto/delete-hashtag-response.dto';
 import { FindAllHashtagsDto } from 'src/models/hashtag/dto/find-all-hashtags.dto';
 import { HashtagsResponseDto } from 'src/models/hashtag/dto/hashtags-response.dto';

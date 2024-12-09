@@ -12,8 +12,9 @@ import { ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { PaymentType } from '@prisma/client';
 
 import { AuthGuard } from 'src/common/auth/auth.guard';
-import { Roles, RolesGuard, UserRole } from 'src/common/auth/role.guard';
+import { RolesGuard } from 'src/common/auth/role.guard';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
+import { Roles, UserRole } from 'src/common/decorators/role.decorator';
 import { IAuthPayload } from 'src/common/interface/auth-payload.interface';
 import { PaymentCallbackDto } from 'src/models/subscription/dto/callback.dto';
 import {

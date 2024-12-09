@@ -19,7 +19,8 @@ import {
 } from '@nestjs/swagger';
 
 import { AuthGuard } from 'src/common/auth/auth.guard';
-import { Roles, RolesGuard, UserRole } from 'src/common/auth/role.guard';
+import { RolesGuard } from 'src/common/auth/role.guard';
+import { Roles, UserRole } from 'src/common/decorators/role.decorator';
 import { CreateUserDto } from 'src/models/user/dtos/create-user.dto';
 import { FindAllUsersDto } from 'src/models/user/dtos/find-all-user.dto';
 import { UpdateUserDto } from 'src/models/user/dtos/update-user.dto';
