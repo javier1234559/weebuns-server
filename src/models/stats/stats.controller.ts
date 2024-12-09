@@ -10,6 +10,10 @@ import {
   ActivityStreakResponseDto,
   GetActivityStreakDto,
 } from 'src/models/stats/dto/activity-streak.dto';
+import {
+  AdminStatsOverviewDto,
+  GrowthDataDto,
+} from 'src/models/stats/dto/admin-stats.dto';
 import { UserOverviewDto } from 'src/models/stats/dto/user-overview.dto';
 import { StatsService } from 'src/models/stats/stats.service';
 
@@ -47,5 +51,35 @@ export class StatsController {
   ): Promise<UserOverviewDto> {
     const userId = String(currentUser.sub);
     return this.statsService.getUserOverview(userId);
+  }
+
+  @Get('/admin/overview')
+  @Roles(UserRole.ADMIN)
+  @ApiResponse({
+    status: 200,
+    type: AdminStatsOverviewDto,
+  })
+  getStatsOverview(): Promise<AdminStatsOverviewDto> {
+    return this.statsService.getAdminStatsOverview();
+  }
+
+  @Get('/admin/users/growth')
+  @Roles(UserRole.ADMIN)
+  @ApiResponse({
+    status: 200,
+    type: GrowthDataDto,
+  })
+  getUserGrowth(): Promise<GrowthDataDto> {
+    return this.statsService.getMonthlyUserGrowth();
+  }
+
+  @Get('admin/revenue/growth')
+  @Roles(UserRole.ADMIN)
+  @ApiResponse({
+    status: 200,
+    type: GrowthDataDto,
+  })
+  getRevenueGrowth(): Promise<GrowthDataDto> {
+    return this.statsService.getMonthlyRevenue();
   }
 }

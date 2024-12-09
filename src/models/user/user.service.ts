@@ -14,6 +14,7 @@ import { PrismaService } from 'src/common/prisma/prisma.service';
 import { calculatePagination } from 'src/common/utils/pagination';
 import { CreateUserDto } from 'src/models/user/dtos/create-user.dto';
 import { FindAllUsersDto } from 'src/models/user/dtos/find-all-user.dto';
+import { UpdateProfileUserDto } from 'src/models/user/dtos/update-profile-user.dto';
 import { UpdateUserDto } from 'src/models/user/dtos/update-user.dto';
 import {
   CreateUserResponse,
@@ -103,6 +104,34 @@ export class UserService {
         ...updateUserInput,
         firstName: updateUserInput.first_name,
         lastName: updateUserInput.last_name,
+      },
+    });
+
+    const { passwordHash, ...userWithoutPassword } = updatedUser;
+    return { user: userWithoutPassword };
+  }
+
+  async updateProfile(
+    id: string,
+    updateUserInput: UpdateProfileUserDto,
+  ): Promise<UpdateUserResponse> {
+    const user = await this.prisma.user.findFirst({
+      where: { id, ...notDeletedQuery },
+    });
+
+    if (!user) {
+      throw new NotFoundException(`User with ID ${id} not found`);
+    }
+
+    const updatedUser = await this.prisma.user.update({
+      where: { id },
+      data: {
+        firstName: updateUserInput.firstName,
+        lastName: updateUserInput.lastName,
+        email: updateUserInput.email,
+        nativeLanguage: updateUserInput.nativeLanguage,
+        username: updateUserInput.username,
+        profilePicture: updateUserInput.profilePicture,
       },
     });
 

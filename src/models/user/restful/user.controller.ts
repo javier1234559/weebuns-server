@@ -5,6 +5,7 @@ import {
   Get,
   HttpStatus,
   Param,
+  Patch,
   Post,
   Put,
   Query,
@@ -23,6 +24,7 @@ import { RolesGuard } from 'src/common/auth/role.guard';
 import { Roles, UserRole } from 'src/common/decorators/role.decorator';
 import { CreateUserDto } from 'src/models/user/dtos/create-user.dto';
 import { FindAllUsersDto } from 'src/models/user/dtos/find-all-user.dto';
+import { UpdateProfileUserDto } from 'src/models/user/dtos/update-profile-user.dto';
 import { UpdateUserDto } from 'src/models/user/dtos/update-user.dto';
 import {
   CreateUserResponse,
@@ -96,6 +98,23 @@ export class UserController {
     @Body() updateUserDto: UpdateUserDto,
   ): Promise<UpdateUserResponse> {
     return this.userService.update(id, updateUserDto);
+  }
+
+  @Patch(':id')
+  @Roles(UserRole.USER)
+  @ApiParam({
+    name: 'id',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'User updated successfully',
+    type: UpdateUserResponse,
+  })
+  async updateProfile(
+    @Param('id') id: string,
+    @Body() updateUserDto: UpdateProfileUserDto,
+  ): Promise<UpdateUserResponse> {
+    return this.userService.updateProfile(id, updateUserDto);
   }
 
   @Delete(':id')

@@ -16,6 +16,7 @@ import { TransactionInterceptor } from 'src/common/interceptor/transaction.inter
 import { AiModule } from 'src/models/ai/ai.module';
 import { CorrectionModule } from 'src/models/correction/corrrection.module';
 import { CourseModule } from 'src/models/course/course.module';
+import { DictionaryModule } from 'src/models/dictionary/dictionary.module';
 import { EssayModule } from 'src/models/essay/essay.module';
 import { HashTagModule } from 'src/models/hashtag/hashtag.module';
 import { LessonModule } from 'src/models/lesson/lesson.module';
@@ -54,6 +55,7 @@ import { VocabularyModule } from 'src/models/vocabulary/vocabulary.module';
     AiModule,
     SubscriptionModule,
     SubscriptionPaymentModule,
+    DictionaryModule,
   ],
   providers: [
     {

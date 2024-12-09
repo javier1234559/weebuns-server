@@ -6,6 +6,10 @@ import {
   ActivityStreakResponseDto,
   RawActivityDto,
 } from 'src/models/stats/dto/activity-streak.dto';
+import {
+  AdminStatsOverviewDto,
+  GrowthDataDto,
+} from 'src/models/stats/dto/admin-stats.dto';
 import { UserOverviewDto } from 'src/models/stats/dto/user-overview.dto';
 
 @Injectable()
@@ -133,109 +137,221 @@ export class StatsService {
     };
   }
 
-  // async getSpaceStats(spaceId: string) {
-  //   const [essays, notes, vocabularies, courses] = await Promise.all([
-  //     this.prisma.essay.count({ where: { spaceId } }),
-  //     this.prisma.note.count({ where: { spaceId } }),
-  //     this.prisma.vocabulary.count({ where: { spaceId } }),
-  //     this.prisma.spaceCourse.count({ where: { spaceId } }),
-  //   ]);
+  async getAdminStatsOverview(): Promise<AdminStatsOverviewDto> {
+    console.log('getAdminStatsOverview');
 
-  //   return {
-  //     essays,
-  //     notes,
-  //     vocabularies,
-  //     courses,
-  //   };
-  // }
+    // Get current period data (this month)
+    const currentDate = new Date();
+    const firstDayOfMonth = new Date(
+      currentDate.getFullYear(),
+      currentDate.getMonth(),
+      1,
+    );
+    const lastDayOfMonth = new Date(
+      currentDate.getFullYear(),
+      currentDate.getMonth() + 1,
+      0,
+    );
 
-  // // Admin Stats
-  // async getRevenueTrends(interval: string = '1 day', days: number = 30) {
-  //   return this.prisma.$queryRaw`
-  //     SELECT
-  //       time_bucket(${interval}::interval, timestamp) AS period,
-  //       payment_type,
-  //       SUM(amount) as total_amount,
-  //       COUNT(DISTINCT user_id) as paying_users
-  //     FROM revenue_metrics
-  //     WHERE timestamp > NOW() - INTERVAL '${days} days'
-  //     GROUP BY period, payment_type
-  //     ORDER BY period DESC;
-  //   `;
-  // }
+    // Get previous period data (last month)
+    const firstDayOfLastMonth = new Date(
+      currentDate.getFullYear(),
+      currentDate.getMonth() - 1,
+      1,
+    );
+    const lastDayOfLastMonth = new Date(
+      currentDate.getFullYear(),
+      currentDate.getMonth(),
+      0,
+    );
 
-  // async getAdminOverview() {
-  //   const [totalEssays, totalNotes, totalVocabs, totalCourses, totalUsers] =
-  //     await Promise.all([
-  //       this.prisma.essay.count(),
-  //       this.prisma.note.count(),
-  //       this.prisma.vocabulary.count(),
-  //       this.prisma.course.count(),
-  //       this.prisma.user.count(),
-  //     ]);
+    const [
+      currentUsers,
+      previousUsers,
+      currentRevenue,
+      previousRevenue,
+      currentCourses,
+      previousCourses,
+      completionRates,
+    ] = await Promise.all([
+      // Users count
+      this.prisma.user.count({
+        where: {
+          createdAt: {
+            lte: lastDayOfMonth,
+          },
+        },
+      }),
+      this.prisma.user.count({
+        where: {
+          createdAt: {
+            lte: lastDayOfLastMonth,
+          },
+        },
+      }),
 
-  //   return {
-  //     totalEssays,
-  //     totalNotes,
-  //     totalVocabs,
-  //     totalCourses,
-  //     totalUsers,
-  //   };
-  // }
+      // Revenue calculations
+      this.prisma.subscriptionPayment.aggregate({
+        where: {
+          paymentDate: {
+            gte: firstDayOfMonth,
+            lte: lastDayOfMonth,
+          },
+          status: 'SUCCESS',
+        },
+        _sum: {
+          amount: true,
+        },
+      }),
+      this.prisma.subscriptionPayment.aggregate({
+        where: {
+          paymentDate: {
+            gte: firstDayOfLastMonth,
+            lte: lastDayOfLastMonth,
+          },
+          status: 'SUCCESS',
+        },
+        _sum: {
+          amount: true,
+        },
+      }),
 
-  // async getUserGrowth(interval: string = '1 day', days: number = 30) {
-  //   return this.prisma.$queryRaw`
-  //     SELECT
-  //       time_bucket(${interval}::interval, timestamp) AS period,
-  //       COUNT(*) as new_users,
-  //       event_type
-  //     FROM user_growth_metrics
-  //     WHERE
-  //       timestamp > NOW() - INTERVAL '${days} days'
-  //       AND event_type = 'registration'
-  //     GROUP BY period, event_type
-  //     ORDER BY period DESC;
-  //   `;
-  // }
+      // Courses count
+      this.prisma.course.count({
+        where: {
+          createdAt: {
+            lte: lastDayOfMonth,
+          },
+          status: 'published',
+        },
+      }),
+      this.prisma.course.count({
+        where: {
+          createdAt: {
+            lte: lastDayOfLastMonth,
+          },
+          status: 'published',
+        },
+      }),
 
-  // async trackUserActivity(data: {
-  //   userId: string;
-  //   activityType: string;
-  //   spaceId?: string;
-  //   metadata?: any;
-  // }) {
-  //   return this.prisma.userActivity.create({
-  //     data: {
-  //       timestamp: new Date(),
-  //       ...data,
-  //     },
-  //   });
-  // }
+      // Course completion calculation
+      this.calculateCourseCompletionRates(
+        firstDayOfMonth,
+        lastDayOfMonth,
+        firstDayOfLastMonth,
+        lastDayOfLastMonth,
+      ),
+    ]);
 
-  // async trackRevenue(data: {
-  //   amount: number;
-  //   paymentType: string;
-  //   userId: string;
-  //   metadata?: any;
-  // }) {
-  //   return this.prisma.revenueMetric.create({
-  //     data: {
-  //       timestamp: new Date(),
-  //       ...data,
-  //     },
-  //   });
-  // }
+    return {
+      data: [
+        {
+          id: 1,
+          type: 'users',
+          stats: {
+            current: currentUsers,
+            previous: previousUsers,
+          },
+        },
+        {
+          id: 2,
+          type: 'currency',
+          stats: {
+            current: currentRevenue._sum.amount || 0,
+            previous: previousRevenue._sum.amount || 0,
+          },
+        },
+        {
+          id: 3,
+          type: 'course',
+          stats: {
+            current: currentCourses,
+            previous: previousCourses,
+          },
+        },
+        {
+          id: 4,
+          type: 'coursecomplete',
+          stats: {
+            current: completionRates.current,
+            previous: completionRates.previous,
+          },
+        },
+      ],
+    };
+  }
 
-  // async trackUserGrowth(data: {
-  //   userId: string;
-  //   eventType: string;
-  //   metadata?: any;
-  // }) {
-  //   return this.prisma.userGrowthMetric.create({
-  //     data: {
-  //       timestamp: new Date(),
-  //       ...data,
-  //     },
-  //   });
-  // }
+  private async calculateCourseCompletionRates(
+    currentStart: Date,
+    currentEnd: Date,
+    previousStart: Date,
+    previousEnd: Date,
+  ): Promise<{ current: number; previous: number }> {
+    const [currentRate, previousRate] = await Promise.all([
+      this.prisma.$queryRaw<[{ rate: number }]>`
+        SELECT 
+          ROUND(
+            COUNT(CASE WHEN cp.completed_weight >= c.total_weight THEN 1 END)::DECIMAL / 
+            NULLIF(COUNT(*), 0) * 100,
+            1
+          ) as rate
+        FROM course_progress cp
+        JOIN courses c ON cp.course_id = c.id
+        WHERE cp.last_accessed_at BETWEEN ${currentStart} AND ${currentEnd}
+      `,
+      this.prisma.$queryRaw<[{ rate: number }]>`
+        SELECT 
+          ROUND(
+            COUNT(CASE WHEN cp.completed_weight >= c.total_weight THEN 1 END)::DECIMAL / 
+            NULLIF(COUNT(*), 0) * 100,
+            1
+          ) as rate
+        FROM course_progress cp
+        JOIN courses c ON cp.course_id = c.id
+        WHERE cp.last_accessed_at BETWEEN ${previousStart} AND ${previousEnd}
+      `,
+    ]);
+
+    return {
+      current: currentRate[0]?.rate || 0,
+      previous: previousRate[0]?.rate || 0,
+    };
+  }
+
+  async getMonthlyUserGrowth(): Promise<GrowthDataDto> {
+    const last12Months = await this.prisma.$queryRaw<
+      Array<{
+        date: string;
+        value: number;
+      }>
+    >`
+      SELECT 
+        TO_CHAR(DATE_TRUNC('month', created_at), 'YYYY-MM') as date,
+        CAST(COUNT(*) AS INTEGER) as value
+      FROM users
+      WHERE created_at >= NOW() - INTERVAL '1 year'
+      GROUP BY DATE_TRUNC('month', created_at)
+      ORDER BY date ASC
+    `;
+
+    return { data: last12Months };
+  }
+
+  async getMonthlyRevenue(): Promise<GrowthDataDto> {
+    const last12Months = await this.prisma.$queryRaw<
+      { date: string; value: number }[]
+    >`
+      SELECT 
+        TO_CHAR(DATE_TRUNC('month', payment_date), 'YYYY-MM') as date,
+        ROUND(SUM(amount)::numeric, 2) as value
+      FROM subscription_payments
+      WHERE 
+        payment_date >= NOW() - INTERVAL '1 year'
+        AND status = 'SUCCESS'
+      GROUP BY DATE_TRUNC('month', payment_date)
+      ORDER BY date ASC
+    `;
+
+    return { data: last12Months };
+  }
 }

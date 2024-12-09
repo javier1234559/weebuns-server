@@ -14,7 +14,9 @@ import { ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 import { AuthGuard } from 'src/common/auth/auth.guard';
 import { RolesGuard } from 'src/common/auth/role.guard';
+import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { Roles, UserRole } from 'src/common/decorators/role.decorator';
+import { IAuthPayload } from 'src/common/interface/auth-payload.interface';
 
 import { CreateSubscriptionPaymentDto } from './dto/create-subscription-payment.dto';
 import { FindAllSubscriptionPaymentDto } from './dto/find-all-subscription-payment.dto';
@@ -26,13 +28,13 @@ import { SubscriptionPaymentService } from './subscription-payment.service';
 @Controller('subscription-payments')
 @ApiTags('subscription-payments')
 @UseGuards(AuthGuard, RolesGuard)
-@Roles(UserRole.ADMIN)
 export class SubscriptionPaymentController {
   constructor(
     private readonly subscriptionPaymentService: SubscriptionPaymentService,
   ) {}
 
   @Post()
+  @Roles(UserRole.ADMIN)
   @ApiResponse({
     status: HttpStatus.CREATED,
     type: FindOneSubscriptionPaymentResponseDto,
@@ -43,7 +45,22 @@ export class SubscriptionPaymentController {
     return this.subscriptionPaymentService.create(createSubscriptionPaymentDto);
   }
 
+  @Get('/history')
+  @Roles(UserRole.USER)
+  @ApiResponse({
+    status: HttpStatus.OK,
+    type: SubscriptionPaymentResponse,
+  })
+  findAllMyHistory(
+    @CurrentUser() currentUser: IAuthPayload,
+    @Query() query: FindAllSubscriptionPaymentDto,
+  ): Promise<SubscriptionPaymentResponse> {
+    const userId = String(currentUser.sub);
+    return this.subscriptionPaymentService.findAllHistory(userId, query);
+  }
+
   @Get()
+  @Roles(UserRole.ADMIN)
   @ApiResponse({
     status: HttpStatus.OK,
     type: SubscriptionPaymentResponse,

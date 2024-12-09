@@ -67,6 +67,35 @@ export class SubscriptionPaymentService {
     };
   }
 
+  async findAllHistory(
+    userId: string,
+    query: FindAllSubscriptionPaymentDto,
+  ): Promise<SubscriptionPaymentResponse> {
+    const { page, perPage, search } = query;
+
+    const where = {
+      subscription: {
+        userId,
+      },
+      ...searchQuery(search, ['status']),
+    };
+
+    const [payments, totalItems] = await Promise.all([
+      this.prisma.subscriptionPayment.findMany({
+        // where,
+        orderBy: { paymentDate: 'asc' },
+        ...paginationQuery(page, perPage),
+        include: this.includeQuery,
+      }),
+      this.prisma.subscriptionPayment.count({ where }),
+    ]);
+
+    return {
+      data: payments,
+      pagination: calculatePagination(totalItems, query),
+    };
+  }
+
   async findOne(id: string): Promise<FindOneSubscriptionPaymentResponseDto> {
     const payment = await this.prisma.subscriptionPayment.findFirst({
       where: { id },
