@@ -24,6 +24,16 @@ import {
 import { LoginFacebookDto } from 'src/models/user/dtos/login-facebook.dto';
 import { LoginGoogleDto } from 'src/models/user/dtos/login-google.dto';
 import { LoginDto } from 'src/models/user/dtos/login.dto';
+import {
+  RequestResetPasswordResponse,
+  ResetPasswordResponse,
+  VerifyResetCodeResponse,
+} from 'src/models/user/dtos/password-reset-response.dto';
+import {
+  RequestResetPasswordDto,
+  ResetPasswordDto,
+  VerifyResetCodeDto,
+} from 'src/models/user/dtos/password-reset.dto';
 import { RegisterDto } from 'src/models/user/dtos/register.dto';
 
 @Controller('auth')
@@ -153,5 +163,64 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
   ): Promise<LogoutResponse> {
     return this.authService.logout(res);
+  }
+
+  @Post('password-reset/request')
+  @ApiOperation({ summary: 'Request password reset code' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Reset code sent successfully',
+    type: RequestResetPasswordResponse,
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Invalid email',
+  })
+  async requestPasswordReset(
+    @Body() requestDto: RequestResetPasswordDto,
+  ): Promise<RequestResetPasswordResponse> {
+    return this.authService.requestPasswordReset(requestDto.email);
+  }
+
+  @Post('password-reset/verify')
+  @ApiOperation({ summary: 'Verify reset code' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Code verified successfully',
+    type: VerifyResetCodeResponse,
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Invalid or expired code',
+  })
+  async verifyResetCode(
+    @Body() verifyDto: VerifyResetCodeDto,
+  ): Promise<VerifyResetCodeResponse> {
+    return this.authService.verifyResetCode(verifyDto.email, verifyDto.code);
+  }
+
+  @Post('password-reset/reset')
+  @ApiOperation({ summary: 'Reset password with code' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Password reset successfully',
+    type: ResetPasswordResponse,
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Invalid or expired code',
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Invalid password format',
+  })
+  async resetPassword(
+    @Body() resetDto: ResetPasswordDto,
+  ): Promise<ResetPasswordResponse> {
+    return this.authService.resetPassword(
+      resetDto.email,
+      resetDto.code,
+      resetDto.newPassword,
+    );
   }
 }

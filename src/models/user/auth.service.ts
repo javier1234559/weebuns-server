@@ -1,6 +1,8 @@
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import {
   BadRequestException,
   ConflictException,
+  Inject,
   Injectable,
   InternalServerErrorException,
   UnauthorizedException,
@@ -10,9 +12,12 @@ import { JwtService } from '@nestjs/jwt';
 import { AuthProvider, UserRole } from '@prisma/client';
 import axios from 'axios';
 import * as bcrypt from 'bcrypt';
+import { Cache } from 'cache-manager';
+import { randomBytes } from 'crypto';
 import { Response } from 'express';
 
 import { IAuthPayload } from 'src/common/interface/auth-payload.interface';
+import { MailService } from 'src/common/mail/mail.service';
 import { PrismaService } from 'src/common/prisma/prisma.service';
 import { LanguageUtil } from 'src/common/utils/language';
 import config, {
@@ -35,8 +40,9 @@ export class AuthService {
   constructor(
     private prisma: PrismaService,
     private readonly jwtService: JwtService,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
+    private readonly mailService: MailService,
   ) {}
-
   private generateTokens(user: any) {
     const payload = {
       email: user.email,
@@ -316,5 +322,84 @@ export class AuthService {
   async logout(res: Response): Promise<LogoutResponse> {
     res.clearCookie('refreshToken');
     return { message: 'Logged out successfully' };
+  }
+
+  async requestPasswordReset(email: string): Promise<{ message: string }> {
+    console.log(email);
+
+    const user = await this.prisma.user.findUnique({ where: { email } });
+
+    if (!user) {
+      throw new UnauthorizedException('User not found');
+    }
+
+    // Generate 6-digit code
+    const resetCode = Math.floor(100000 + Math.random() * 900000).toString();
+
+    // Store code with 15min TTL
+    await this.cacheManager.set(
+      `reset_code:${email}`,
+      resetCode,
+      900_000, // 15 minutes
+    );
+
+    // Send email
+    await this.mailService.sendPasswordResetEmail(email, resetCode);
+
+    return { message: 'Reset code sent to email' };
+  }
+
+  async verifyResetCode(
+    email: string,
+    code: string,
+  ): Promise<{ message: string }> {
+    const storedCode = await this.cacheManager.get<string>(
+      `reset_code:${email}`,
+    );
+
+    if (!storedCode || storedCode !== code) {
+      throw new UnauthorizedException('Invalid or expired code');
+    }
+
+    // Generate verification token
+    const resetToken = randomBytes(32).toString('hex');
+    await this.cacheManager.set(
+      `reset_token:${email}`,
+      resetToken,
+      300_000, // 5 minutes
+    );
+
+    return { message: 'Code verified successfully' };
+  }
+
+  async resetPassword(
+    email: string,
+    code: string,
+    newPassword: string,
+  ): Promise<{ message: string }> {
+    const storedCode = await this.cacheManager.get<string>(
+      `reset_code:${email}`,
+    );
+
+    if (!storedCode || storedCode !== code) {
+      throw new UnauthorizedException('Invalid or expired code');
+    }
+
+    const user = await this.prisma.user.findUnique({ where: { email } });
+    if (!user) {
+      throw new UnauthorizedException('User not found');
+    }
+
+    // Hash and update password
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    await this.prisma.user.update({
+      where: { email },
+      data: { passwordHash: hashedPassword },
+    });
+
+    // Cleanup
+    await this.cacheManager.del(`reset_code:${email}`);
+
+    return { message: 'Password reset successfully' };
   }
 }
