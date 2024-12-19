@@ -49,7 +49,16 @@ export class SpaceController {
     @CurrentUser() user: IAuthPayload,
     @Query() query: GetSpacesUserDto,
   ): Promise<SpacesResponse> {
-    return this.spaceService.getSpacesUser(user.sub.toString(), query);
+    const userId = String(user.sub);
+    const page = query.page || 1;
+    const perPage = query.page || 5;
+
+    return this.spaceService.findUserSpaces({
+      userId,
+      page,
+      perPage,
+      search: query.search,
+    });
   }
 
   @Get(':id')

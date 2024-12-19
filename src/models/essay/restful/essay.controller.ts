@@ -107,7 +107,7 @@ export class EssayController {
   }
 
   @Delete(':id')
-  @Roles(UserRole.ADMIN)
+  @Roles(UserRole.USER)
   @ApiParam({ name: 'id', type: String })
   @ApiResponse({ status: HttpStatus.OK, type: DeleteEssayResponseDto })
   async delete(

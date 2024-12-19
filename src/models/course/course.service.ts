@@ -402,25 +402,6 @@ export class CourseService {
 
       console.log('Course progress:', courseProgress);
 
-      // Create new progress if doesn't exist
-      // if (!courseProgress) {
-      //   console.log('Creating new progress');
-      //   console.log(JSON.stringify(firstUnit, null, 2));
-
-      //   courseProgress = await tx.courseProgress.create({
-      //     data: {
-      //       userId,
-      //       courseId,
-      //       currentUnitId: firstUnit.id,
-      //       currentLessonId: firstUnit.lessons[0]?.id,
-      //       completedWeight: 0,
-      //       completedUnits: [],
-      //       completedLessons: [],
-      //       lastAccessedAt: new Date(),
-      //     },
-      //   });
-      // }
-
       return {
         message: 'Successfully joined the course',
         joinedAt: spaceCourse.joinedAt,

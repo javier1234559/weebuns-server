@@ -27,7 +27,7 @@ export class UpdateEssayDto {
     example: 42,
     minimum: 0,
   })
-  upvote_count: number;
+  upvote_count?: number;
 
   @ApiPropertyOptional({
     example: 'https://example.com/images/updated-cover-123.jpg',

@@ -330,7 +330,7 @@ export class AuthService {
     const user = await this.prisma.user.findUnique({ where: { email } });
 
     if (!user) {
-      throw new UnauthorizedException('User not found');
+      throw new BadRequestException('Email does not existing in db');
     }
 
     // Generate 6-digit code
@@ -358,7 +358,7 @@ export class AuthService {
     );
 
     if (!storedCode || storedCode !== code) {
-      throw new UnauthorizedException('Invalid or expired code');
+      throw new BadRequestException('Invalid or expired code');
     }
 
     // Generate verification token
@@ -382,12 +382,12 @@ export class AuthService {
     );
 
     if (!storedCode || storedCode !== code) {
-      throw new UnauthorizedException('Invalid or expired code');
+      throw new BadRequestException('Invalid or expired code');
     }
 
     const user = await this.prisma.user.findUnique({ where: { email } });
     if (!user) {
-      throw new UnauthorizedException('User not found');
+      throw new BadRequestException('User not found');
     }
 
     // Hash and update password
